@@ -25,7 +25,7 @@
 <main
   class="bg-neutral-950 text-white grid place-items-center w-screen h-screen overflow-hidden"
 >
-  <div class="max-w-xl h-full max-h-full overflow-x-hidden">
+  <div class="max-w-xl h-full max-h-full overflow-hidden">
     {#if configuration}
       <DiscoverPage tmdbConfig={configuration} />
     {:else}
