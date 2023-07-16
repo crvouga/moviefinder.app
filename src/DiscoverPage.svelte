@@ -1,16 +1,26 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import Swiper from "swiper";
+  import "swiper/css";
   import {
     TmdbConfiguration,
     TmdbMovieListResult,
     tmdb,
     toImageUrl,
   } from "./tmdb-client";
-  import { onMount } from "svelte";
+
+  //
+  //
+  //
+  //
 
   export let tmdbConfig: TmdbConfiguration;
 
+  //
+  //
+  //
+  //
   let movies: TmdbMovieListResult[] = [];
-
   onMount(async () => {
     const got = await tmdb.discoverMovie({
       queryParams: {
@@ -23,19 +33,56 @@
       movies = got.data.body.results;
     }
   });
+
+  //
+  //
+  //
+  //
+
+  const swiper = new Swiper(".my-swiper", {
+    // direction: "vertical",
+    // simulateTouch: true,
+  });
+
+  swiper.on("slideChange", () => {
+    console.log("slideChange");
+  });
+  //   @ts-ignore
+  window.swiper = swiper;
 </script>
 
-<div
-  class="w-full h-full overflow-x-hidden overflow-y-scroll snap-y snap-mandatory"
->
+<swiper-container direction="vertical">
   {#each movies as movie}
-    <div class="w-full h-full overflow-hidden cursor-move">
+    <swiper-slide>
       <img
         class="w-full h-full object-cover user-select-none pointer-events-none"
         alt=""
         src={toImageUrl(tmdbConfig, movie.poster_path)}
       />
-      <h1>{movie.title}</h1>
-    </div>
+    </swiper-slide>
   {/each}
-</div>
+</swiper-container>
+
+<style>
+  swiper-container {
+    width: 100%;
+    height: 100%;
+    cursor: move;
+  }
+
+  swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

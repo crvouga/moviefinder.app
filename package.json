@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "firebase": "^10.0.0",
+    "swiper": "^10.0.4",
     "zod": "^3.21.4"
   }
 }
