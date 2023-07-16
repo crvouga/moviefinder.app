@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "ci": "ECHO \"No ci yet...\" && exit 0",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
