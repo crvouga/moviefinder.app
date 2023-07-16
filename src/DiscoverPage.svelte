@@ -1,7 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Swiper from "swiper";
-  import "swiper/css";
   import {
     TmdbConfiguration,
     TmdbMovieListResult,
@@ -38,17 +36,6 @@
   //
   //
   //
-
-  const swiper = new Swiper(".my-swiper", {
-    // direction: "vertical",
-    // simulateTouch: true,
-  });
-
-  swiper.on("slideChange", () => {
-    console.log("slideChange");
-  });
-  //   @ts-ignore
-  window.swiper = swiper;
 </script>
 
 <swiper-container direction="vertical">
