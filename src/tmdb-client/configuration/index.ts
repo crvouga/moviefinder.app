@@ -58,3 +58,20 @@ export const toImageUrl = (
 
   return `${base}${posterSize}${posterPath}`;
 };
+
+export const toVideoSrc = (data: { site?: string; key?: string }) => {
+  const { site, key } = data;
+  if (!key) {
+    return null;
+  }
+
+  if (!site) {
+    return null;
+  }
+
+  if (site === "YouTube") {
+    return `https://www.youtube.com/embed/${key}`;
+  }
+
+  return null;
+};

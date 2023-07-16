@@ -1,11 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import {
-    TmdbConfiguration,
-    TmdbMovieListResult,
-    tmdb,
-    toImageUrl,
-  } from "./tmdb-client";
+  import { TmdbConfiguration, TmdbMovieListResult, tmdb } from "./tmdb-client";
+  import MovieItem from "./MovieItem.svelte";
 
   //
   //
@@ -23,12 +19,16 @@
     const got = await tmdb.discoverMovie({
       queryParams: {
         page: 1,
+
+        include_video: true,
       },
       pathParams: undefined,
     });
 
+
     if (got.success && got.data.status === 200) {
       movies = got.data.body.results;
+      console.log(got.data.body)
     }
   });
 
@@ -41,13 +41,7 @@
 <swiper-container direction="vertical" history>
   {#each movies as movie}
     <swiper-slide>
-      <div class="w-full h-full">
-        <img
-          class="w-full h-full object-cover user-select-none pointer-events-none"
-          alt=""
-          src={toImageUrl(tmdbConfig, movie.poster_path)}
-        />
-      </div>
+      <MovieItem {movie} {tmdbConfig} />
     </swiper-slide>
   {/each}
 </swiper-container>
@@ -67,11 +61,6 @@
     justify-content: center;
     align-items: center;
   }
-
-  swiper-slide img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 </style>
+
+
