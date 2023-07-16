@@ -1,6 +1,8 @@
 <script lang="ts">
-  import Counter from "./lib/Counter.svelte";
+  import type { Movie } from "./movie";
   import { tmdb } from "./tmdb-client";
+
+  let movies: Movie[] = [];
 
   const load = async () => {
     const got = await tmdb.discover.movie({
@@ -9,6 +11,15 @@
       },
       pathParams: undefined,
     });
+
+    if (got.success && got.data.status === 200) {
+      movies = got.data.body.results.map((x): Movie => {
+        return {
+          id: x.id,
+          title: x.title,
+        };
+      });
+    }
 
     console.log(got);
   };
@@ -19,21 +30,11 @@
 </script>
 
 <main>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a
-      href="https://github.com/sveltejs/kit#readme"
-      target="_blank"
-      rel="noreferrer">SvelteKit</a
-    >, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">Click on the Vite and Svelte logos to learn more</p>
+  {#each movies as movie}
+    <div>
+      <h1>{movie.title}</h1>
+    </div>
+  {/each}
 </main>
 
 <style>
