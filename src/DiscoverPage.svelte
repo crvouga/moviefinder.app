@@ -38,14 +38,16 @@
   //
 </script>
 
-<swiper-container direction="vertical">
+<swiper-container direction="vertical" history>
   {#each movies as movie}
     <swiper-slide>
-      <img
-        class="w-full h-full object-cover user-select-none pointer-events-none"
-        alt=""
-        src={toImageUrl(tmdbConfig, movie.poster_path)}
-      />
+      <div class="w-full h-full">
+        <img
+          class="w-full h-full object-cover user-select-none pointer-events-none"
+          alt=""
+          src={toImageUrl(tmdbConfig, movie.poster_path)}
+        />
+      </div>
     </swiper-slide>
   {/each}
 </swiper-container>
