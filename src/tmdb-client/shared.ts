@@ -34,7 +34,7 @@ export const makeFetcher =
     queryParams: ZodSchema<QueryParams>;
     response: ZodSchema<ResponseBody>;
   }) =>
-  async (input: { pathParams: PathParams; queryParams: QueryParams }) => {
+  async (input: { pathParams?: PathParams; queryParams: QueryParams }) => {
     const url = new URL(`${BASE_URL}${endpoint(input.pathParams)}`);
     const searchParams = new URLSearchParams(
       objectToStringMap(input.queryParams)

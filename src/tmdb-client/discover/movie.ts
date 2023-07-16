@@ -85,7 +85,7 @@ export const TmdbDiscoverMovieQueryParams = z.object({
 
 export type QueryParams = z.infer<typeof TmdbDiscoverMovieQueryParams>;
 
-const MovieListResult = z.object({
+export const TmdbMovieListResult = z.object({
   poster_path: z.string().nullable(),
   adult: z.boolean(),
   overview: z.string(),
@@ -101,10 +101,11 @@ const MovieListResult = z.object({
   video: z.boolean(),
   vote_average: z.number(),
 });
+export type TmdbMovieListResult = z.infer<typeof TmdbMovieListResult>;
 
 const OkResponse = z.object({
   page: z.number().nullish(),
-  results: z.array(MovieListResult),
+  results: z.array(TmdbMovieListResult),
   total_results: z.number().nullish(),
   total_pages: z.number().nullish(),
 });
@@ -116,7 +117,7 @@ const ApiResponse = z.discriminatedUnion("status", [
 ]);
 type ApiResponse = z.infer<typeof ApiResponse>;
 
-export const movie = makeFetcher({
+export const discoverMovie = makeFetcher({
   endpoint: () => "/discover/movie",
   queryParams: TmdbDiscoverMovieQueryParams,
   response: ApiResponse,

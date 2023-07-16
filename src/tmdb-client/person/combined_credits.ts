@@ -55,7 +55,7 @@ export type TmdbCombinedCreditsResponse = z.infer<
   typeof TmdbCombinedCreditsResponse
 >;
 
-export const combined_credits = makeFetcher({
+export const personCombinedCredits = makeFetcher({
   endpoint: ({ id }: { id: number }) => `/person/${id}/combined_credits`,
   queryParams: TmdbPersonCombinedCreditsQueryParams,
   response: TmdbCombinedCreditsResponse,

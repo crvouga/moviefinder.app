@@ -1,24 +1,17 @@
 <script lang="ts">
-  import type { Movie } from "./movie";
-  import { tmdb } from "./tmdb-client";
+  import DiscoverPage from "./DiscoverPage.svelte";
+  import { tmdb, TmdbConfiguration } from "./tmdb-client";
 
-  let movies: Movie[] = [];
+  let configuration: TmdbConfiguration | null = null;
 
   const load = async () => {
-    const got = await tmdb.discover.movie({
-      queryParams: {
-        page: 1,
-      },
+    const got = await tmdb.configuration({
+      queryParams: {},
       pathParams: undefined,
     });
 
     if (got.success && got.data.status === 200) {
-      movies = got.data.body.results.map((x): Movie => {
-        return {
-          id: x.id,
-          title: x.title,
-        };
-      });
+      configuration = got.data.body;
     }
 
     console.log(got);
@@ -29,28 +22,14 @@
   }
 </script>
 
-<main>
-  {#each movies as movie}
-    <div>
-      <h1>{movie.title}</h1>
-    </div>
-  {/each}
+<main
+  class="bg-neutral-950 text-white grid place-items-center w-screen h-screen overflow-hidden"
+>
+  <div class="max-w-xl h-full max-h-full overflow-x-hidden">
+    {#if configuration}
+      <DiscoverPage tmdbConfig={configuration} />
+    {:else}
+      <div>loading</div>
+    {/if}
+  </div>
 </main>
-
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>

@@ -39,7 +39,7 @@ const ApiResponse = z.discriminatedUnion("status", [
 ]);
 type ApiResponse = z.infer<typeof ApiResponse>;
 
-export const details = makeFetcher({
+export const personDetails = makeFetcher({
   endpoint: ({ id }: { id: number }) => `/person/${id}`,
   queryParams: TmdbPersonDetailsQueryParams,
   response: ApiResponse,

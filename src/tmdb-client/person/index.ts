@@ -1,5 +1,2 @@
-import { details } from "./details";
-
-export const person = {
-  details,
-};
+export * from "./combined_credits";
+export * from "./details";

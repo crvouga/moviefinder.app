@@ -1,7 +1,2 @@
-import { multi } from "./multi";
-import { movie } from "./movie";
-
-export const search = {
-  multi,
-  movie,
-};
+export * from "./movie";
+export * from "./multi";

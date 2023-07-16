@@ -94,7 +94,7 @@ const OkResponse = z.object({
   total_pages: z.number().int().nullish(),
 });
 
-export type OkResponse = z.infer<typeof OkResponse>;
+type OkResponse = z.infer<typeof OkResponse>;
 
 const ApiResponse = z.discriminatedUnion("status", [
   z.object({ status: z.literal(200), body: OkResponse }),
@@ -103,7 +103,7 @@ const ApiResponse = z.discriminatedUnion("status", [
 ]);
 type ApiResponse = z.infer<typeof ApiResponse>;
 
-export const multi = makeFetcher({
+export const searchMulti = makeFetcher({
   endpoint: () => "/search/multi",
   queryParams: TmdbSearchMultiQueryParams,
   response: ApiResponse,

@@ -12,18 +12,49 @@ const ImagesConfigurationSchema = z.object({
   change_keys: z.array(z.string()).nullish(),
 });
 
-const OkResponse = z.object({
+export const TmdbConfiguration = z.object({
   images: ImagesConfigurationSchema.nullish(),
   change_keys: z.array(z.string()).nullish(),
 });
+export type TmdbConfiguration = z.infer<typeof TmdbConfiguration>;
 
 const ApiResponse = z.discriminatedUnion("status", [
-  z.object({ status: z.literal(200), body: OkResponse }),
+  z.object({ status: z.literal(200), body: TmdbConfiguration }),
 ]);
 type ApiResponse = z.infer<typeof ApiResponse>;
 
 export const configuration = makeFetcher({
   endpoint: () => "/configuration",
-  queryParams: z.object({}),
+  queryParams: z.object({}).nullish(),
   response: ApiResponse,
 });
+
+export const toImageUrl = (
+  config: TmdbConfiguration,
+  posterPath: string | undefined | null,
+  sizeIndex?: number
+): string | null => {
+  if (!posterPath) {
+    return null;
+  }
+
+  const base = config?.images?.secure_base_url;
+
+  if (!base) {
+    return null;
+  }
+
+  const posterSizes = config?.images?.poster_sizes;
+
+  if (!posterSizes) {
+    return null;
+  }
+
+  const posterSize = posterSizes?.[sizeIndex ?? posterSizes?.length - 1 ?? 0];
+
+  if (!posterSize) {
+    return null;
+  }
+
+  return `${base}${posterSize}${posterPath}`;
+};

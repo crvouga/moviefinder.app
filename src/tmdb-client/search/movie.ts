@@ -51,7 +51,7 @@ const ApiResponse = z.discriminatedUnion("status", [
 ]);
 type ApiResponse = z.infer<typeof ApiResponse>;
 
-export const movie = makeFetcher({
+export const searchMovie = makeFetcher({
   endpoint: () => "/search/movie",
   queryParams: TmdbSearchMovieQueryParams,
   response: ApiResponse,
