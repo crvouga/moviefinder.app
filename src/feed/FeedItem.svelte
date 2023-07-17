@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import MovieVideoItem from "./MovieVideoItem.svelte";
+  import FeedItemVideoItem from "./FeedItemVideoItem.svelte";
   import {
     TmdbConfiguration,
     TmdbMovieListResult,
@@ -39,10 +39,10 @@
 <div class="w-full h-full overflow-hidden flex flex-col">
 
   <div class="w-full h-full">
-  <swiper-container direction="horizontal">
+  <swiper-container direction="horizontal" class="w-full h-full">
     {#each videos as video (video.key)}
-      <swiper-slide>
-          <MovieVideoItem {movie} {video} />
+      <swiper-slide class="w-full h-full">
+          <FeedItemVideoItem {movie} {video} />
       </swiper-slide>
     {/each}
   </swiper-container>
@@ -56,26 +56,4 @@
         </p>
     </div>
   </div>
-
 </div>
-
-
-<style>
-  swiper-container {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    max-height: 100% !important;
-    min-height: 100% !important;
-  }
-
-  swiper-slide {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    max-height: 100% !important;
-    min-height: 100% !important;
-  }
-</style>

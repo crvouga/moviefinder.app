@@ -1,5 +1,5 @@
 <script lang="ts">
-  import DiscoverPage from "./DiscoverPage.svelte";
+  import FeedPage from "./feed/FeedPage.svelte";
   import { tmdb, TmdbConfiguration } from "./tmdb-client";
 
   let configuration: TmdbConfiguration | null = null;
@@ -27,7 +27,7 @@
 >
   <div class="max-w-xl overflow- h-full max-h-full overflow-hidden">
     {#if configuration}
-      <DiscoverPage tmdbConfig={configuration} />
+      <FeedPage tmdbConfig={configuration} />
     {:else}
       <div>loading</div>
     {/if}

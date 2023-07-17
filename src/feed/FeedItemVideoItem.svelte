@@ -5,9 +5,9 @@
 	  TmdbMovieListResult,
 	  TmdbMovieVideo
 	} from "../tmdb-client";
-	import { uploadMovieVideoItem } from './movie-video-item';
+	import { uploadMovieVideoItem } from './feed-item';
   import { onMount } from "svelte";
-  	import viewport from './on-viewport-enter';
+
 
 
   export let movie: TmdbMovieListResult;
@@ -80,17 +80,23 @@ let playing = false
 </script>
 
 
+{#if downloadUrl}
 <button class="w-full h-full overflow-hidden flex flex-col bg-black items-center justify-center" on:click={toggle}>
-  <div class="w-full flex-1 overflow-hidden max-w-full flex items-center justify-center bg-black" >
-    <!-- svelte-ignore a11y-media-has-caption -->
-     <video
-      src={downloadUrl}
-      on:play={onPlay}
-      on:pause={onPause}
-      bind:this={videoEl}
-      playsinline
-      class="w-full h-full bg-black"
-      />
+  <!-- svelte-ignore a11y-media-has-caption -->
+  <video
+   src={downloadUrl}
+   on:play={onPlay}
+   on:pause={onPause}
+   bind:this={videoEl}
+   playsinline
+   class="w-full h-full bg-black"
+   />
+  </button>
+{:else}
+<div class="w-full h-full overflow-hidden flex flex-col bg-black items-center justify-center">
+  <button on:click={uploadYouTubeVideo}>
+    Download video
+  </button>
   </div>
-</button>
+{/if}
 
