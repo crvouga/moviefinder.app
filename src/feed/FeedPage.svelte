@@ -28,7 +28,6 @@
 
     if (got.success && got.data.status === 200) {
       movies = got.data.body.results;
-      console.log(got.data.body)
     }
   });
 
@@ -38,12 +37,11 @@
   //
 </script>
 
-<div class="w-full h-full">
-  <swiper-container direction="vertical" class="w-full h-full">
-    {#each movies.slice(0, 3) as movie (movie.id)}
-      <swiper-slide class="w-full h-full">
-        <FeedItem {movie} {tmdbConfig} />
-      </swiper-slide>
-    {/each}
-  </swiper-container>
-</div>
+<swiper-container direction="vertical" class="w-full h-full">
+  {#each movies.slice(0, 3) as movie (movie.id)}
+    <swiper-slide class="w-full h-full">
+      <FeedItem {movie} {tmdbConfig} />
+    </swiper-slide>
+  {/each}
+</swiper-container>
+

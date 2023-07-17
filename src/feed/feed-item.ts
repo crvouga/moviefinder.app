@@ -78,7 +78,7 @@ export const uploadMovieVideoItem = async ({
   youTubeVideoKey: string;
   tmdbMovieId: number;
 }) => {
-  downloadMovieVideoItem({
+  await downloadMovieVideoItem({
     youTubeVideoKey,
     tmdbMovieId,
   });

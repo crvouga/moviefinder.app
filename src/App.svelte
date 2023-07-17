@@ -14,8 +14,6 @@
     if (got.success && got.data.status === 200) {
       tmdbConfig = got.data.body;
     }
-
-    console.log(got);
   };
 
   onMount(() => {
