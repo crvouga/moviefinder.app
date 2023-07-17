@@ -49,25 +49,39 @@ await uploadMovieVideoItem({
   }
 
 let videoEl:HTMLVideoElement
-  const onClick = () => {
-if(videoEl.paused){
+let playing = false
+  const toggle = () => {
+  if(videoEl.paused){
 
-    videoEl.play()
-  return
-}
+      videoEl.play()
+    return
+  }
 videoEl.pause()
+  }
+
+  const onPlay = () => {
+    playing = true
+  }
+
+  const onPause = () => {
+    playing = false
   }
 
 </script>
 
 
-<div class="w-full h-full overflow-hidden flex items-center justify-center bg-black"  use:onViewportEnter={{ once: true }} on:viewportenter={handleViewportEnter}>
-    {#if downloadUrl}
-      <!-- svelte-ignore a11y-media-has-caption -->
-      <video bind:this={videoEl} on:click={onClick} class="w-full h-full bg-black"  src={downloadUrl}></video>
-    {:else}
-      <button on:click={uploadYouTubeVideo}> Upload </button>
-    {/if}
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="w-full h-full overflow-hidden max-w-full flex flex-col bg-black">
+<div
+  class="w-full flex-1 overflow-hidden max-w-full flex items-center justify-center bg-black"
+  use:onViewportEnter={{ once: true }}
+  on:viewportenter={handleViewportEnter}
+
+>
+  <!-- svelte-ignore a11y-media-has-caption -->
+  <video src={downloadUrl} on:play={onPlay} on:pause={onPause} bind:this={videoEl} playsinline class="w-full h-full bg-black"/>
+
 </div>
 
-
+<button on:click={toggle}>toggle</button>
+</div>

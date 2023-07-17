@@ -36,15 +36,16 @@
 
 </script>
 
-<div class="w-full h-full overflow-hidden flex flex-col">
-  <div class="w-full flex-1 overflow-hidden">
+<div class="w-full h-full max-w-full overflow-hidden flex flex-col">
+  <div class="w-full max-w-full flex-1 overflow-hidden">
     <swiper-container direction="horizontal"  >
       {#each videos as video}
         <swiper-slide>
             <MovieVideoItem {movie} {video} />
         </swiper-slide>
       {/each}
-    </swiper-container></div>
+    </swiper-container>
+  </div>
 
   <div class="bg-black flex flex-col justify-end w-full max-wfull">
     <div class="w-full flex items-center overflow-hidden p-4 gap-4">
@@ -62,9 +63,11 @@
     width: 100%;
     height: 100%;
     cursor: move;
+    max-width: 100%;
   }
 
   swiper-slide {
+    max-width: 100%;
     width: 100%;
     height: 100%;
   }
