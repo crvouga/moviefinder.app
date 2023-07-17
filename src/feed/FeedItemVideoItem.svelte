@@ -127,8 +127,6 @@ let playing = false
   <input
       type="range"
       value={progress}
-      on:mousedown|preventDefault|stopPropagation
-      on:click|preventDefault|stopPropagation
       on:input={(e) => onProgressInput(parseInt(e.currentTarget.value))}
       min="0"
       max="100"
