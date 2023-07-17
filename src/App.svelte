@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import FeedPage from "./feed/FeedPage.svelte";
   import { tmdb, TmdbConfiguration } from "./tmdb-client";
 
-  let configuration: TmdbConfiguration | null = null;
+  let tmdbConfig: TmdbConfiguration | null = null;
 
   const load = async () => {
     const got = await tmdb.configuration({
@@ -11,24 +12,22 @@
     });
 
     if (got.success && got.data.status === 200) {
-      configuration = got.data.body;
+      tmdbConfig = got.data.body;
     }
 
     console.log(got);
   };
 
-  $: {
-    load();
-  }
+  onMount(() => {
+    load()
+  })
 </script>
 
 
-<main class="max-w-xl w-screen h-screen max-h-full overflow-hidden mx-auto">
-  {#if configuration}
-    <FeedPage tmdbConfig={configuration} />
-  {:else}
-    <div>loading</div>
-  {/if}
-</main>
+{#if tmdbConfig}
+  <main class="w-screen h-screen overflow-hidden">
+    <FeedPage {tmdbConfig} />
+  </main>
+{/if}
 
 
