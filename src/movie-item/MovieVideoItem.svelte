@@ -31,29 +31,40 @@ const loadDownloadUrl = async () => {
 
   const uploadYouTubeVideo = async () => {
 
-    if(movie.id && video.key)
+    if(!movie.id || !video.key)
 {
-await   uploadMovieVideoItem({
+  return
+}
+await uploadMovieVideoItem({
   tmdbMovieId: movie.id,
   youTubeVideoKey: video.key
 })
   loadDownloadUrl()
-}
   }
 
 
 
-  function handleViewportEnter() {
+  const handleViewportEnter = () => {
     loadDownloadUrl()
+  }
+
+let videoEl:HTMLVideoElement
+  const onClick = () => {
+if(videoEl.paused){
+
+    videoEl.play()
+  return
+}
+videoEl.pause()
   }
 
 </script>
 
 
-<div class="w-full h-full flex items-center justify-center"  use:onViewportEnter={{ once: true }} on:viewportenter={handleViewportEnter}>
+<div class="w-full h-full overflow-hidden flex items-center justify-center bg-black"  use:onViewportEnter={{ once: true }} on:viewportenter={handleViewportEnter}>
     {#if downloadUrl}
       <!-- svelte-ignore a11y-media-has-caption -->
-      <video  src={downloadUrl} controls></video>
+      <video bind:this={videoEl} on:click={onClick} class="w-full h-full bg-black"  src={downloadUrl}></video>
     {:else}
       <button on:click={uploadYouTubeVideo}> Upload </button>
     {/if}

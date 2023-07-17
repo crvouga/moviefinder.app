@@ -36,30 +36,24 @@
 
 </script>
 
-<div class="w-full h-full relative overflow-hidden">
-  <img
-      class="w-full h-full object-cover user-select-none pointer-events-none"
-      alt=""
-      src={toImageUrl(tmdbConfig, movie.poster_path)}
-  />
-
-
-  <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-end">
-    <swiper-container direction="horizontal">
+<div class="w-full h-full overflow-hidden flex flex-col">
+  <div class="w-full flex-1 overflow-hidden">
+    <swiper-container direction="horizontal"  >
       {#each videos as video}
         <swiper-slide>
             <MovieVideoItem {movie} {video} />
         </swiper-slide>
       {/each}
-    </swiper-container>
-    <div class="bg-gradient-to-t from-black flex flex-col justify-end">
-      <div class="w-full flex items-center overflow-hidden p-4 gap-4">
-          <p class="text-xl font-bold text-left">
-            {movie.title}
-          </p>
-      </div>
+    </swiper-container></div>
+
+  <div class="bg-black flex flex-col justify-end w-full max-wfull">
+    <div class="w-full flex items-center overflow-hidden p-4 gap-4">
+        <p class="text-xl font-bold text-left">
+          {movie.title}
+        </p>
     </div>
   </div>
+
 </div>
 
 
