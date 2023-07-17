@@ -38,7 +38,6 @@
 
 <div class="w-full h-full overflow-hidden flex flex-col">
 
-
   <swiper-container direction="horizontal" class="w-full flex-1">
     {#each videos as video (video.key)}
       <swiper-slide class="w-full h-full">
@@ -47,13 +46,9 @@
     {/each}
   </swiper-container>
 
-
-
-  <div class="bg-black flex flex-col justify-end w-full max-wfull">
-    <div class="w-full flex items-center overflow-hidden p-4 gap-4">
-        <p class="text-xl font-bold text-left">
-          {movie.title}
-        </p>
-    </div>
+  <div class="bg-black flex flex-col justify-end w-full p-4 gap-4">
+    <p class="text-xl font-bold text-left">
+      {movie.title}
+    </p>
   </div>
 </div>
