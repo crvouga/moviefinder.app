@@ -38,15 +38,15 @@
 
 <div class="w-full h-full overflow-hidden flex flex-col">
 
-  <div class="w-full h-full">
-  <swiper-container direction="horizontal" class="w-full h-full">
+
+  <swiper-container direction="horizontal" class="w-full flex-1">
     {#each videos as video (video.key)}
       <swiper-slide class="w-full h-full">
-          <FeedItemVideoItem {movie} {video} />
+        <FeedItemVideoItem {movie} {video} />
       </swiper-slide>
     {/each}
   </swiper-container>
-  </div>
+
 
 
   <div class="bg-black flex flex-col justify-end w-full max-wfull">
