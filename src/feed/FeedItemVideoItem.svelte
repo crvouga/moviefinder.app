@@ -103,7 +103,7 @@ let playing = false
 
 
 {#if downloadUrl}
-<div class="w-full h-full overflow-hidden flex flex-col">
+<div class="w-full h-full flex flex-col">
   <button class="w-full flex-1 bg-black relative" on:click={toggle}>
     <!-- svelte-ignore a11y-media-has-caption -->
     <video
@@ -136,7 +136,7 @@ let playing = false
     />
 </div>
 {:else}
-<div class="w-full h-full overflow-hidden flex flex-col bg-black items-center justify-center">
+<div class="w-full h-full flex flex-col bg-black items-center justify-center">
   <button on:click={uploadYouTubeVideo}>
     Download video
   </button>
