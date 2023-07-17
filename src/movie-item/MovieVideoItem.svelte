@@ -18,8 +18,13 @@
 
 const loadDownloadUrl = async () => {
 
-  const videoRef = ref(storage, `movie-video-item/${video.key}.mp4`);
-  downloadUrl = await getDownloadURL(videoRef)
+  try {
+
+    const videoRef = ref(storage, `movie-video-item/${video.key}.mp4`);
+    downloadUrl = await getDownloadURL(videoRef)
+  } catch(error){
+    console.log("error while loading download url")
+  }
 }
 
 
@@ -32,12 +37,7 @@ await   uploadMovieVideoItem({
   tmdbMovieId: movie.id,
   youTubeVideoKey: video.key
 })
-  try {
-
-
-  } catch(error) {
-    console.error(String(error))
-  }
+  loadDownloadUrl()
 }
   }
 

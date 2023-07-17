@@ -25,26 +25,26 @@ const firestore = getFirestore(app);
 const functions = getFunctions(app);
 const storage = getStorage(app);
 
-// Connect to Firestore emulator
-const firestoreEmulatorHost = "localhost";
-const firestoreEmulatorPort = 8080;
-connectFirestoreEmulator(
-  firestore,
-  firestoreEmulatorHost,
-  firestoreEmulatorPort
-);
+// // Connect to Firestore emulator
+// const firestoreEmulatorHost = "localhost";
+// const firestoreEmulatorPort = 8080;
+// connectFirestoreEmulator(
+//   firestore,
+//   firestoreEmulatorHost,
+//   firestoreEmulatorPort
+// );
 
-// Connect to Cloud Functions emulator
-const functionsEmulatorHost = "localhost";
-const functionsEmulatorPort = 5001;
-connectFunctionsEmulator(
-  functions,
-  functionsEmulatorHost,
-  functionsEmulatorPort
-);
+// // Connect to Cloud Functions emulator
+// const functionsEmulatorHost = "localhost";
+// const functionsEmulatorPort = 5001;
+// connectFunctionsEmulator(
+//   functions,
+//   functionsEmulatorHost,
+//   functionsEmulatorPort
+// );
 
-const storageEmulatorHost = "localhost";
-const storageEmulatorPort = 9199;
-connectStorageEmulator(storage, storageEmulatorHost, storageEmulatorPort);
+// const storageEmulatorHost = "localhost";
+// const storageEmulatorPort = 9199;
+// connectStorageEmulator(storage, storageEmulatorHost, storageEmulatorPort);
 
 export { firestore, functions, storage };
