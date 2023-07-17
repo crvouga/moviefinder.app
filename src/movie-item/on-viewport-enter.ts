@@ -1,45 +1,24 @@
-// onViewportEnter.ts
-interface Options {
-  once?: boolean;
+let intersectionObserver;
+
+function ensureIntersectionObserver() {
+  if (intersectionObserver) return;
+
+  intersectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const eventName = entry.isIntersecting ? "enterViewport" : "exitViewport";
+      entry.target.dispatchEvent(new CustomEvent(eventName));
+    });
+  });
 }
 
-export function onViewportEnter(
-  node: HTMLElement,
-  { once = true }: Options = {}
-): any {
-  let observer: IntersectionObserver | undefined;
+export default function viewport(element: HTMLElement) {
+  ensureIntersectionObserver();
 
-  function startObserver() {
-    observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          node.dispatchEvent(new CustomEvent("viewportenter"));
-          if (once) {
-            observer?.disconnect();
-            observer = undefined;
-          }
-        }
-      });
-    });
-
-    observer.observe(node);
-  }
-
-  startObserver();
+  intersectionObserver.observe(element);
 
   return {
-    update(options: Options) {
-      if (observer) {
-        observer.disconnect();
-        observer = undefined;
-      }
-      startObserver();
-    },
     destroy() {
-      if (observer) {
-        observer.disconnect();
-        observer = undefined;
-      }
+      intersectionObserver.unobserve(element);
     },
   };
 }

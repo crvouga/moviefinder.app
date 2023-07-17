@@ -23,9 +23,9 @@
 </script>
 
 <main
-  class="bg-neutral-950 text-white grid place-items-center w-screen h-screen overflow-hidden"
+  class="bg-neutral-950 text-white grid place-items-center root overflow-hidden"
 >
-  <div class="max-w-xl h-full max-h-full overflow-hidden">
+  <div class="max-w-xl overflow- h-full max-h-full overflow-hidden">
     {#if configuration}
       <DiscoverPage tmdbConfig={configuration} />
     {:else}
@@ -33,3 +33,10 @@
     {/if}
   </div>
 </main>
+
+<style>
+  .root{
+    width: 100dvw;
+    height: 100dvh;
+  }
+</style>

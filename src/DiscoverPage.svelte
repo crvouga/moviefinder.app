@@ -38,28 +38,27 @@
   //
 </script>
 
-<swiper-container direction="vertical" >
-  {#each movies as movie}
-    <swiper-slide>
-      <MovieItem {movie} {tmdbConfig} />
-    </swiper-slide>
-  {/each}
-</swiper-container>
+<div class="w-full h-full">
+  <swiper-container direction="vertical" >
+    {#each movies as movie (movie.id)}
+      <swiper-slide>
+        <MovieItem {movie} {tmdbConfig} />
+      </swiper-slide>
+    {/each}
+  </swiper-container>
+</div>
 
 <style>
+
   swiper-container {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     cursor: move;
   }
 
   swiper-slide {
-    text-align: center;
-    font-size: 18px;
-    background: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
+    height: 100%;
   }
 </style>
 

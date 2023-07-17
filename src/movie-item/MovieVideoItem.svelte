@@ -7,7 +7,8 @@
 	} from "../tmdb-client";
 	import { uploadMovieVideoItem } from './movie-video-item';
   import { onMount } from "svelte";
-  import {onViewportEnter}from "./on-viewport-enter"
+  	import viewport from './on-viewport-enter';
+
 
   export let movie: TmdbMovieListResult;
   export let video: TmdbMovieVideo;
@@ -45,18 +46,27 @@ await uploadMovieVideoItem({
 
 
   const handleViewportEnter = () => {
-    loadDownloadUrl()
+
   }
+
+  onMount(() => {
+loadDownloadUrl()
+  })
 
 let videoEl:HTMLVideoElement
 let playing = false
   const toggle = () => {
-  if(videoEl.paused){
+  if(videoEl.paused && !playing){
 
       videoEl.play()
     return
   }
-videoEl.pause()
+
+  if(playing && !videoEl.paused){
+    videoEl.pause()
+    return
+  }
+
   }
 
   const onPlay = () => {
@@ -70,18 +80,19 @@ videoEl.pause()
 </script>
 
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="w-full h-full overflow-hidden max-w-full flex flex-col bg-black">
-<div
-  class="w-full flex-1 overflow-hidden max-w-full flex items-center justify-center bg-black"
-  use:onViewportEnter={{ once: true }}
-  on:viewportenter={handleViewportEnter}
+<div class="w-full h-full overflow-hidden flex flex-col bg-black items-center justify-center"
 
 >
-  <!-- svelte-ignore a11y-media-has-caption -->
-  <video src={downloadUrl} on:play={onPlay} on:pause={onPause} bind:this={videoEl} playsinline class="w-full h-full bg-black"/>
+  <div
+    class="w-full flex-1 overflow-hidden max-w-full flex items-center justify-center bg-black"
 
+    >
+
+    <!-- svelte-ignore a11y-media-has-caption -->
+     <video src={downloadUrl} on:play={onPlay} on:pause={onPause} bind:this={videoEl} playsinline class="w-full h-full bg-black"/>
+
+  </div>
+
+  <button on:click={toggle}>toggle</button>
 </div>
 
-<button on:click={toggle}>toggle</button>
-</div>
