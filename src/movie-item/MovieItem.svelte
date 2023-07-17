@@ -7,7 +7,7 @@
     TmdbMovieVideo,
     tmdb,
     toImageUrl
-  } from "./tmdb-client";
+  } from "../tmdb-client";
 
 
   //
@@ -49,7 +49,7 @@
     <swiper-container direction="horizontal">
       {#each videos as video}
         <swiper-slide>
-            <MovieVideoItem {video} />
+            <MovieVideoItem {movie} {video} />
         </swiper-slide>
       {/each}
     </swiper-container>

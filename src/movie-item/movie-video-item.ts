@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { firestore } from "./firebase-client";
+import { firestore, functions } from "../firebase-client";
 import { collection, doc, getDoc } from "firebase/firestore";
-import { Err, Ok, type Result } from "./result";
+import { Err, Ok, type Result } from "../result";
+import { httpsCallable } from "firebase/functions";
 
 //
 //
@@ -63,4 +64,20 @@ export const getMovieVideoItem = async ({
   }
 
   return Ok(parsed.data);
+};
+
+const uploadMovieVideoItemFn = httpsCallable(functions, "uploadMovieVideoItem");
+
+export const uploadMovieVideoItem = async ({
+  youTubeVideoKey,
+  tmdbMovieId,
+}: {
+  youTubeVideoKey: string;
+  tmdbMovieId: number;
+}) => {
+  uploadMovieVideoItemFn({
+    youTubeVideoKey,
+    tmdbMovieId,
+  });
+  return;
 };

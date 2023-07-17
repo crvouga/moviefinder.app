@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import MovieItem from "./movie-item/MovieItem.svelte";
   import { TmdbConfiguration, TmdbMovieListResult, tmdb } from "./tmdb-client";
-  import MovieItem from "./MovieItem.svelte";
 
   //
   //

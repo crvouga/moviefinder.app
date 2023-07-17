@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -20,5 +20,25 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-export const firestore = getFirestore(app);
+const firestore = getFirestore(app);
+const functions = getFunctions(app);
+
+// Connect to Firestore emulator
+const firestoreEmulatorHost = "localhost";
+const firestoreEmulatorPort = 8080;
+connectFirestoreEmulator(
+  firestore,
+  firestoreEmulatorHost,
+  firestoreEmulatorPort
+);
+
+// Connect to Cloud Functions emulator
+const functionsEmulatorHost = "localhost";
+const functionsEmulatorPort = 5001;
+connectFunctionsEmulator(
+  functions,
+  functionsEmulatorHost,
+  functionsEmulatorPort
+);
+
+export { firestore, functions };
