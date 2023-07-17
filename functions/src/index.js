@@ -1,14 +1,22 @@
 const logger = require("firebase-functions/logger");
 const { onCall } = require("firebase-functions/v2/https");
 const ytdl = require("ytdl-core");
-const admin = require("firebase-admin");
 const fs = require("fs");
+const admin = require("firebase-admin");
 
-// const storage = admin.storage();
-// const bucket = storage.bucket("movie-video-item");
+admin.initializeApp();
+
+const storage = admin.storage();
+const bucket = storage.bucket();
 
 module.exports.uploadMovieVideoItem = onCall(async (request) => {
   try {
+    //
+    //
+    // Input
+    //
+    //
+
     const { tmdbMovieId, youTubeVideoKey } = request.data;
 
     const videoUrl = `https://www.youtube.com/watch?v=${youTubeVideoKey}`;
@@ -17,7 +25,14 @@ module.exports.uploadMovieVideoItem = onCall(async (request) => {
     logger.info(`youTubeVideoKey: ${youTubeVideoKey}`);
     logger.info(`videoUrl: ${videoUrl}`);
 
+    //
+    //
+    // Download from youtube
+    //
+    //
+
     logger.info(`getInfo`);
+
     const info = await ytdl.getInfo(youTubeVideoKey);
 
     const quality = "lowest";
@@ -45,6 +60,12 @@ module.exports.uploadMovieVideoItem = onCall(async (request) => {
       logger.info(`downloaded: ${formattedPercent}`);
     });
 
+    //
+    //
+    // Write to file system
+    //
+    //
+
     const videoPath = `${__dirname}/tmp/${youTubeVideoKey}.mp4`;
     logger.info(`videoPath: ${videoPath}`);
 
@@ -56,10 +77,21 @@ module.exports.uploadMovieVideoItem = onCall(async (request) => {
       videoStream.on("error", reject);
       fileStream.on("finish", resolve);
     });
-    // logger.info("upload time");
-    // await bucketName.upload(videoPath, { destination: fileName });
+
+    //
+    //
+    //
+    // Upload to cloud storage
+    //
+    //
+
+    logger.info("upload time");
+    const fileName = `movie-video-item/${youTubeVideoKey}.mp4`;
+    logger.info(`fileName: ${fileName}`);
+    await bucket.upload(videoPath, { destination: fileName });
 
     return {
+      fileName,
       tmdbMovieId,
       youTubeVideoKey,
       videoUrl,

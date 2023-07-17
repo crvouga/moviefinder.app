@@ -24,7 +24,6 @@
   let videos: TmdbMovieVideo[] = []
 
   onMount(async () => {
-    console.log(movie);
     const got = await tmdb.movieVideo({
       pathParams: { movie_id: movie.id },
       queryParams: {},

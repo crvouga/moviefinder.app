@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,6 +23,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 const functions = getFunctions(app);
+const storage = getStorage(app);
 
 // Connect to Firestore emulator
 const firestoreEmulatorHost = "localhost";
@@ -41,4 +43,8 @@ connectFunctionsEmulator(
   functionsEmulatorPort
 );
 
-export { firestore, functions };
+const storageEmulatorHost = "localhost";
+const storageEmulatorPort = 9199;
+connectStorageEmulator(storage, storageEmulatorHost, storageEmulatorPort);
+
+export { firestore, functions, storage };

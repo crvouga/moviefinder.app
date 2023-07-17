@@ -25,7 +25,7 @@ export const makeFetcher =
   <
     QueryParams extends Record<string, unknown>,
     ResponseBody extends Record<string, unknown>,
-    PathParams = undefined
+    PathParams = undefined,
   >({
     endpoint,
     response,
@@ -41,7 +41,7 @@ export const makeFetcher =
     );
     searchParams.set("api_key", TMDB_API_KEY_V3);
     url.search = searchParams.toString();
-    console.log("[tmdb] GET", url.toString(), "");
+    // console.log("[tmdb] GET", url.toString(), "");
     const fetched = await fetch(url.toString());
     const status = fetched.status;
     const body = await fetched.json();
