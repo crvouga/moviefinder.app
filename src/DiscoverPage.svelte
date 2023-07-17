@@ -38,7 +38,7 @@
   //
 </script>
 
-<swiper-container direction="vertical" history>
+<swiper-container direction="vertical" >
   {#each movies as movie}
     <swiper-slide>
       <MovieItem {movie} {tmdbConfig} />
