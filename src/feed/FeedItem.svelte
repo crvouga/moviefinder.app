@@ -1,20 +1,17 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import FeedItemVideoItem from "./FeedItemVideoItem.svelte";
   import {
-    TmdbConfiguration,
     TmdbMovieListResult,
     TmdbMovieVideo,
-    tmdb,
+    tmdb
   } from "../tmdb-client";
+  import FeedItemVideoItem from "./FeedItemVideoItem.svelte";
 
 
   //
   //
   //
   //
-
-  export let tmdbConfig: TmdbConfiguration;
   export let movie: TmdbMovieListResult;
 
   //
@@ -37,7 +34,7 @@
 
 <div class="w-full h-full flex flex-col">
   <swiper-container direction="horizontal" class="w-full flex-1">
-    {#each videos.slice(0, 3) as video (video.key)}
+    {#each videos.slice(0, 5) as video (video.key)}
       <swiper-slide class="w-full h-full">
         <FeedItemVideoItem {movie} {video} />
       </swiper-slide>

@@ -22,17 +22,20 @@
 </script>
 
 
-{#if tmdbConfig}
-  <main>
-    <FeedPage {tmdbConfig} />
-  </main>
-{/if}
+
+<main>
+  <FeedPage />
+</main>
+
 
 
 
 
 <style>
   main {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100dvw;
     height: 100dvh;
   }

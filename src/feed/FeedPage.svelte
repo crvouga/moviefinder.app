@@ -1,14 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import FeedItem from "./FeedItem.svelte";
-  import { TmdbConfiguration, TmdbMovieListResult, tmdb } from "../tmdb-client";
-
-  //
-  //
-  //
-  //
-
-  export let tmdbConfig: TmdbConfiguration;
+  import {  TmdbMovieListResult, tmdb } from "../tmdb-client";
 
   //
   //
@@ -38,9 +31,9 @@
 </script>
 
 <swiper-container direction="vertical" class="w-full h-full">
-  {#each movies.slice(0, 3) as movie (movie.id)}
+  {#each movies.slice(0, 5) as movie (movie.id)}
     <swiper-slide class="w-full h-full">
-      <FeedItem {movie} {tmdbConfig} />
+      <FeedItem {movie}  />
     </swiper-slide>
   {/each}
 </swiper-container>
