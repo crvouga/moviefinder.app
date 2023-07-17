@@ -80,19 +80,17 @@ let playing = false
 </script>
 
 
-<div class="w-full h-full overflow-hidden flex flex-col bg-black items-center justify-center"
-
->
-  <div
-    class="w-full flex-1 overflow-hidden max-w-full flex items-center justify-center bg-black"
-
-    >
-
+<button class="w-full h-full overflow-hidden flex flex-col bg-black items-center justify-center" on:click={toggle}>
+  <div class="w-full flex-1 overflow-hidden max-w-full flex items-center justify-center bg-black" >
     <!-- svelte-ignore a11y-media-has-caption -->
-     <video src={downloadUrl} on:play={onPlay} on:pause={onPause} bind:this={videoEl} playsinline class="w-full h-full bg-black"/>
-
+     <video
+      src={downloadUrl}
+      on:play={onPlay}
+      on:pause={onPause}
+      bind:this={videoEl}
+      playsinline
+      class="w-full h-full bg-black"
+      />
   </div>
-
-  <button on:click={toggle}>toggle</button>
-</div>
+</button>
 
