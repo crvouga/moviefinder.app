@@ -23,9 +23,17 @@
 
 
 {#if tmdbConfig}
-  <main class="w-screen h-screen overflow-hidden">
+  <main>
     <FeedPage {tmdbConfig} />
   </main>
 {/if}
 
 
+
+
+<style>
+  main {
+    width: 100dvw;
+    height: 100dvh;
+  }
+</style>
