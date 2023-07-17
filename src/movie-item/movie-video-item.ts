@@ -66,7 +66,10 @@ export const getMovieVideoItem = async ({
   return Ok(parsed.data);
 };
 
-const uploadMovieVideoItemFn = httpsCallable(functions, "uploadMovieVideoItem");
+const downloadMovieVideoItem = httpsCallable(
+  functions,
+  "downloadMovieVideoItem"
+);
 
 export const uploadMovieVideoItem = async ({
   youTubeVideoKey,
@@ -75,7 +78,7 @@ export const uploadMovieVideoItem = async ({
   youTubeVideoKey: string;
   tmdbMovieId: number;
 }) => {
-  uploadMovieVideoItemFn({
+  downloadMovieVideoItem({
     youTubeVideoKey,
     tmdbMovieId,
   });
