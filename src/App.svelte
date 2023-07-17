@@ -22,21 +22,13 @@
   }
 </script>
 
-<main
-  class="bg-neutral-950 text-white grid place-items-center root overflow-hidden"
->
-  <div class="max-w-xl overflow- h-full max-h-full overflow-hidden">
-    {#if configuration}
-      <FeedPage tmdbConfig={configuration} />
-    {:else}
-      <div>loading</div>
-    {/if}
-  </div>
+
+<main class="max-w-xl w-screen h-screen max-h-full overflow-hidden mx-auto">
+  {#if configuration}
+    <FeedPage tmdbConfig={configuration} />
+  {:else}
+    <div>loading</div>
+  {/if}
 </main>
 
-<style>
-  .root{
-    width: 100dvw;
-    height: 100dvh;
-  }
-</style>
+
