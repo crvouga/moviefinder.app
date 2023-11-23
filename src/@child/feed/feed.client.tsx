@@ -1,28 +1,28 @@
+// import { useEffect } from "react";
 import { useEffect } from "react";
 import { useCurrentPage } from "../../@shared/page";
-import { tmdbClient } from "../../@shared/tmdb-client";
+// import { tmdbClient } from "../../@shared/tmdb-client";
+import type { FeedRouter } from "./feed.server";
+
+
+
+
 
 export function FeedPage() {
   const currentPage = useCurrentPage();
 
-
-
-  async function get() {
-    const got = await tmdbClient.discover.movie({
-      pathParams:undefined,
-      queryParams:{},
-    })
-
-
-
+  async function load() {
+    const feed = await currentPage.query((query) =>
+      query.feed.getFeed({
+        page: 1,
+      })
+    );
+    console.log(feed);
   }
 
   useEffect(() => {
-  get()
+    load()
   }, [])
-
-
-
 
   return (
     <div className="w-full flex flex-col flex-1">

@@ -16,7 +16,7 @@ function Page() {
   const currentPage = useCurrentPage();
 
   switch (currentPage.value.t) {
-    case "home": {
+    case "feed": {
       return <FeedPage />;
     }
 

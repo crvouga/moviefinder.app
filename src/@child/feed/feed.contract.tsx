@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 const Movie = z.object({
@@ -20,4 +21,5 @@ const FeedItem = Movie
 export const Feed = z.object({
   items: z.array(FeedItem)
 })
+
 
