@@ -8,7 +8,7 @@ const queryClient = new QueryClient();
 export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="w-screen h-screen flex-col bg-black flex items-center justify-center text-white overflow-hidden box-border">
+      <div className="w-screen h-[100dvh] flex-col bg-black flex items-center justify-center text-white overflow-hidden box-border">
         <div className="w-full h-full max-w-2xl max-h-[840px] border rounded overflow-hidden flex flex-col">
           <Page />
         </div>
@@ -25,7 +25,7 @@ const Page = () => {
         t: z.literal("feed"),
       }),
       z.object({
-        t: z.literal("movie-details"),
+        t: z.literal("media-details"),
       }),
     ]),
     initialValue: {
@@ -35,10 +35,10 @@ const Page = () => {
 
   switch (page.value.t) {
     case "feed": {
-      return <FeedPage />;
+      return <FeedPage openMediaDetails={() => page.push({t: 'media-details'})} />;
     }
 
-    case "movie-details": {
+    case "media-details": {
       return <div>hello</div>
     }
   }

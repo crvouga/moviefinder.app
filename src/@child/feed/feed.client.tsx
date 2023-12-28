@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const client = createClient(contract) 
 
-export const FeedPage = () => {
+export const FeedPage = ({openMediaDetails}: {openMediaDetails: () => void}) => {
   const [page] = useState(0)
   const [pageSize] = useState(10)
   const { data } = useQuery({
@@ -30,7 +30,7 @@ export const FeedPage = () => {
   return <div>
     {data.body.items.map(item => {
       return (
-        <div key={item.id}>
+        <div key={item.id} onClick={() => openMediaDetails()}>
           <div>{item.title}</div>
         </div>
       )
