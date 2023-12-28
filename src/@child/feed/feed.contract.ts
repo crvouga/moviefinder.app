@@ -3,12 +3,6 @@ import { z } from 'zod';
 
 const c = initContract();
 
-const PostSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  body: z.string(),
-});
-
 const FeedItem = z.object({
   id: z.string(),
   title: z.string(),
@@ -28,26 +22,6 @@ export const contract = c.router({
         error: z.string(),
       }),
     },
-  },
-  createPost: {
-    method: 'POST',
-    path: '/posts',
-    responses: {
-      201: PostSchema,
-    },
-    body: z.object({
-      title: z.string(),
-      body: z.string(),
-    }),
-    summary: 'Create a post',
-  },
-  getPost: {
-    method: 'GET',
-    path: `/posts/:id`,
-    responses: {
-      200: PostSchema.nullable(),
-    },
-    summary: 'Get a post by id',
   },
 });
 

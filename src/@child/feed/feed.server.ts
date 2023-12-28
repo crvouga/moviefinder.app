@@ -45,28 +45,7 @@ export const feedRouter = ({ s }: { s: Server }) => {
           items: feedItems
         }
       }
-    },
-    getPost: async () => {
-      return {
-        status: 200,
-        body: {
-          body: 'body',
-          id: 'id',
-          title: 'title',
-        },
-      };
-    },
-
-    createPost: async () => {
-      return {
-        status: 201,
-        body: {
-          body: 'body',
-          id: 'id',
-          title: 'title',
-        },
-      };
-    },
+    },    
   });
 }
 
