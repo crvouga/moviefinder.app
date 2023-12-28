@@ -37,3 +37,13 @@ export const FeedPage = ({openMediaDetails}: {openMediaDetails: () => void}) => 
     })}
   </div>
 }
+
+const FeedItem = () => {
+  return <div>
+    <div>title</div>
+    <div>description</div>
+    <div>image</div>
+    <div>tags</div>
+    <div>comments</div>
+  </div>
+}
