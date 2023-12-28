@@ -63,9 +63,9 @@ const PersonListResult = z.object({
   popularity: z.number().optional(),
 });
 
-const PersonKnownForResult = z.union([MovieListResult, TvListResult]);
+export const PersonKnownForResult = z.union([MovieListResult, TvListResult]);
 
-const PersonListResultKnownFor = z
+export const PersonListResultKnownFor = z
   .object({
     poster_path: z.string().nullable().optional(),
     adult: z.boolean().optional(),

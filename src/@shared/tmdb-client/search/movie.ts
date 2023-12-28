@@ -1,13 +1,10 @@
 import { z } from "zod";
 import {
-  API_KEY_REGEX,
   ErrResponse,
   ISO_3166_1_REGEX,
   ISO_639_1_REGEX,
-  makeFetcher,
+  makeFetcher
 } from "../shared";
-
-// https://developers.themoviedb.org/3/search/multi-search
 
 export const TmdbSearchMovieQueryParams = z.object({
   language: z.string().regex(ISO_639_1_REGEX).default("en-US").optional(),
