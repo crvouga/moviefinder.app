@@ -25,7 +25,7 @@ export const makeFetcher =
   <
     QueryParams extends Record<string, unknown>,
     ResponseBody extends Record<string, unknown>,
-    PathParams = undefined
+    PathParams = void
   >({
     endpoint,
     response,

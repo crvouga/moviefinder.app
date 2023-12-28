@@ -31,12 +31,7 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       }
 
-      const config = await tmdbClient.configuration({
-        pathParams: undefined,
-        queryParams: {
-
-        },
-      })
+      const config = await tmdbClient.configuration({pathParams: undefined, queryParams: {},})
 
       if(!config.success || config.data.status !== 200 || !config.data.body.images?.base_url) {
         return {
