@@ -39,6 +39,7 @@ const s = initServer()
 
 const router = appRouter({ s })
 
+fastify.register(s.plugin(router.auth));
 fastify.register(s.plugin(router.feed));
 
 
