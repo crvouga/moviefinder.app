@@ -67,6 +67,7 @@ const main = async () => {
   try {
     await fastify.listen({
       port: Number(PORT),
+      host: "0.0.0.0"
     });
     console.log(`server started on port ${PORT}`)
   } catch (err) {
