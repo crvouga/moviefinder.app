@@ -12,8 +12,8 @@ export const FeedPage = ({openMediaDetails}: {openMediaDetails: () => void}) => 
     queryKey: ["feed", page, pageSize],
     queryFn: () => client.feed({
       query: {
-        page: page,
-        pageSize: pageSize,
+        page: String(page),
+        pageSize: String(pageSize),
       }
     }),
   })
