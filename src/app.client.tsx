@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { useQueryParam } from "./@shared/use-query-param";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FeedPage } from "./@child/feed/feed.client";
+import * as FeedClient from "./@child/feed/feed.client";
+import * as MediaClient from "./@child/media/media.client";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const Page = () => {
       }),
       z.object({
         t: z.literal("media-details"),
+        from: z.enum(['feed'])
       }),
     ]),
     initialValue: {
@@ -35,11 +37,11 @@ const Page = () => {
 
   switch (page.value.t) {
     case "feed": {
-      return <FeedPage openMediaDetails={() => page.push({t: 'media-details'})} />;
+      return <FeedClient.FeedPage openMediaDetails={() => page.push({t: 'media-details', from: 'feed'})} />;
     }
 
     case "media-details": {
-      return <div>hello</div>
+      return <MediaClient.MediaPage />;
     }
   }
 }
