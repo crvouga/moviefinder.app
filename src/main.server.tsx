@@ -61,11 +61,13 @@ fastify.register(fastifyStatic, {
 // 
 // 
 
-const PORT = process.env.PORT ?  Number(process.env.PORT) : 5000;
+const PORT = process.env.PORT || 4000;
 const main = async () => {
   console.log("starting server")
   try {
-    await fastify.listen({ port: PORT });
+    await fastify.listen({
+      port: Number(PORT),
+    });
     console.log(`server started on port ${PORT}`)
   } catch (err) {
     fastify.log.error(err);
