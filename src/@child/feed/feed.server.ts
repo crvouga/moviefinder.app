@@ -13,7 +13,7 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       })
 
-      if(!got.success) {
+      if (!got.success) {
         return {
           status: 500,
           body: {
@@ -22,7 +22,7 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       }
 
-      if(got.data.status !== 200) {
+      if (got.data.status !== 200) {
         return {
           status: 500,
           body: {
@@ -31,11 +31,35 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       }
 
-      const feedItems = got.data.body.results.map((result): FeedItem => {
+      const config = await tmdbClient.configuration({
+        pathParams: undefined,
+        queryParams: {
+
+        },
+      })
+
+      if(!config.success || config.data.status !== 200 || !config.data.body.images?.base_url) {
         return {
+          status: 500,
+          body: {
+            error: "Something went wrong",
+          }
+        }
+      }
+
+      
+    
+      const feedItems = got.data.body.results.flatMap((result): FeedItem[] => {
+        const posterPath = result.poster_path
+        if (!posterPath) {
+          return []
+        }
+        
+        return [{
           id: result.id.toString(),
           title: result.title,
-        }
+          posterUrl: posterPath,
+        }]
       })
 
 
@@ -45,7 +69,7 @@ export const feedRouter = ({ s }: { s: Server }) => {
           items: feedItems
         }
       }
-    },    
+    },
   });
 }
 

@@ -6,6 +6,7 @@ const c = initContract();
 const FeedItem = z.object({
   id: z.string(),
   title: z.string(),
+  posterUrl: z.string(),
 })
 
 export type FeedItem = z.infer<typeof FeedItem>;
