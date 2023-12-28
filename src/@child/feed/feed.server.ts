@@ -42,7 +42,8 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       }
 
-      
+      // const mediaIds = got.data.body.results.map((result) => result.id.toString())
+            
     
       const feedItems = got.data.body.results.flatMap((result): FeedItem[] => {
         const posterPath = result.poster_path

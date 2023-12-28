@@ -32,6 +32,7 @@ export const FeedPage = ({openMediaDetails}: {openMediaDetails: () => void}) => 
       return (
         <div key={item.id} onClick={() => openMediaDetails()}>
           <div>{item.title}</div>
+          <FeedItem />
         </div>
       )
     })}
