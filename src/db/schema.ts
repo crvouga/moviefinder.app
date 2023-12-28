@@ -17,3 +17,11 @@ export const cities = pgTable('cities', {
   countryId: integer('country_id').references(() => countries.id),
   popularity: popularityEnum('popularity'),
 });
+
+
+export const videoDownloads = pgTable('video_downloads', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 256 }),
+  countryId: integer('country_id').references(() => countries.id),
+  popularity: popularityEnum('popularity'),
+});

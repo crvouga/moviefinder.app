@@ -3,8 +3,6 @@ import { z } from 'zod';
 
 const c = initContract();
 
-
-
 export const contract = c.router({
   loginWithEmailAndPassword: {
     method: "POST",
