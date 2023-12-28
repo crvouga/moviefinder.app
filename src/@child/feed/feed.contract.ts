@@ -15,6 +15,10 @@ export const contract = c.router({
   feed: {
     method: "GET",
     path: "/feed",
+    query: z.object({
+      page: z.number().positive().int(),
+      pageSize: z.number().positive().int(),
+    }),
     responses: {
       200: z.object({
         items: z.array(FeedItem),

@@ -1,13 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { contract } from "./feed.contract";
 import { createClient } from "../../@shared/client";
+import { useState } from "react";
 
 const client = createClient(contract) 
 
 export const FeedPage = () => {
+  const [page] = useState(0)
+  const [pageSize] = useState(10)
   const { data } = useQuery({
-    queryKey: ["feed"],
-    queryFn: () => client.feed(),
+    queryKey: ["feed", page, pageSize],
+    queryFn: () => client.feed({
+      query: {
+        page: page,
+        pageSize: pageSize,
+      }
+    }),
   })
 
   if(!data) {
