@@ -10,6 +10,13 @@ const PostSchema = z.object({
 });
 
 export const contract = c.router({
+  feed: {
+    method: "GET",
+    path: "/feed",
+    responses: {
+      200: z.array(PostSchema),
+    },
+  },
   createPost: {
     method: 'POST',
     path: '/posts',
