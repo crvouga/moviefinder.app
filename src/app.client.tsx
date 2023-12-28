@@ -1,7 +1,7 @@
-
+import { z } from "zod";
+import { useQueryParam } from "./@shared/use-query-param";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FeedPage } from "./@child/feed/feed.client";
-import { useCurrentPage } from "./@shared/page";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +18,20 @@ export const App = () => {
 }
 
 const Page = () => {
-  const currentPage = useCurrentPage();
+  const currentPage = useQueryParam({
+    key: "appPage",
+    parser: z.discriminatedUnion("t", [
+      z.object({
+        t: z.literal("feed"),
+      }),
+      z.object({
+        t: z.literal("movie-details"),
+      }),
+    ]),
+    initialValue: {
+      t: "feed",
+    },
+  });
 
   switch (currentPage.value.t) {
     case "feed": {
