@@ -1,5 +1,5 @@
+
 import { FeedPage } from "./@child/feed/feed.client";
-import { MoveDetailsPage } from "./@child/movie-details/movie-details.client";
 import { useCurrentPage } from "./@shared/page";
 
 export function App() {
@@ -21,7 +21,7 @@ function Page() {
     }
 
     case "movie-details": {
-      return <MoveDetailsPage />;
+      return <div>hello</div>
     }
   }
 }

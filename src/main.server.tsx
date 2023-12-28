@@ -1,22 +1,23 @@
-import cors from 'cors';
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
+import fastify from 'fastify';
+import { initServer } from '@ts-rest/fastify';
 import { appRouter } from './app.server';
 
+const s = initServer()
 
-const adapter = createHTTPServer({
-  router: appRouter,
-  middleware: cors(),
-  createContext() {
-    return {};
-  },
-});
+const app = fastify();
 
-const port = Number(process.env["PORT"] ?? process.env["port"] ?? 2022);
+const router =appRouter({s})
 
-console.log("[server] starting");
+app.register(s.plugin(router.feed));
 
-adapter.server.addListener("listening", () => {
-  console.log("[server] listening");
-});
+const start = async () => {
+  try {
+    await app.listen({ port: 3000 });
+    console.log('server started')
+  } catch (err) {
+    app.log.error(err);
+    process.exit(1);
+  }
+};
 
-adapter.listen(port);
+start();

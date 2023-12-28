@@ -11,8 +11,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.15.0",
     "@trpc/client": "^10.44.0",
     "@trpc/server": "^10.44.0",
+    "@ts-rest/core": "^3.30.5",
+    "@ts-rest/fastify": "^3.30.5",
+    "@ts-rest/react-query": "^3.30.5",
     "@types/cors": "^2.8.17",
     "cors": "^2.8.5",
     "react": "^18.2.0",

@@ -1,9 +1,10 @@
-import { router } from "./@shared/trpc";
 
+import { feedRouter } from './@child/feed/feed.server';
+import {Server}from './@shared/server'
 
-export const appRouter = router({
-  // ...
-});
+export const appRouter = ({s}: {s: Server}) => {
+  return {
+    feed: feedRouter({s})
+  }
+}
 
-
-export type AppRouter = typeof appRouter;

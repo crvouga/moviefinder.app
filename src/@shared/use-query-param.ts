@@ -13,7 +13,7 @@ export function useQueryParam<P extends z.ZodType<any, any, any>>({
   function getValue() {
     const url = new URL(window.location.href);
     const queryValue = url.searchParams.get(key);
-    console.log("queryValue", queryValue);
+    
     if (queryValue === null) {
       return initialValue;
     }
