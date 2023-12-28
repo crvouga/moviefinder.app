@@ -1,18 +1,23 @@
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FeedPage } from "./@child/feed/feed.client";
 import { useCurrentPage } from "./@shared/page";
 
-export function App() {
+const queryClient = new QueryClient();
+
+export const App = () => {
   return (
-    <div className="w-screen h-screen flex-col bg-black flex items-center justify-center text-white overflow-hidden box-border">
-      <div className="w-full h-full max-w-2xl max-h-[840px] border rounded overflow-hidden flex flex-col">
-        <Page />
+    <QueryClientProvider client={queryClient}>
+      <div className="w-screen h-screen flex-col bg-black flex items-center justify-center text-white overflow-hidden box-border">
+        <div className="w-full h-full max-w-2xl max-h-[840px] border rounded overflow-hidden flex flex-col">
+          <Page />
+        </div>
       </div>
-    </div>
+    </QueryClientProvider>
   );
 }
 
-function Page() {
+const Page = () => {
   const currentPage = useCurrentPage();
 
   switch (currentPage.value.t) {

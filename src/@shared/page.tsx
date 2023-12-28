@@ -10,6 +10,8 @@ export const Page = z.discriminatedUnion("t", [
   }),
 ]);
 
+export type Page = z.infer<typeof Page>;
+
 export function useCurrentPage() {
   const currentPage = useQueryParam({
     key: "currentPage",

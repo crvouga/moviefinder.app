@@ -10,7 +10,7 @@ export function useQueryParam<P extends z.ZodType<any, any, any>>({
   parser: P;
   initialValue: z.infer<P>;
 }) {
-  function getValue() {
+  function getValue(): z.infer<P> {
     const url = new URL(window.location.href);
     const queryValue = url.searchParams.get(key);
     

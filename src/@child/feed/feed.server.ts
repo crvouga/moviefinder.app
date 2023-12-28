@@ -1,20 +1,20 @@
 import { Server } from "../../@shared/server";
 import { contract } from "./feed.contract";
 
-export const feedRouter = ({s}: {s: Server}) => {
- return s.router(contract, {
-async feed() {
-return {
-status: 200,
-body: [
-  {
-    body: 'body',
-    id: 'id',
-    title: 'title',
-  }
-]
-}
-  },
+export const feedRouter = ({ s }: { s: Server }) => {
+  return s.router(contract, {
+    feed: async () => {
+      return {
+        status: 200,
+        body: [
+          {
+            body: 'body',
+            id: 'id',
+            title: 'title',
+          }
+        ]
+      }
+    },
     getPost: async () => {
       return {
         status: 200,

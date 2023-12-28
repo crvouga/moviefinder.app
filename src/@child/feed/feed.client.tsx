@@ -1,32 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
-import { initClient } from "@ts-rest/core";
 import { contract } from "./feed.contract";
+import { createClient } from "../../@shared/client";
 
-const client = initClient(contract, {
-  baseUrl: "http://localhost:3000",
-  baseHeaders: {}
-}) 
+const client = createClient(contract) 
 
 export const FeedPage = () => {
-  const { status, data } = useQuery({
+  const { data } = useQuery({
     queryKey: ["feed"],
     queryFn: () => client.feed(),
   })
 
-  if(data?.status === 200) {
-    return <div>{data.body.map(x => x.body)}</div>
+  if(!data) {
+    return <div>loading...</div>
   }
 
-  switch(status) {
-    case 'error': {
-      return <div>error</div>
-    }
-    case 'pending': {
-      return <div>loading</div>
-    }
-    case 'success': {
-      
-      return <div>success</div>
-    }
+  if(data?.status !== 200) {
+    return <div>error</div>
   }
+
+  
+  return <div>{data.body.map(x => x.body)}</div>
 }
