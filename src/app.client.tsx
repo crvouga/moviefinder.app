@@ -18,7 +18,7 @@ export const App = () => {
 }
 
 const Page = () => {
-  const currentPage = useQueryParam({
+  const page = useQueryParam({
     key: "appPage",
     parser: z.discriminatedUnion("t", [
       z.object({
@@ -33,7 +33,7 @@ const Page = () => {
     },
   });
 
-  switch (currentPage.value.t) {
+  switch (page.value.t) {
     case "feed": {
       return <FeedPage />;
     }
