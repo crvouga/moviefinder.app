@@ -1,3 +1,4 @@
+import 'isomorphic-fetch'
 import Fastify from 'fastify';
 import { initServer } from '@ts-rest/fastify';
 import { appRouter } from './app.server';

@@ -19,5 +19,13 @@ export const FeedPage = () => {
   }
 
   
-  return <div>{data.body.map(x => x.body)}</div>
+  return <div>
+    {data.body.items.map(item => {
+      return (
+        <div key={item.id}>
+          <div>{item.title}</div>
+        </div>
+      )
+    })}
+  </div>
 }

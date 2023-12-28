@@ -9,12 +9,24 @@ const PostSchema = z.object({
   body: z.string(),
 });
 
+const FeedItem = z.object({
+  id: z.string(),
+  title: z.string(),
+})
+
+export type FeedItem = z.infer<typeof FeedItem>;
+
 export const contract = c.router({
   feed: {
     method: "GET",
     path: "/feed",
     responses: {
-      200: z.array(PostSchema),
+      200: z.object({
+        items: z.array(FeedItem),
+      }),
+      500: z.object({
+        error: z.string(),
+      }),
     },
   },
   createPost: {
