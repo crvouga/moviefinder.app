@@ -5,6 +5,13 @@ import { useState } from "react";
 
 const client = createClient(contract) 
 
+client.addComment({
+  body: {
+    mediaId: 'mediaId',
+    text: 'text',
+  }
+})
+
 export const FeedPage = ({openMediaDetails}: {openMediaDetails: () => void}) => {
   const [page] = useState(0)
   const [pageSize] = useState(10)

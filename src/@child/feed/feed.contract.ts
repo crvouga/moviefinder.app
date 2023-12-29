@@ -11,7 +11,7 @@ const FeedItem = z.object({
 
 export type FeedItem = z.infer<typeof FeedItem>;
 
-export const contract = c.router({
+export const contract = c.router({  
   feed: {
     method: "GET",
     path: "/feed",
@@ -28,5 +28,20 @@ export const contract = c.router({
       }),
     },
   },
+  addComment: {
+    method: "POST",
+    path: "/add-comment",
+    body: z.object({
+      text: z.string(),
+      mediaId: z.string(),
+    }),
+    responses: {
+      200: z.object({
+        commentId: z.string(),
+      }),
+      500: z.object({
+        error: z.string(),
+      }),
+    },
+  },
 });
-
