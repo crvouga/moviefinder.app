@@ -3,10 +3,11 @@ import { z } from 'zod';
 
 const c = initContract();
 
-const FeedItem = z.object({
+export const FeedItem = z.object({
   id: z.string(),
   title: z.string(),
   posterUrl: z.string(),
+  thirdPartyVideoUrls: z.array(z.string()),
 })
 
 export type FeedItem = z.infer<typeof FeedItem>;

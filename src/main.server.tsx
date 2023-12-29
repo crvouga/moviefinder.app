@@ -62,14 +62,15 @@ fastify.register(fastifyStatic, {
 // 
 // 
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8000;
+const HOST = "0.0.0.0"
 const main = async () => {
   console.log("starting server")
   try {
     // https://docs.railway.app/guides/fixing-common-errors 
     await fastify.listen({
       port: Number(PORT),
-      host: "0.0.0.0" // <- important to make it work on Railway
+      host: HOST // <- important to make it work on Railway
     });
     console.log(`server started on port ${PORT}`)
   } catch (err) {

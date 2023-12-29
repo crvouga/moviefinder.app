@@ -1,5 +1,6 @@
 import { Server } from "../../@shared/server";
-import { tmdbClient } from "../../@shared/tmdb-client";
+import { tmdbClient, toTmdbImageUrl, toVideoSrc } from "../../@shared/tmdb-client";
+import { TmdbMovieVideo } from "../../@shared/tmdb-client/movie/video";
 import { FeedItem, contract } from "./feed.contract";
 
 export const feedRouter = ({ s }: { s: Server }) => {
@@ -10,8 +11,10 @@ export const feedRouter = ({ s }: { s: Server }) => {
         queryParams: {
           page: 1,
           include_adult: false,
+          include_video: true,
         }
       })
+
 
       if (!got.success) {
         return {
@@ -31,9 +34,9 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       }
 
-      const config = await tmdbClient.configuration({pathParams: undefined, queryParams: {},})
+      const config = await tmdbClient.configuration({ pathParams: undefined, queryParams: {}, })
 
-      if(!config.success || config.data.status !== 200 || !config.data.body.images?.base_url) {
+      if (!config.success || config.data.status !== 200 || !config.data.body.images?.base_url) {
         return {
           status: 500,
           body: {
@@ -42,19 +45,73 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       }
 
-      // const mediaIds = got.data.body.results.map((result) => result.id.toString())
-            
-    
-      const feedItems = got.data.body.results.flatMap((result): FeedItem[] => {
+      const movieVideoResponses = await Promise.all(
+        got.data.body.results.map((movie) => {
+          return tmdbClient.movie.video({
+            pathParams: { movie_id: movie.id },
+            queryParams: {},
+          });
+        })
+      );
+
+      const videosByMovieId = new Map<number, TmdbMovieVideo[]>();
+      for (const response of movieVideoResponses) {
+        if (!response.success) {
+          continue;
+        }
+
+        if (response.data.status !== 200) {
+          continue;
+        }
+
+        const results = response.data?.body?.results;
+
+        if (!results) {
+          continue;
+        }
+
+        const movieId = response.data.body.id;
+
+        if (!movieId) {
+          continue;
+        }
+
+        videosByMovieId.set(movieId, results);
+      }
+
+      const moviesWithVideos = got.data.body.results.map((movie) => {
+        const videos = videosByMovieId.get(movie.id) ?? [];
+        return { ...movie, videos };
+      });
+
+      const tmdbConfig = config.data.body
+
+      const feedItems = moviesWithVideos.flatMap((result): FeedItem[] => {
         const posterPath = result.poster_path
-        if (!posterPath) {
+
+        const posterUrl = toTmdbImageUrl(
+          tmdbConfig,
+          posterPath
+        )
+
+        if (!posterUrl) {
           return []
         }
         
+        const thirdPartyVideoUrls = result.videos.flatMap((video) => {
+          const src = toVideoSrc(video);
+          if (!src) {
+            return [];
+          }
+          return [src];
+        })
+
+
         return [{
           id: result.id.toString(),
           title: result.title,
-          posterUrl: posterPath,
+          posterUrl: posterUrl,
+          thirdPartyVideoUrls: thirdPartyVideoUrls,
         }]
       })
 
@@ -76,3 +133,4 @@ export const feedRouter = ({ s }: { s: Server }) => {
     }
   });
 }
+

@@ -1,7 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { contract } from "./feed.contract";
+import { FeedItem, contract } from "./feed.contract";
 import { createClient } from "../../@shared/client";
 import { useState } from "react";
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+// Import Swiper styles
+import 'swiper/css';
+
 
 const client = createClient(contract) 
 
@@ -33,25 +38,38 @@ export const FeedPage = ({openMediaDetails}: {openMediaDetails: () => void}) => 
     return <div>error</div>
   }
 
+  return (
+    <Swiper
+    className="w-full h-full"
+    spaceBetween={50}
+    slidesPerView={1}
+    direction="vertical"
+    onSlideChange={() => console.log('slide change')}
+    onSwiper={(swiper) => console.log(swiper)}
+  >
+    {data.body.items.map((feedItem) => (
+      <SwiperSlide key={feedItem.id}>
+        <ViewFeedItem feedItem={feedItem} />
+      </SwiperSlide>
+    ))}
+    
   
-  return <div>
-    {data.body.items.map(item => {
-      return (
-        <div key={item.id} onClick={() => openMediaDetails()}>
-          <div>{item.title}</div>
-          <FeedItem />
-        </div>
-      )
-    })}
-  </div>
+  </Swiper>
+  )
+
+  
 }
 
-const FeedItem = () => {
-  return <div>
-    <div>title</div>
-    <div>description</div>
-    <div>image</div>
-    <div>tags</div>
-    <div>comments</div>
+const ViewFeedItem = ({feedItem}: {feedItem: FeedItem}) => {
+  return <div className="w-full h-full flex flex-col">
+              <iframe
+              className="w-full h-96"
+              src={feedItem.thirdPartyVideoUrls[0]}
+              frame-border="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              ></iframe>
+              <button className="w-full p-4">
+                
+              </button>
   </div>
 }
