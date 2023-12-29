@@ -23,6 +23,7 @@ export const contract = c.router({
     responses: {
       200: z.object({
         items: z.array(FeedItem),
+        page: z.number(),
       }),
       500: z.object({
         error: z.string(),
