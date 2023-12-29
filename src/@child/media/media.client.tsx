@@ -1,5 +1,5 @@
 
 
-export const MediaPage = () => {
-    return <div>Media</div>
+export const MediaPage = ({ mediaId }: { mediaId: string }) => {
+    return <div>Media: {mediaId}</div>
 }

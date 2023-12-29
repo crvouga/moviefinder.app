@@ -27,7 +27,8 @@ const Page = () => {
       }),
       z.object({
         t: z.literal("media-details"),
-        from: z.enum(['feed'])
+        from: z.enum(['feed']),
+        mediaId: z.string(),
       }),
     ]),
     initialValue: {
@@ -37,11 +38,11 @@ const Page = () => {
 
   switch (page.value.t) {
     case "feed": {
-      return <FeedClient.FeedPage openMediaDetails={() => page.push({t: 'media-details', from: 'feed'})} />;
+      return <FeedClient.FeedPage onOpenMediaDetails={({ mediaId }) => page.push({ t: 'media-details', from: 'feed', mediaId: mediaId })} />;
     }
 
     case "media-details": {
-      return <MediaClient.MediaPage />;
+      return <MediaClient.MediaPage mediaId={page.value.mediaId} />;
     }
   }
 }

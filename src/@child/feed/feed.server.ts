@@ -144,6 +144,7 @@ const getFeedItems = async ({ page }: { page: number }): Promise<Result<FeedItem
       title: result.title,
       posterUrl: posterUrl,
       thirdPartyVideoUrls: thirdPartyVideoUrls,
+      mediaId: result.id.toString(),
     }]
   })
 

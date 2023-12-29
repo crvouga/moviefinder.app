@@ -10,34 +10,44 @@ export function useQueryParam<P extends z.ZodType<any, any, any>>({
   parser: P;
   initialValue: z.infer<P>;
 }) {
-  function getValue(): z.infer<P> {
+  function getValue(): z.infer<P> | null {
     const url = new URL(window.location.href);
     const queryValue = url.searchParams.get(key);
     
     if (queryValue === null) {
-      return initialValue;
+      return null;
     }
 
     try {
       const parsed = parser.parse(JSON.parse(atob(queryValue)));
       return parsed;
-    } catch (error) {
-      console.error("Error parsing query param:", error);
-      return initialValue;
+    } catch (error) {      
+      return null;
     }
   }
+  const getValueWithFallback = () => getValue() ?? initialValue;
 
-  const [value, setValue] = useState(getValue);
+  const [value, setValue] = useState(getValueWithFallback);
 
   useEffect(() => {
-    const listener = () => {
-      setValue(getValue());
+    if (getValue() === null) {
+      replace(initialValue);
+    }
+
+    const onPopState = () => {      
+      setValue(getValueWithFallback());
+    }
+
+    const onPushState = () => {      
+      setValue(getValueWithFallback());
     };
 
-    window.addEventListener("popstate", listener);
+    window.addEventListener("popstate", onPopState);
+    window.addEventListener("pushstate", onPushState);
 
     return () => {
-      window.removeEventListener("popstate", listener);
+      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("pushstate", onPushState);
     };
   }, []);
 

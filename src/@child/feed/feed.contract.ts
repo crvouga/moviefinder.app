@@ -8,6 +8,7 @@ export const FeedItem = z.object({
   title: z.string(),
   posterUrl: z.string(),
   thirdPartyVideoUrls: z.array(z.string()),
+  mediaId: z.string(),
 })
 
 export type FeedItem = z.infer<typeof FeedItem>;

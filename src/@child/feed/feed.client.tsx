@@ -5,6 +5,7 @@ import 'swiper/css/virtual';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { createClient } from "../../@shared/client";
 import { FeedItem, contract } from "./feed.contract";
+import { Spinner } from "../../@shared/ui/spinner";
 
 
 const client = createClient(contract)
@@ -16,7 +17,7 @@ client.addComment({
   }
 })
 
-export const FeedPage = (_props: { openMediaDetails: () => void }) => {
+export const FeedPage = ({ onOpenMediaDetails }: { onOpenMediaDetails: (input: { mediaId: string }) => void }) => {
   const { data, fetchNextPage } = useInfiniteQuery({
     queryKey: ["feed"],
     queryFn: (input) => {
@@ -65,36 +66,46 @@ export const FeedPage = (_props: { openMediaDetails: () => void }) => {
       onSlideChange={(swiper) => {
         setActiveIndex(swiper.activeIndex)
       }}
-    // virtual
     >
       {feedItems.map((feedItem, index) => (
         <SwiperSlide key={feedItem.id}>
-          <ViewFeedItem feedItem={feedItem} index={index} activeIndex={activeIndex} />
+          <ViewFeedItem feedItem={feedItem} index={index} activeIndex={activeIndex} onOpenMediaDetails={onOpenMediaDetails} />
         </SwiperSlide>
       ))}
       <SwiperSlide>
-        <div>
-          Loading...
+        <div className="w-full h-full flex items-center justify-center">
+          <Spinner className="w-12 h-12" />
         </div>
       </SwiperSlide>
     </Swiper>
   )
 }
 
-const ViewFeedItem = ({ feedItem, index, activeIndex }: { feedItem: FeedItem, index: number, activeIndex: number }) => {
+const ViewFeedItem = ({ feedItem, index, activeIndex, onOpenMediaDetails, }: { feedItem: FeedItem, index: number, activeIndex: number, onOpenMediaDetails: (input: { mediaId: string }) => void, }) => {
   if (Math.abs(index - activeIndex) > 1) {
     return null
   }
+  return <ViewFeedItemActive feedItem={feedItem} onOpenMediaDetails={onOpenMediaDetails} />
+}
 
-  return <div className="w-full h-full flex flex-col">
-    {feedItem.title}
-    <iframe
-      className="w-full h-96 select-none"
-      src={feedItem.thirdPartyVideoUrls[0]}
-      frame-border="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    ></iframe>
-    <button className="w-full p-4">
-    </button>
-  </div>
+const ViewFeedItemActive = ({ feedItem, onOpenMediaDetails }: { feedItem: FeedItem, onOpenMediaDetails: (input: { mediaId: string }) => void }) => {
+  return (
+    <div className="w-full h-full flex flex-col">
+      <iframe
+        className="w-full h-96 select-none"
+        src={feedItem.thirdPartyVideoUrls[0]}
+        frame-border="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      ></iframe>
+      <button className="w-full p-4" onClick={() => onOpenMediaDetails({ mediaId: feedItem.mediaId })}>
+        <div>
+          <p className="text-3xl font-bold">
+            {feedItem.title}
+          </p>
+          <p className="text-lg text-white/50">
+          </p>
+        </div>
+      </button>
+    </div>
+  )
 }
