@@ -2,9 +2,17 @@ import { z, ZodSchema } from "zod";
 
 //  https://www.themoviedb.org/settings/api
 // example API request: https://api.themoviedb.org/3/movie/550?api_key=cf875963864a2cef08d67ed92cff7703
-export const TMDB_API_KEY_V3 = "cf875963864a2cef08d67ed92cff7703";
-export const TMDB_API_KEY_V4 =
-  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjZjg3NTk2Mzg2NGEyY2VmMDhkNjdlZDkyY2ZmNzcwMyIsInN1YiI6IjVlNmFkNzg2MzU3YzAwMDAxMzNmZDEwMyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Z4FnQZCCKKA5NaMg_H6ZFzytDSXLeEEUGotDQ7BqGsU";
+export const TMDB_API_KEY_V3 = process.env.TMDB_API_KEY_V3;
+export const TMDB_API_KEY_V4 = process.env.TMDB_API_KEY_V4;
+
+if (!TMDB_API_KEY_V3) {
+  throw new Error("TMDB_API_KEY_V3 is not set");
+}
+
+if (!TMDB_API_KEY_V4) {
+  throw new Error("TMDB_API_KEY_V4 is not set");
+}
+
 export const BASE_URL = "https://api.themoviedb.org/3";
 
 export const API_KEY_REGEX = /^[a-f0-9]{32}$/;
