@@ -15,7 +15,6 @@ export const MediaPage = ({ mediaId }: { mediaId: string }) => {
                     mediaType: "movie",
                 }
             })
-
         }
     })
 
@@ -27,7 +26,7 @@ export const MediaPage = ({ mediaId }: { mediaId: string }) => {
 
     return <div>
 
-        <h1>
+        <h1 className="w-full text-xl font-bold h-full">
             {media.title}
         </h1>
 
