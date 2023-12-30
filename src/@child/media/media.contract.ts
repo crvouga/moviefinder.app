@@ -3,28 +3,27 @@ import { z } from 'zod';
 
 const c = initContract();
 
-export const FeedItem = z.object({
+export const MediaPageData = z.object({
   id: z.string(),
   title: z.string(),
   posterUrl: z.string(),
+  backgroundUrl: z.string(),
   thirdPartyVideoUrls: z.array(z.string()),
   mediaId: z.string(),
+  mediaType: z.string(),
 })
 
-export type FeedItem = z.infer<typeof FeedItem>;
+export type MediaPageData = z.infer<typeof MediaPageData>;
 
 export const contract = c.router({  
-  feed: {
+  mediaPage: {
     method: "POST",
-    path: "/feed",
+    path: "/media-page",
     body: z.object({
       page_index: z.number(),      
     }),
     responses: {
-      200: z.object({
-        items: z.array(FeedItem),
-        page_index: z.number(),
-      }),
+      200: MediaPageData,
       500: z.object({
         error: z.string(),
       }),
