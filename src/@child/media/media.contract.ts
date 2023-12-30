@@ -1,5 +1,6 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
+import { MediaType } from '../../@shared/media-type';
 
 const c = initContract();
 
@@ -20,7 +21,8 @@ export const contract = c.router({
     method: "POST",
     path: "/media-page",
     body: z.object({
-      page_index: z.number(),      
+      mediaId: z.string(),      
+      mediaType: MediaType
     }),
     responses: {
       200: MediaPageData,

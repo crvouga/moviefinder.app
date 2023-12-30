@@ -24,7 +24,7 @@ const fastify = Fastify();
 // 
 // 
 
-fastify.register(cors, { 
+fastify.register(cors, {
   origin: true,
   credentials: true,
 })
@@ -41,6 +41,7 @@ const router = appRouter({ s })
 
 fastify.register(s.plugin(router.auth));
 fastify.register(s.plugin(router.feed));
+fastify.register(s.plugin(router.media));
 
 
 // 
