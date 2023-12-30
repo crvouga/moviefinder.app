@@ -23,9 +23,14 @@ export const MediaPage = ({ mediaId }: { mediaId: string }) => {
         return <div>loading...</div>
     }
 
+    const media = data.body
+
     return <div>
-        <pre>
-            {JSON.stringify(data.body, null, 2)}
-        </pre>
+
+        <h1>
+            {media.title}
+        </h1>
+
+        <img src={media.posterUrl} />
     </div>
 }
