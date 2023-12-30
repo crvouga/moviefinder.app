@@ -161,7 +161,7 @@ const ViewFeedItemActive = ({ feedItem }: { feedItem: FeedItem, }) => {
   return (
     <div className="w-full h-full flex flex-col">
       {true && <iframe
-        className="w-full h-96 select-none"
+        className="w-full h-96 select-none bg-neutral-700"
         src={feedItem.thirdPartyVideoUrls[0]}
         frame-border="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
