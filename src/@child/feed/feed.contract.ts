@@ -15,16 +15,15 @@ export type FeedItem = z.infer<typeof FeedItem>;
 
 export const contract = c.router({  
   feed: {
-    method: "GET",
+    method: "POST",
     path: "/feed",
-    query: z.object({
-      page: z.string(),
-      pageSize: z.string(),
+    body: z.object({
+      page_index: z.number(),      
     }),
     responses: {
       200: z.object({
         items: z.array(FeedItem),
-        page: z.number(),
+        page_index: z.number(),
       }),
       500: z.object({
         error: z.string(),

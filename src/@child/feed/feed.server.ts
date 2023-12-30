@@ -6,19 +6,8 @@ import { FeedItem, contract } from "./feed.contract";
 
 export const feedRouter = ({ s }: { s: Server }) => {
   return s.router(contract, {
-    feed: async ({ query }) => {
-      const page = parseInt(query.page)
-
-      if (isNaN(page)) {
-        return {
-          status: 400,
-          body: {
-            error: "Invalid page number",
-          }
-        }
-      }
-
-      const got = await getFeedItems({ page: parseInt(query.page) })
+    feed: async ({ body }) => {
+      const got = await getFeedItems(body)
       
       if (isErr(got)) {
         return {
@@ -29,13 +18,11 @@ export const feedRouter = ({ s }: { s: Server }) => {
         }
       }
 
-      const feedItems = got.data
-
       return {
         status: 200,
         body: {
-          items: feedItems,
-          page: page
+          items: got.data,
+          page_index: body.page_index,
         }
       }
     },
@@ -51,11 +38,11 @@ export const feedRouter = ({ s }: { s: Server }) => {
   });
 }
 
-const getFeedItems = async ({ page }: { page: number }): Promise<Result<FeedItem[], string>> => {
+const getFeedItems = async ({ page_index }: { page_index: number }): Promise<Result<FeedItem[], string>> => {
   const got = await tmdbClient.discover.movie({
     pathParams: undefined,
     queryParams: {
-      page: page,
+      page: page_index + 1,
       include_adult: false,
       include_video: true,
     }

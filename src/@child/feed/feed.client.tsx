@@ -1,75 +1,141 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/virtual';
+import { Controller, } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { z } from "zod";
 import { createClient } from "../../@shared/client";
-import { FeedItem, contract } from "./feed.contract";
+import { useRoute } from "../../@shared/routing";
 import { Spinner } from "../../@shared/ui/spinner";
-
+import { useQueryParamState } from "../../@shared/use-query-param";
+import { FeedItem, contract } from "./feed.contract";
 
 const client = createClient(contract)
 
-client.addComment({
-  body: {
-    mediaId: 'mediaId',
-    text: 'text',
-  }
-})
+const MAX_PAGE_SIZE = 20
 
-export const FeedPage = ({ onOpenMediaDetails }: { onOpenMediaDetails: (input: { mediaId: string }) => void }) => {
-  const { data, fetchNextPage } = useInfiniteQuery({
-    queryKey: ["feed"],
-    queryFn: (input) => {
-      console.log({ input })
-      return client.feed({
-        query: {
-          page: input.pageParam.toString(),
-          pageSize: String(10),
-        }
-      })
-    },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      console.log({ lastPage })
-      if (lastPage.status === 200) {
-        return lastPage.body.page + 1
-      }
-      return 1
-    },
-    getPreviousPageParam: (firstPage) => {
-      // console.log({ firstPage })
-      if (firstPage.status === 200) {
-        return firstPage.body.page - 1
-      }
-      return 1
+export const FeedPage = () => {
+  const [swiper_controller, set_swiper_controller] = useState<SwiperType | null>(null);
+
+  const query_param_state = useQueryParamState({
+    key: "feed_item_position",
+    parser: z.object({
+      active_page_index: z.number().int().nonnegative(),
+      active_page_item_index: z.number().int().nonnegative(),
+    }),
+    initialValue: {
+      active_page_index: 0,
+      active_page_item_index: 0,
     },
   })
 
-  const feedItems = data?.pages.flatMap(page => page.status === 200 ? page.body.items : []) ?? []
+  const { data, fetchNextPage, fetchPreviousPage } = useInfiniteQuery({
+    queryKey: ["feed"],
+    queryFn: (input) => {
+      return client.feed({
+        body: {
+          page_index: input.pageParam,
+        }
+      })
+    },
+    initialPageParam: query_param_state.value.active_page_index,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.status === 200) {
+        return lastPage.body.page_index + 1
+      }
+      return 0
+    },
+    getPreviousPageParam: (firstPage) => {
+      if (firstPage.status === 200) {
+        return Math.max(0, firstPage.body.page_index - 1)
+      }
+      return 0
+    },
+  })
 
-  const [activeIndex, setActiveIndex] = useState(0)
+
+  const swiper_items = (data?.pages ?? []).flatMap((page, relative_page_index) => {
+    if (page.status !== 200) {
+      return []
+    }
+
+    const page_index = page.body.page_index
+
+    return page.body.items.map((item, page_item_index) => {
+      const swiper_item_index = relative_page_index * MAX_PAGE_SIZE + page_item_index
+      return {
+        item,
+        swiper_item_index,
+        page_index,
+        page_item_index,
+      } as const
+    })
+  })
+
+
+  const active_swiper_index = swiper_items.findIndex(swiper_item => swiper_item.page_item_index === query_param_state.value.active_page_item_index && swiper_item.page_index === query_param_state.value.active_page_index)
 
   useEffect(() => {
-    const isEnd = Math.abs(activeIndex - feedItems.length) < 1
-    if (isEnd) {
+    if (active_swiper_index === -1) {
+      return
+    }
+
+    const is_first_item_active = active_swiper_index === 0
+
+    if (is_first_item_active) {
+      fetchPreviousPage()
+    }
+
+    const is_last_item_active = active_swiper_index === swiper_items.length - 1
+
+    if (is_last_item_active) {
       fetchNextPage()
     }
-  }, [activeIndex])
+
+  }, [active_swiper_index])
+
+  useEffect(() => {
+    if (!swiper_controller) {
+      return
+    }
+    if (active_swiper_index === -1) {
+      return
+    }
+    swiper_controller.slideTo(active_swiper_index, 0)
+  }, [active_swiper_index, swiper_controller])
+
+
+
 
   return (
     <Swiper
       className="w-full h-full"
-      spaceBetween={50}
       slidesPerView={1}
       direction="vertical"
+      modules={[Controller]}
+      controller={{ control: swiper_controller }}
+      onSwiper={set_swiper_controller}
       onSlideChange={(swiper) => {
-        setActiveIndex(swiper.activeIndex)
+        const active_swiper_item = swiper_items[swiper.activeIndex]
+
+        if (active_swiper_item === undefined) {
+          return
+        }
+
+        query_param_state.push({
+          active_page_index: active_swiper_item.page_index,
+          active_page_item_index: active_swiper_item.page_item_index,
+        })
       }}
     >
-      {feedItems.map((feedItem, index) => (
-        <SwiperSlide key={feedItem.id}>
-          <ViewFeedItem feedItem={feedItem} index={index} activeIndex={activeIndex} onOpenMediaDetails={onOpenMediaDetails} />
+      {swiper_items.flatMap((item) => (
+        <SwiperSlide key={item.item.id} >
+          <ViewFeedItem
+            isMounted={Math.abs(item.swiper_item_index - active_swiper_index) <= 1}
+            feedItem={item.item}
+          />
         </SwiperSlide>
       ))}
       <SwiperSlide>
@@ -78,26 +144,29 @@ export const FeedPage = ({ onOpenMediaDetails }: { onOpenMediaDetails: (input: {
         </div>
       </SwiperSlide>
     </Swiper>
+
   )
 }
 
-const ViewFeedItem = ({ feedItem, index, activeIndex, onOpenMediaDetails, }: { feedItem: FeedItem, index: number, activeIndex: number, onOpenMediaDetails: (input: { mediaId: string }) => void, }) => {
-  if (Math.abs(index - activeIndex) > 1) {
-    return null
+const ViewFeedItem = ({ feedItem, isMounted }: { feedItem: FeedItem, isMounted: boolean, }) => {
+  if (isMounted) {
+    return <ViewFeedItemActive feedItem={feedItem} />
   }
-  return <ViewFeedItemActive feedItem={feedItem} onOpenMediaDetails={onOpenMediaDetails} />
+
+  return null
 }
 
-const ViewFeedItemActive = ({ feedItem, onOpenMediaDetails }: { feedItem: FeedItem, onOpenMediaDetails: (input: { mediaId: string }) => void }) => {
+const ViewFeedItemActive = ({ feedItem }: { feedItem: FeedItem, }) => {
+  const route = useRoute()
   return (
     <div className="w-full h-full flex flex-col">
-      <iframe
+      {true && <iframe
         className="w-full h-96 select-none"
         src={feedItem.thirdPartyVideoUrls[0]}
         frame-border="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      ></iframe>
-      <button className="w-full p-4" onClick={() => onOpenMediaDetails({ mediaId: feedItem.mediaId })}>
+      ></iframe>}
+      <button className="w-full p-4" onClick={() => route.push({ t: 'media-details', from: 'feed', mediaId: feedItem.mediaId })}>
         <div>
           <p className="text-3xl font-bold">
             {feedItem.title}

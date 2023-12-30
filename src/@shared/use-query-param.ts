@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-export function useQueryParam<P extends z.ZodType<any, any, any>>({
+export type QueryParamState<TValue> = {
+  value: TValue;
+  push: (value: TValue) => void;
+  replace: (value: TValue) => void;
+};
+
+export function useQueryParamState<P extends z.ZodType<any, any, any>>({
   key,
   parser,
   initialValue,
@@ -9,7 +15,7 @@ export function useQueryParam<P extends z.ZodType<any, any, any>>({
   key: string;
   parser: P;
   initialValue: z.infer<P>;
-}) {
+}): QueryParamState<z.infer<P>> {
   function getValue(): z.infer<P> | null {
     const url = new URL(window.location.href);
     const queryValue = url.searchParams.get(key);
@@ -65,5 +71,5 @@ export function useQueryParam<P extends z.ZodType<any, any, any>>({
     window.dispatchEvent(new Event("popstate"));
   }
 
-  return { value, push, replace } as const;
+  return { value, push, replace }
 }
