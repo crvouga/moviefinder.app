@@ -10,9 +10,7 @@
    :store/events [[:app/initialized]]})
 
 (defn view []
-  (store/view
-   (fn [i]
-     (routing/view i))))
+  (store/view routing/view))
 
 (store/register! {:store/init init})
 

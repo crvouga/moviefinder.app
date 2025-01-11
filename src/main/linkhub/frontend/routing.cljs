@@ -17,9 +17,9 @@
 
 (defmethod step :default [i] i)
 
-(defmethod store/effect! ::get-route! []
+(defmethod store/effect! ::get-route! [i]
   (let [route (-> js/window.location.pathname (subs 1) (decode))]
-    (store/dispatch! [::got-route route])))
+    ((:store/dispatch! i) [::got-route route])))
 
 (defmethod step ::got-route [i]
   (-> i
