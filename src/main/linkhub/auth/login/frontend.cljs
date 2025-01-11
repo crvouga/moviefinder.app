@@ -1,7 +1,9 @@
 (ns linkhub.auth.login.frontend
   (:require [linkhub.frontend.store :as store]
             [clojure.core.async :as async]
-            [linkhub.frontend.routing :as routing]))
+            [linkhub.frontend.routing :as routing]
+            [linkhub.frontend.ui.text-field :as text-field]
+            [linkhub.frontend.ui.button :as button]))
 
 (defn init []
   {:store/state {::current-user [:result/not-asked]}})
@@ -13,7 +15,7 @@
 (defmethod step ::clicked-get-current-user [i] 
   (-> i
       (update-in [:store/state] assoc ::current-user [:result/loading])
-      (update-in [:store/effect] conj [::get-current-user!])))
+      (update-in [:store/effects] conj [::get-current-user!])))
 
 (defmethod step ::got-current-user [i] 
   (-> i
@@ -51,15 +53,53 @@
   [:button {:on-click #((:store/dispatch! i) [::clicked-get-current-user])
             :disabled (-> i :store/state ::current-user first (= :result/loading))} "Get current user"])
 
+;; 
+;; 
+;; 
+
+(defmethod step ::inputted-phone-number [i]
+  (-> i 
+      (assoc-in [:store/state ::phone-number] (store/event-payload i))))
+
+(defmethod step ::submitted-send-code-form [i]
+  (-> i
+      (update-in [:store/state] assoc ::send-code [:result/loading])
+      (update-in [:store/effects] conj [::send-code!])))
+
+(defmethod store/effect! ::send-code! [i]
+  (println "Sending code..." i))
+
+(defn loading? [i]
+  (-> i :store/state ::send-code first (= :result/loading)))
+
+(defn view-send-code-form [i]
+  [:form {:on-submit #(do (.preventDefault %) 
+                          ((:store/dispatch! i) [::submitted-send-code-form]))}
+    [text-field/view
+     {:text-field/label "Phone Number"
+      :text-field/value (-> i :store/state ::phone-number)
+      :text-field/required? true
+      :text-field/disabled? (loading? i)
+      :text-field/on-change #((i :store/dispatch!) [::inputted-phone-number %])}]
+    [button/view
+     {:button/type :button-type/submit
+      :button/loading? (loading? i)
+      :button/label "Send code"}]])
+
+;; 
+;; 
+;; 
+
 (defn view [i]
-  [:div 
-   [:button {:on-click #((:store/dispatch! i) [:routing/clicked-link [:route/counter]])} "Go to counter"]
-   (view-get-current-user-button i)
-   (view-status i)])
+  [:main
+   [:section
+    [:button {:on-click #((:store/dispatch! i) [:routing/clicked-link [:route/counter]])} "Go to counter"]
+    (view-send-code-form i)
+    (view-get-current-user-button i)
+    (view-status i)]])
 
 (defmethod routing/view :route/login [i]
   (view i))
 
-(store/register! {:store/init init 
-                  :store/step step})
+(store/register! {:store/init init :store/step step})
 

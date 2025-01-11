@@ -7,29 +7,29 @@
 (defonce steps! (r/atom #{}))
 
 (defn- reducer [acc step-fn] 
-    (let [stepped (step-fn acc)
+    (let [stepped (step-fn (assoc acc :store/effects []))
           state-new (merge (:store/state acc) (:store/state stepped))
-          effect-new (concat (:store/effect acc) (:store/effect stepped))]
+          effect-new (concat (:store/effects acc) (:store/effects stepped))]
       {:store/event (-> stepped :store/event)
        :store/state state-new
-       :store/effect effect-new}))
+       :store/effects effect-new}))
 
-(defmulti effect! (fn [i] (-> i :store/effect first)))
+(defmulti effect! (fn [i] (-> i :store/effects first)))
 
 (defn dispatch! [event]
   (let [state-prev @state!
         initial {:store/event event 
                  :store/state state-prev
-                 :store/effect []}
+                 :store/effects []}
         stepped (reduce reducer initial @steps!)
         state-new (:store/state stepped)
-        effects (:store/effect stepped)]
+        effects (:store/effects stepped)]
     (cljs.pprint/pprint {:event event 
                          :state-prev state-prev 
                          :state-new state-new 
                          :effects effects})
     (doseq [effect effects]
-      (effect! {:store/effect effect
+      (effect! {:store/effects effect
                 :store/state state-new
                 :store/dispatch! dispatch!}))
     (reset! state! state-new)))
@@ -39,12 +39,18 @@
         values (map (fn [init-fn] (init-fn)) init-fns)
         states (map :store/state values)
         events (mapcat :store/events values)
+        effects (mapcat :store/effects values)
         state (reduce merge states)]
-    #_(cljs.pprint/pprint {:events events 
-                         :state state})
+    (cljs.pprint/pprint {:state state
+                         :events events
+                         :effects effects})
     (reset! state! state)
     (doseq [event events]
-      (dispatch! event))))
+      (dispatch! event))
+    (doseq [effect effects]
+      (effect! {:store/effects effect
+                :store/state state
+                :store/dispatch! dispatch!}))))
 
 (defn register! [module] 
   (let [step (:store/step module)
