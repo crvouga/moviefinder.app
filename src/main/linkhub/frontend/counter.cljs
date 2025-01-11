@@ -1,5 +1,6 @@
 (ns linkhub.frontend.counter
-  (:require [linkhub.frontend.store :as store]))
+  (:require [linkhub.frontend.store :as store]
+            [linkhub.frontend.routing :as routing]))
 
 (defn init []
   {:store/state {::count 0}})
@@ -16,11 +17,14 @@
 
 (defn view [i]
   [:div
+   [:button {:on-click #((:store/dispatch! i) [:routing/clicked-link [:route/login]])} "Go to login"]
    "The state " [:code "click-count"] " has value: "
    (-> i :store/state ::count) ". "
    [:input {:type "button" :value "Click me!"
             :on-click #((:store/dispatch! i) [::clicked-count-button])}]])
 
+(defmethod routing/view :route/counter [i]
+  (view i))
 
 (store/register! {:store/init init 
                   :store/step step})

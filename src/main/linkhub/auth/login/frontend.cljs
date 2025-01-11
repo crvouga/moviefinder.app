@@ -1,6 +1,7 @@
-(ns linkhub.auth.frontend
+(ns linkhub.auth.login.frontend
   (:require [linkhub.frontend.store :as store]
-            [clojure.core.async :as async]))
+            [clojure.core.async :as async]
+            [linkhub.frontend.routing :as routing]))
 
 (defn init []
   {:store/state {::current-user [:result/not-asked]}})
@@ -50,10 +51,15 @@
   [:button {:on-click #((:store/dispatch! i) [::clicked-get-current-user])
             :disabled (-> i :store/state ::current-user first (= :result/loading))} "Get current user"])
 
-(defn view [input]
+(defn view [i]
   [:div 
-   (view-get-current-user-button input)
-   (view-status input)])
+   [:button {:on-click #((:store/dispatch! i) [:routing/clicked-link [:route/counter]])} "Go to counter"]
+   (view-get-current-user-button i)
+   (view-status i)])
+
+(defmethod routing/view :route/login [i]
+  (view i))
 
 (store/register! {:store/init init 
                   :store/step step})
+
