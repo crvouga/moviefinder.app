@@ -6,6 +6,8 @@
 (defonce inits! (r/atom #{}))
 (defonce steps! (r/atom #{}))
 
+(defmulti effect! (fn [i] (-> i :store/effects first)))
+
 (defn- reducer [acc step-fn] 
     (let [stepped (step-fn (assoc acc :store/effects []))
           state-new (merge (:store/state acc) (:store/state stepped))
@@ -14,9 +16,7 @@
        :store/state state-new
        :store/effects effect-new}))
 
-(defmulti effect! (fn [i] (-> i :store/effects first)))
-
-(defn dispatch! [event]
+(defn- dispatch! [event]
   (let [state-prev @state!
         initial {:store/event event 
                  :store/state state-prev
@@ -60,6 +60,11 @@
     (when step
       (swap! steps! conj step))))
 
+
+(defn view [view-fn]
+  (let [i {:store/state @state!
+           :store/dispatch! dispatch!}]
+    (view-fn i)))
 
 (defn event [input]
   (-> input :store/event))
