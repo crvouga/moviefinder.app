@@ -1,0 +1,11 @@
+{
+  "name": "linkhub",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "frontend": "npx shadow-cljs watch frontend"
+  },
+  "devDependencies": {
+    "shadow-cljs": "2.28.20"
+  }
+}
