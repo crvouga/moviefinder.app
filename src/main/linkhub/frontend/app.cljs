@@ -1,14 +1,14 @@
 (ns linkhub.frontend.app
   (:require [reagent.dom.client :as rd]
             [linkhub.frontend.counter :as counter]
-            [linkhub.frontend.auth.client :as auth]
+            [linkhub.auth.frontend :as auth]
             [linkhub.frontend.store :as store]))
 
 
 (defn view []
   (let [input {:store/state @store/state! 
                :store/dispatch! store/dispatch!}]
-    [:<>
+    [:main
      [counter/view input]
      [auth/view input]]))
 
