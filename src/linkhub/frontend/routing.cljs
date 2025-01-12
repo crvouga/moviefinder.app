@@ -49,10 +49,9 @@
     (js/window.history.pushState nil nil encoded)))
 
 (defmethod store/effect! ::subscribe-route! [i]
-  (doseq [event "popstate pushstate"]
-    #_(js/window.addEventListener event #(store/dispatch! i [::route-changed (get-route!)]))))
+  (doseq [event "popstate pushstate replacestate"]
+    (js/window.addEventListener event #(store/dispatch! i [::route-changed (get-route!)]))))
 
 (defmulti view (fn [i] (-> i :store/state ::route first)))
-
 
 (store/register! {:store/init init :store/step step})

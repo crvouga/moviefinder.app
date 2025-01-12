@@ -2,6 +2,7 @@
   (:require [reagent.dom.client :as rd]
             [linkhub.frontend.counter]
             [linkhub.auth.login.frontend]
+            [linkhub.rpc.frontend]
             [linkhub.frontend.store :as store]
             [linkhub.frontend.routing :as routing]))
 

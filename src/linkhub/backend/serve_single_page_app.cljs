@@ -1,6 +1,7 @@
 (ns linkhub.backend.serve-single-page-app
   (:require ["fs" :as fs]
-            ["path" :as path]))
+            ["path" :as path]
+            [linkhub.backend.request-handler :refer [request-handler!]]))
 
 (def public-dir (path/resolve "public"))
 
@@ -33,7 +34,7 @@
          (end! res 200 "text/html" data))))))
 
 (defn- serve-file-ok! [res file-path]
-  (println "Serving file" file-path)
+  #_(println "Serving file" file-path)
   (fs/readFile
    file-path
    (fn [err data]
@@ -48,7 +49,7 @@
         (serve-file-err! res err)
         (serve-file-ok! res file-path)))))
 
-(defn request-handler! [^js req ^js res]
+(defmethod request-handler! :default [req res]
   (let [url-path (-> req .-url)
         safe-path (if (= url-path "/") "index.html" url-path)
         file-path (path/join public-dir safe-path)]

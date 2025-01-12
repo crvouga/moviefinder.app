@@ -4,9 +4,8 @@
    [linkhub.frontend.routing :as routing]
    [linkhub.frontend.store :as store]
    [linkhub.frontend.ui.button :as button]
-   [linkhub.frontend.ui.form :as form]
-   [linkhub.frontend.ui.text-field :as text-field]
-   [linkhub.rpc.frontend :as rpc]))
+   #_[linkhub.frontend.ui.form :as form]
+   [linkhub.frontend.ui.text-field :as text-field]))
 
 (defn init []
   {:store/state {::current-user [:result/not-asked]}})
@@ -67,15 +66,18 @@
 (defmethod step ::submitted-send-code-form [i]
   (-> i
       (update-in [:store/state] assoc ::send-code [:result/loading])
-      (update-in [:store/effect] conj [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
-                                                   :rpc/msg #(vector ::sent-code %)}])))
+      (update-in [:store/effects] conj [:rpc/send! {:rpc/msg [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
+                                                    :rpc/dispatch! #(vector ::sent-code %)}])))
 
 (defn sending-code? [i] 
   (-> i :store/state ::send-code first (= :result/loading)))
 
 (defn view-send-code-form [i]
-  [form/view
-   {:form/on-submit #(store/dispatch! i [::submitted-send-code-form])}
+  [:form
+   {:on-submit 
+    #(do
+       (.preventDefault %)
+       (store/dispatch! i [::submitted-send-code-form]))}
    [text-field/view
     {:text-field/label "Phone Number"
      :text-field/value (-> i :store/state ::phone-number)

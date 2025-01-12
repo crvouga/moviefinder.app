@@ -1,16 +1,22 @@
 (ns linkhub.rpc.frontend 
   (:require
-    [linkhub.frontend.store :as store]
-    [clojure.core.async :as async]))
+   [linkhub.frontend.store :as store]
+   [linkhub.core.http-client :as http-client]
+   [clojure.core.async :refer [<! go]]))
 
-(defn rpc! [request]
-  (println request))
+(defn rpc! [msg]
+  (http-client/send!
+   {:http-request/method :http-method/post
+    :http-request/url "/rpc"
+    :http-request/headers {"Content-Type" "text/plain"}
+    :http-request/body (pr-str msg)}))
 
 (defmethod store/effect! :rpc/send! [i]
-  (async/go
+  (go
     (let [effect-payload (-> i :store/effect second)
-          req (-> effect-payload :rpc/req)
-          map-response (-> effect-payload :rpc/msg)
-          res (async/<! (rpc! req))
+          msg (-> effect-payload :rpc/msg)
+          map-response (-> effect-payload :rpc/dispatch!)
+          res (<! (rpc! msg))
           mapped-res (map-response res)]
+      (println "mapped-res" mapped-res)
       (store/dispatch! i mapped-res))))
