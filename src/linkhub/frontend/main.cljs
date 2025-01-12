@@ -1,4 +1,4 @@
-(ns linkhub.frontend.app
+(ns linkhub.frontend.main
   (:require [reagent.dom.client :as rd]
             [linkhub.frontend.counter]
             [linkhub.auth.login.frontend]

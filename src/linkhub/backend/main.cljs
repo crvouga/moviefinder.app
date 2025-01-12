@@ -1,4 +1,4 @@
-(ns linkhub.backend.app
+(ns linkhub.backend.main
   (:require ["http" :as http]
             [linkhub.backend.serve-single-page-app :as serve-single-page-app]
             [linkhub.backend.env :as env]))

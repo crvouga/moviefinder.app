@@ -10,8 +10,8 @@
  :builds
  {:frontend
   {:target :browser
-   :modules {:main {:init-fn linkhub.frontend.app/-main}}}
+   :modules {:main {:init-fn linkhub.frontend.main/-main}}}
   :backend
   {:target :node-script
-   :main linkhub.backend.app/-main
+   :main linkhub.backend.main/-main
    :output-to "out/backend/main.js"}}}
