@@ -6,51 +6,63 @@
 (def inits! (r/atom #{}))
 (def steps! (r/atom #{}))
 
-(defmulti effect! (fn [i] (-> i :store/effects first)))
+
+(defn effect [i]
+  (-> i :store/effect))
+
+(defn effect-type [i]
+  (-> i effect first))
+
+(defn effect-payload [i]
+  (-> i effect second))
+
+(defmulti effect! effect-type)
 
 (defn- reducer [acc step-fn] 
     (let [stepped (step-fn (assoc acc :store/effects []))
           state-new (merge (:store/state acc) (:store/state stepped))
           effect-new (concat (:store/effects acc) (:store/effects stepped))]
-      {:store/event (-> stepped :store/event)
+      {:store/msg (-> stepped :store/msg)
        :store/state state-new
        :store/effects effect-new}))
 
-(defn- dispatch! [event]
+(defn- -dispatch! [msg]
   (let [state-prev @state!
-        initial {:store/event event 
+        initial {:store/msg msg 
                  :store/state state-prev
                  :store/effects []}
         stepped (reduce reducer initial @steps!)
         state-new (:store/state stepped)
         effects (:store/effects stepped)]
-    (cljs.pprint/pprint {:event event 
+    (cljs.pprint/pprint {:msg msg 
                          :state-prev state-prev 
                          :state-new state-new 
                          :effects effects})
     (doseq [effect effects]
-      (effect! {:store/effects effect
+      (cljs.pprint/pprint {:effect effect})
+      (effect! {:store/effect effect
                 :store/state state-new
-                :store/dispatch! dispatch!}))
+                :store/dispatch! -dispatch!}))
     (reset! state! state-new)))
 
 (defn init! []
   (let [init-fns @inits!
         values (map (fn [init-fn] (init-fn)) init-fns)
         states (map :store/state values)
-        events (mapcat :store/events values)
+        msgs (mapcat :store/msgs values)
         effects (mapcat :store/effects values)
         state (reduce merge states)]
     (cljs.pprint/pprint {:state state
-                         :events events
+                         :msgs msgs
                          :effects effects})
     (reset! state! state)
-    (doseq [event events]
-      (dispatch! event))
+    (doseq [msg msgs]
+      (-dispatch! msg))
     (doseq [effect effects]
-      (effect! {:store/effects effect
+      (cljs.pprint/pprint {:effect effect})
+      (effect! {:store/effect effect
                 :store/state state
-                :store/dispatch! dispatch!}))))
+                :store/dispatch! -dispatch!}))))
 
 (defn register! [module] 
   (let [step (:store/step module)
@@ -63,14 +75,18 @@
 
 (defn view [view-fn]
   (let [i {:store/state @state!
-           :store/dispatch! dispatch!}]
+           :store/dispatch! -dispatch!}]
     (view-fn i)))
 
-(defn event [input]
-  (-> input :store/event))
+(defn dispatch! [i msg]
+  ((-> i :store/dispatch!) msg))
 
-(defn event-type [input]
-  (-> input event first))
 
-(defn event-payload [input]
-  (-> input event second))
+(defn msg [i]
+  (-> i :store/msg))
+
+(defn msg-type [i]
+  (-> i msg first))
+
+(defn msg-payload [i]
+  (-> i msg second))

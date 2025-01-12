@@ -1,6 +1,6 @@
 (ns linkhub.frontend.ui.text-field)
 
-(defn- input-event->value [e]
+(defn- input-msg->value [e]
   (-> e .-target .-value))
 
 (defn view [i]
@@ -15,4 +15,4 @@
               :value value
               :disabled disabled?
               :required required?
-              :on-change #(-> % input-event->value on-change)}]]]))
+              :on-change #(-> % input-msg->value on-change)}]]]))

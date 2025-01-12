@@ -7,7 +7,7 @@
 
 (defn init []
   {:store/state {}
-   :store/events [[:app/initialized]]})
+   :store/msgs [[:app/initialized]]})
 
 (defn view []
   (store/view routing/view))

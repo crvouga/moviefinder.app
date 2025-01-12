@@ -11,32 +11,46 @@
 
 (defn init []
   {:store/state {::route [:route/login]}
-   :store/effects [[::get-route!]]})
+   :store/effects [[::get-route!]
+                   [::subscribe-route!]]})
 
-(defmulti step store/event-type)
+(defmulti step store/msg-type)
 
 (defmethod step :default [i] i)
 
 (def fallback [:route/login])
 
+(defn- get-route! []
+  (-> js/window.location.pathname (subs 1) (decode) (or fallback)))
+
 (defmethod store/effect! ::get-route! [i]
-  (let [route (-> js/window.location.pathname (subs 1) (decode))]
-    ((:store/dispatch! i) [::got-route (or route fallback)])))
+  (store/dispatch! i [::got-route (get-route!)]))
+
+(defn assoc-msg-payload-as-route [i]
+  (let [route-new (store/msg-payload i)]
+    (-> i
+        (assoc-in [:store/state ::route] route-new))))
 
 (defmethod step ::got-route [i]
-  (-> i
-      (assoc-in [:store/state ::route] (store/event-payload i))))
+  (assoc-msg-payload-as-route i))
+
+(defmethod step ::route-changed [i]
+  (assoc-msg-payload-as-route i))
 
 (defmethod step :routing/clicked-link [i]
-  (let [route-new (store/event-payload i)]
+  (let [route-new (store/msg-payload i)]
     (-> i
         (assoc-in [:store/state ::route] route-new)
         (update-in [:store/effects] conj [::push-route! route-new]))))
 
-(defmethod store/effect! ::push-route! [input]
-  (let [route (-> input :store/effects second)
+(defmethod store/effect! ::push-route! [i]
+  (let [route (store/effect-payload i)
         encoded (encode route)]
     (js/window.history.pushState nil nil encoded)))
+
+(defmethod store/effect! ::subscribe-route! [i]
+  (doseq [event "popstate pushstate"]
+    #_(js/window.addEventListener event #(store/dispatch! i [::route-changed (get-route!)]))))
 
 (defmulti view (fn [i] (-> i :store/state ::route first)))
 

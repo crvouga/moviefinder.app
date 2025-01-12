@@ -5,7 +5,7 @@
 (defn init []
   {:store/state {::count 0}})
 
-(defmulti step store/event-type)
+(defmulti step store/msg-type)
 
 (defmethod step :default [i] i)
 
@@ -17,11 +17,11 @@
 
 (defn view [i]
   [:div
-   [:button {:on-click #((:store/dispatch! i) [:routing/clicked-link [:route/login]])} "Go to login"]
+   [:button {:on-click #(store/dispatch! i [:routing/clicked-link [:route/login]])} "Go to login"]
    "The state " [:code "click-count"] " has value: "
    (-> i :store/state ::count) ". "
    [:input {:type "button" :value "click me!"
-            :on-click #((:store/dispatch! i) [::clicked-count-button])}]])
+            :on-click #(store/dispatch! i [::clicked-count-button])}]])
 
 (defmethod routing/view :route/counter [i]
   (view i))
