@@ -9,7 +9,7 @@
     "backend": "npx shadow-cljs watch backend",
     "watch": "npx concurrently \"npm run frontend\" \"npm run backend\"",
     "start": "npx nodemon out/backend/main.js",
-    "preview": "npm run build && npm run start"
+    "preview": "npm install && npm run build && npm run start"
   },
   "devDependencies": {
     "shadow-cljs": "2.28.20"
