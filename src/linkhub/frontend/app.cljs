@@ -14,7 +14,7 @@
 
 (store/register! {:store/init init})
 
-(defn main [] 
+(defn -main [] 
   (store/init!)
   (let [dom-root (.getElementById js/document "root")
         react-root (rd/create-root dom-root)]
