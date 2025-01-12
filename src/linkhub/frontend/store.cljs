@@ -3,8 +3,8 @@
             [cljs.pprint]))
 
 (defonce state! (r/atom {}))
-(defonce inits! (r/atom #{}))
-(defonce steps! (r/atom #{}))
+(def inits! (r/atom #{}))
+(def steps! (r/atom #{}))
 
 (defmulti effect! (fn [i] (-> i :store/effects first)))
 
