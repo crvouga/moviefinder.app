@@ -24,4 +24,4 @@ RUN ["npm", "run", "build"]
 EXPOSE 3000
 
 # Command to start the Node.js server
-CMD ["node", "out/server/main.js"]
+CMD ["npm", "run", "start"]
