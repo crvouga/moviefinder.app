@@ -17,9 +17,11 @@
 
 (defmethod step :default [i] i)
 
+(def fallback [:route/login])
+
 (defmethod store/effect! ::get-route! [i]
   (let [route (-> js/window.location.pathname (subs 1) (decode))]
-    ((:store/dispatch! i) [::got-route route])))
+    ((:store/dispatch! i) [::got-route (or route fallback)])))
 
 (defmethod step ::got-route [i]
   (-> i
@@ -30,7 +32,6 @@
     (-> i
         (assoc-in [:store/state ::route] route-new)
         (update-in [:store/effects] conj [::push-route! route-new]))))
-
 
 (defmethod store/effect! ::push-route! [input]
   (let [route (-> input :store/effects second)

@@ -3,8 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "build": "npx shadow-cljs release frontend backend",
     "clean": "npx shadow-cljs clean",
-    "frontend": "npx shadow-cljs watch frontend"
+    "frontend": "npx shadow-cljs watch frontend",
+    "backend": "npx shadow-cljs watch backend",
+    "watch": "npx concurrently \"npm run frontend\" \"npm run backend\"",
+    "start": "npx nodemon out/backend/main.js",
+    "preview": "npm run build && npm run start"
   },
   "devDependencies": {
     "shadow-cljs": "2.28.20"

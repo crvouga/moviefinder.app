@@ -1,8 +1,6 @@
 ;; shadow-cljs configuration
 {:source-paths
- ["src/dev"
-  "src/main"
-  "src/test"]
+ ["src"]
 
  :dependencies
  [[reagent "1.2.0"]]
@@ -12,5 +10,8 @@
  :builds
  {:frontend
   {:target :browser
-   :modules {:main {:init-fn linkhub.frontend.app/main}}
-   }}}
+   :modules {:main {:init-fn linkhub.frontend.app/main}}}
+  :backend
+  {:target :node-script
+   :main linkhub.backend.app/-main
+   :output-to "out/backend/main.js"}}}
