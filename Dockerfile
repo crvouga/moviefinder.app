@@ -12,7 +12,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install npm dependencies
-RUN npm install
+RUN ["npm", "install"]
 
 # Copy the rest of the application code to the working directory
 COPY . .
