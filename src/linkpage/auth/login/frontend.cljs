@@ -111,10 +111,7 @@
 (defn view [i]
   [:main
    [:section
-    [:button {:on-click #(store/dispatch! i [:routing/clicked-link [:route/counter]])} "my 123"]
-    (view-send-code-form i)
-    (view-get-current-user-button i)
-    (view-current-user-status i)]])
+    (view-send-code-form i)]])
 
 (defmethod routing/view :route/login [i]
   (view i))

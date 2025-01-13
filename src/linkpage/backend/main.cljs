@@ -4,6 +4,7 @@
             [linkpage.backend.serve-single-page-app]
             [linkpage.rpc.backend]
             [linkpage.auth.login.backend]
+            [linkpage.auth.current-user.backend]
             [linkpage.core.http-server :as http-server]
             [linkpage.backend.env :as env]))
 

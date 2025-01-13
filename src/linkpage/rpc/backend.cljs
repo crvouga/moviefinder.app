@@ -6,6 +6,12 @@
 
 (defmulti rpc! first)
 
+(defmethod rpc! :default [req]
+  (go
+    (println "rpc! :default " req)
+    [:result/err {:error/message "Unknown rpc method"
+                  :error/data {:rpc/req req}}]))
+
 (defmethod request-handler! "/rpc" [req res]
   (go
     (let [body-edn (<! (http-request/body-edn-chan req))
