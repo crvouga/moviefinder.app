@@ -80,7 +80,6 @@
 (defn dispatch! [i msg]
   ((-> i :store/dispatch!) msg))
 
-
 (defn msg [i]
   (-> i :store/msg))
 
