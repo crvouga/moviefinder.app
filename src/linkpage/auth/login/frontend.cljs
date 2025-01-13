@@ -4,6 +4,7 @@
    [linkpage.frontend.store :as store]
    [linkpage.core.result :as result]
    [linkpage.frontend.ui.button :as button]
+   [linkpage.frontend.toast :as toast]
    [linkpage.frontend.ui.text-field :as text-field]))
 
 (defmulti step store/msg-type)
@@ -24,12 +25,11 @@
 
 (defmethod step ::sent-code [i]
   (let [sent-code (store/msg-payload i)]
-    (println "sent-code" sent-code)
     (-> i
         (update-in [:store/state] assoc ::send-code sent-code)
-        (update-in [:store/msgs] conj (when (result/ok? sent-code)
-                                        (println "pushing" "sent-code=" sent-code)
-                                        [:routing/push [:route/login-verify-code sent-code]])))))
+        (update-in [:store/msgs] concat (when (result/ok? sent-code)
+                                          [[:routing/push [:route/login-verify-code sent-code]]
+                                           [:toaster/show (toast/info "Code sent")]])))))
 
 (defmethod step ::inputted-phone-number [i] (-> i (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
 
