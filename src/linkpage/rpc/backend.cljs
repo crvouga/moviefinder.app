@@ -17,8 +17,5 @@
     (let [body-edn (<! (http-request/body-edn-chan req))
           rpc-res (<! (rpc! body-edn))
           rpc-res-text-plain (pr-str rpc-res)]
-      (println "body-edn " body-edn)
-      (println "rpc-res " rpc-res)
-      (println "rpc-res-text-plain " rpc-res-text-plain)
       (http-response/set-header! res "Content-Type" "text/plain")
       (http-response/end! res rpc-res-text-plain))))

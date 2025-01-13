@@ -1,8 +1,8 @@
 (ns linkpage.auth.login.frontend
   (:require
-   [clojure.core.async :refer [go <! timeout]]
    [linkpage.frontend.routing :as routing]
    [linkpage.frontend.store :as store]
+   [linkpage.core.result :as result]
    [linkpage.frontend.ui.button :as button]
    [linkpage.frontend.ui.text-field :as text-field]))
 
@@ -12,109 +12,78 @@
 
 (defmethod step :store/initialized [i]
   (-> i
-      (assoc-in [:store/state ::current-user] [:result/not-asked])
-      (assoc-in [:store/state ::send-code] [:result/not-asked])))
+      (assoc-in [:store/state ::send-code] [:result/not-asked])
+      (assoc-in [:store/state ::verify-code] [:result/not-asked])))
 
-(defmethod step ::clicked-get-current-user [i]
-  (-> i
-      (update-in [:store/state] assoc ::current-user [:result/loading])
-      (update-in [:store/effs] conj [::get-current-user!])))
-
-(defn get-current-user! []
-  (go
-    (<! (timeout 3000))
-    [:result/ok
-     {:user/user-id 1
-      :user/username "test-user"
-      :user/email "my-email"}]))
-
-
-(defmethod store/eff! ::get-current-user! [i]
-  (go
-    (let [user (<! (get-current-user!))]
-      (store/dispatch! i [::got-current-user user]))))
-
-(defmethod step ::got-current-user [i]
-  (-> i
-      (assoc-in [:store/state ::current-user] (store/msg-payload i))))
-
-(defmulti view-current-user-status (fn [i] (-> i :store/state ::current-user first)))
-
-(defmethod view-current-user-status :default [_]
-  [:div "Unknown status"])
-
-(defmethod view-current-user-status :result/not-asked [_]
-  [:div "Not asked yet"])
-
-(defmethod view-current-user-status :result/loading [_]
-  [:div "Loading..."])
-
-(defmethod view-current-user-status :result/ok [i]
-  [:div (str "Current user: " (-> i :store/state ::current-user second :user/username))])
-
-(defmethod view-current-user-status :result/err [_]
-  [:div "Error!"])
-
-(defn view-get-current-user-button [i]
-  [:button {:on-click #(store/dispatch! i [::clicked-get-current-user])
-            :disabled (-> i :store/state ::current-user first (= :result/loading))} "Get current user"])
-
-;; 
-;; 
-;; 
-
-
-
-(defn send-code-rpc-eff [i]
-  (let [phone-number (-> i :store/state ::phone-number)]
-    [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number phone-number}]
-                 :rpc/res #(vector ::sent-code %)}]))
 
 (defmethod step ::submitted-send-code-form [i]
   (-> i
       (update-in [:store/state] assoc ::send-code [:result/loading])
-      (update-in [:store/effs] conj (send-code-rpc-eff i))))
+      (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
+                                                 :rpc/res #(vector ::sent-code %)}])))
 
 (defmethod step ::sent-code [i]
-  (-> i
-      (update-in [:store/state] assoc ::send-code (store/msg-payload i))))
+  (let [sent-code (store/msg-payload i)]
+    (println "sent-code" sent-code)
+    (-> i
+        (update-in [:store/state] assoc ::send-code sent-code)
+        (update-in [:store/msgs] conj (when (result/ok? sent-code)
+                                        (println "pushing" "sent-code=" sent-code)
+                                        [:routing/push [:route/login-verify-code sent-code]])))))
 
-(defn sending-code? [i]
-  (-> i :store/state ::send-code first (= :result/loading)))
+(defmethod step ::inputted-phone-number [i] (-> i (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
 
-(defmethod step ::inputted-phone-number [i]
-  (-> i
-      (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
-
-(defn view-send-code-form [i]
-  [:form
-   {:on-submit
-    #(do
-       (.preventDefault %)
-       (store/dispatch! i [::submitted-send-code-form]))}
-   [:pre [:code (-> i :store/state ::send-code pr-str)]]
-   [text-field/view
-    {:text-field/label "Phone Number"
-     :text-field/value (-> i :store/state ::phone-number)
-     :text-field/required? true
-     :text-field/disabled? (sending-code? i)
-     :text-field/on-change #(store/dispatch! i [::inputted-phone-number %])}]
-   [button/view
-    {:button/type :button-type/submit
-     :button/loading? (sending-code? i)
-     :button/label "Send code"}]])
-
-;; 
-;; 
-;; 
-
-(defn view [i]
-  [:main
-   [:section
-    (view-send-code-form i)]])
+(defn sending-code? [i] (-> i :store/state ::send-code first (= :result/loading)))
 
 (defmethod routing/view :route/login [i]
-  (view i))
+  [:main.container
+   [:header [:h1 "Login with SMS"]]
+   [:section
+    [:form
+     {:on-submit
+      #(do
+         (.preventDefault %)
+         (store/dispatch! i [::submitted-send-code-form]))}
+     [text-field/view
+      {:text-field/label "Phone Number"
+       :text-field/value (-> i :store/state ::phone-number)
+       :text-field/required? true
+       :text-field/disabled? (sending-code? i)
+       :text-field/on-change #(store/dispatch! i [::inputted-phone-number %])}]
+     [button/view
+      {:button/type :button-type/submit
+       :button/loading? (sending-code? i)
+       :button/label "Send code"}]]]])
+
+(defmethod step ::inputted-code [i] (-> i (assoc-in [:store/state ::code] (store/msg-payload i))))
+(defmethod step ::submitted-verify-code-form [i]
+  (-> i
+      (update-in [:store/state] assoc ::verify-code [:result/loading])
+      (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:login/verify-code {:user/code (-> i :store/state ::code)}]
+                                                 :rpc/res #(vector ::verified-code %)}])))
+(defmethod step ::verified-code [i]
+  (-> i
+      (update-in [:store/state] assoc ::verify-code (store/msg-payload i))))
+
+(defmethod routing/view :route/login-verify-code [i]
+  [:main.container
+   [:header [:h1 "Verify Code"]]
+   [:section
+    [:form
+     {:on-submit
+      #(do
+         (.preventDefault %)
+         (store/dispatch! i [::submitted-verify-code-form]))}
+     [text-field/view
+      {:text-field/label "Code"
+       :text-field/value (-> i :store/state ::code)
+       :text-field/required? true
+       :text-field/disabled? (sending-code? i)
+       :text-field/on-change #(store/dispatch! i [::inputted-code %])}]
+     [button/view
+      {:button/type :button-type/submit
+       :button/loading? (sending-code? i)
+       :button/label "Send code"}]]]])
 
 (store/register-step! step)
 

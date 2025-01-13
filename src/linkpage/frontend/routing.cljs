@@ -9,7 +9,7 @@
 
 (defmethod step :store/initialized [i]
   (-> i
-      (update :store/state merge {::route [:route/login]})
+      #_(update :store/state merge {::route [:route/login]})
       (update :store/effs conj [::get-route!])
       (update :store/effs conj [::subscribe-route!])))
 
@@ -35,19 +35,26 @@
   (let [route-new (store/msg-payload i)]
     (-> i
         (assoc-in [:store/state ::route] route-new)
-        (update-in [:store/effs] conj [::push-route! route-new]))))
+        (update-in [:store/effs] conj [::push! route-new]))))
 
-(defmethod store/eff! ::push-route! [i]
+(defmethod step :routing/push [i]
+  (let [route-new (store/msg-payload i)]
+    (-> i
+        (assoc-in [:store/state ::route] route-new)
+        (update-in [:store/effs] conj [::push! route-new]))))
+
+(defmethod store/eff! ::push! [i]
   (let [route (store/eff-payload i)
         encoded (route/encode route)]
     (js/window.history.pushState nil nil encoded)))
 
 (defmethod store/eff! ::subscribe-route! [i]
-  (doseq [event "popstate pushstate replacestate"]
+  (doseq [event ["popstate" "pushstate" "replacestate"]]
     (js/window.addEventListener event #(store/dispatch! i [::route-changed (get-route!)]))))
 
 (defmulti view (fn [i] (-> i :store/state ::route first)))
 
-
+(defmethod view nil []
+  [:div "Loading..."])
 
 (store/register-step! step)

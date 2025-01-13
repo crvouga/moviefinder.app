@@ -9,11 +9,7 @@
 
 (defn view []
   (store/view
-   (fn [i]
-     (current-user/view
-      (-> i
-          (assoc :current-user/view-logged-in routing/view)
-          (assoc :current-user/view-logged-out routing/view))))))
+   #(current-user/view % routing/view)))
 
 (defn -main []
   (store/initialize!)
