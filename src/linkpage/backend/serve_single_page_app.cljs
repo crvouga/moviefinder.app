@@ -53,4 +53,5 @@
   (let [url-path (-> req .-url)
         safe-path (if (= url-path "/") "index.html" url-path)
         file-path (path/join public-dir safe-path)]
+    #_(println "Serving file" file-path)
     (serve-file! file-path res)))

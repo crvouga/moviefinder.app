@@ -1,17 +1,21 @@
 (ns linkpage.backend.main
-  (:require ["http" :as http]
+  (:require [clojure.core.async :refer [go <!]]
+            [linkpage.backend.request-handler :refer [request-handler!]]
             [linkpage.backend.serve-single-page-app]
             [linkpage.rpc.backend]
-            [linkpage.backend.request-handler :refer [request-handler!]]
+            [linkpage.core.http-server :as http-server]
             [linkpage.backend.env :as env]))
 
-(defn on-start []
-  (println (str "Server is running on http://localhost:" env/port)))
+(defn request-handler-root! [req res]
+  (request-handler! req res))
 
-(defn start-server []
-  (let [http-server! (.createServer http request-handler!)]
-    (.listen http-server! env/port on-start)))
+(defn start-http-server! []
+  (go
+    (let [http-server! (http-server/new! request-handler-root!)]
+      (<! (http-server/listen! http-server! env/port))
+      (println (str "Server is running... http://localhost:" env/port)))))
 
 (defn -main []
-  (println "Starting server...")
-  (start-server))
+  (go
+    (<! (start-http-server!))))
+  

@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
+        "aset",
         "defmethod",
         "defmulti",
         "defn",
+        "doseq",
+        "extname",
         "keywordize",
         "linkpage",
         "println"
