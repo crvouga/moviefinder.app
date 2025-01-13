@@ -2,12 +2,13 @@
   (:require [linkpage.frontend.store :as store]
             [linkpage.frontend.routing :as routing]))
 
-(defn init []
-  {:store/state {::count 0}})
-
 (defmulti step store/msg-type)
 
 (defmethod step :default [i] i)
+
+(defmethod step :store/initialized [i]
+  (-> i
+      (update :store/state merge {::count 0})))
 
 (defmethod step ::clicked-count-button [i]
   (let [current-count (-> i :store/state ::count (or 0))
@@ -26,5 +27,4 @@
 (defmethod routing/view :route/counter [i]
   (view i))
 
-(store/register! {:store/init init
-                  :store/step step})
+(store/register-step! step)

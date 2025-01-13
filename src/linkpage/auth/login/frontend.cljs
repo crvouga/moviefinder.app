@@ -4,20 +4,20 @@
    [linkpage.frontend.routing :as routing]
    [linkpage.frontend.store :as store]
    [linkpage.frontend.ui.button :as button]
-   #_[linkpage.frontend.ui.form :as form]
    [linkpage.frontend.ui.text-field :as text-field]))
-
-(defn init []
-  {:store/state {::current-user [:result/not-asked]}})
 
 (defmulti step store/msg-type)
 
 (defmethod step :default [i] i)
 
+(defmethod step :store/initialized [i]
+  (-> i
+      (update :store/state merge {::current-user [:result/not-asked]})))
+
 (defmethod step ::clicked-get-current-user [i]
   (-> i
       (update-in [:store/state] assoc ::current-user [:result/loading])
-      (update-in [:store/effects] conj [::get-current-user!])))
+      (update-in [:store/effs] conj [::get-current-user!])))
 
 (defn get-current-user! []
   (go
@@ -28,7 +28,7 @@
       :user/email "my-email"}]))
 
 
-(defmethod store/effect! ::get-current-user! [i]
+(defmethod store/eff! ::get-current-user! [i]
   (go
     (let [user (<! (get-current-user!))]
       (store/dispatch! i [::got-current-user user]))))
@@ -38,6 +38,9 @@
       (assoc-in [:store/state ::current-user] (store/msg-payload i))))
 
 (defmulti view-current-user-status (fn [i] (-> i :store/state ::current-user first)))
+
+(defmethod view-current-user-status :default [_]
+  [:div "Unknown status"])
 
 (defmethod view-current-user-status :result/not-asked [_]
   [:div "Not asked yet"])
@@ -59,18 +62,22 @@
 ;; 
 ;; 
 
-(defmethod step ::inputted-phone-number [i]
-  (-> i
-      (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
+(defn send-code-rpc-eff [i]
+  (let [phone-number (-> i :store/state ::phone-number)]
+    [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number phone-number}]
+                 :rpc/res #(vector ::sent-code %)}]))
 
 (defmethod step ::submitted-send-code-form [i]
   (-> i
       (update-in [:store/state] assoc ::send-code [:result/loading])
-      (update-in [:store/effects] conj [:rpc/send! {:rpc/msg [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
-                                                    :rpc/dispatch! #(vector ::sent-code %)}])))
+      (update-in [:store/effs] conj (send-code-rpc-eff i))))
 
 (defn sending-code? [i]
   (-> i :store/state ::send-code first (= :result/loading)))
+
+(defmethod step ::inputted-phone-number [i]
+  (-> i
+      (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
 
 (defn view-send-code-form [i]
   [:form
@@ -104,5 +111,5 @@
 (defmethod routing/view :route/login [i]
   (view i))
 
-(store/register! {:store/init init :store/step step})
+(store/register-step! step)
 

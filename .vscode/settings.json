@@ -10,7 +10,11 @@
         "keywordize",
         "linkpage",
         "mapcat",
+        "multimethod",
+        "popstate",
         "pprint",
-        "println"
+        "println",
+        "pushstate",
+        "replacestate"
     ]
 }

@@ -12,8 +12,3 @@
       (.listen http-server! port #(close! started-chan))
       (<! started-chan))))
 
-(defn end! [^js res]
-  (.end res))
-
-(defn body [^js req]
-  )

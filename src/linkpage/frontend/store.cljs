@@ -1,90 +1,63 @@
 (ns linkpage.frontend.store
-  (:require [reagent.core :as r]
-            [cljs.pprint]))
+  (:require [cljs.pprint]
+            [reagent.core :as r]))
 
-(defonce state! (r/atom {}))
-(def inits! (atom #{}))
-(def steps! (atom #{}))
+(defonce ^:private state! (r/atom {}))
+(def ^:private steps! (atom #{}))
 
-(defn effect [i]
-  (-> i :store/effect))
+(defn register-step! [step]
+  (swap! steps! conj step))
 
-(defn effect-type [i]
-  (-> i effect first))
+(def eff :store/eff)
+(def eff-type (comp first eff))
+(def eff-payload (comp second eff))
 
-(defn effect-payload [i]
-  (-> i effect second))
+(defmulti eff! eff-type)
 
-(defmulti effect! effect-type)
+(def msg :store/msg)
+(def msg-type (comp first msg))
+(def msg-payload (comp second msg))
 
-(defn- reducer [acc step-fn]
-  (let [stepped (step-fn (assoc acc :store/effects []))
+(defn- step-reducer [acc step-fn]
+  (let [stepped (step-fn (assoc acc :store/effs []))
         state-new (merge (:store/state acc) (:store/state stepped))
-        effect-new (concat (:store/effects acc) (:store/effects stepped))]
-    {:store/msg (-> stepped :store/msg)
+        eff-new (concat (:store/effs acc) (:store/effs stepped))]
+    (println "Stepped" stepped)
+    {:store/msgs (-> stepped :store/msgs)
      :store/state state-new
-     :store/effects effect-new}))
+     :store/effs eff-new}))
 
-(defn- -dispatch! [msg]
+(defn- internal-dispatch! [msg]
   (let [state-prev @state!
         initial {:store/msg msg
                  :store/state state-prev
-                 :store/effects []}
-        stepped (reduce reducer initial @steps!)
+                 :store/effs []
+                 :store/msgs []}
+        stepped (reduce step-reducer initial @steps!)
         state-new (:store/state stepped)
-        effects (:store/effects stepped)]
+        effs (:store/effs stepped)
+        msgs (:store/msgs stepped)]
     (cljs.pprint/pprint {:msg msg
                          :state-prev state-prev
                          :state-new state-new
-                         :effects effects})
-    (doseq [effect effects]
-      (cljs.pprint/pprint {:effect effect})
-      (effect! {:store/effect effect
-                :store/state state-new
-                :store/dispatch! -dispatch!}))
+                         :effs effs
+                         :msgs msgs})
+    (doseq [msg msgs]
+      (internal-dispatch! msg))
+    (doseq [eff effs]
+      (cljs.pprint/pprint "running effect" eff)
+      (eff! {:store/eff eff
+             :store/state state-new
+             :store/dispatch! internal-dispatch!}))
     (reset! state! state-new)))
 
-(defn init! []
-  (let [init-fns @inits!
-        values (map (fn [init-fn] (init-fn)) init-fns)
-        states (map :store/state values)
-        msgs (mapcat :store/msgs values)
-        effects (mapcat :store/effects values)
-        state (reduce merge states)]
-    (cljs.pprint/pprint {:state state
-                         :msgs msgs
-                         :effects effects})
-    (reset! state! state)
-    (doseq [msg msgs]
-      (-dispatch! msg))
-    (doseq [effect effects]
-      (cljs.pprint/pprint {:effect effect})
-      (effect! {:store/effect effect
-                :store/state state
-                :store/dispatch! -dispatch!}))))
-
-(defn register! [module]
-  (let [step (:store/step module)
-        init (:store/init module)]
-    (when init
-      (swap! inits! conj init))
-    (when step
-      (swap! steps! conj step))))
-
+(defn initialize! []
+  (internal-dispatch! [:store/initialized]))
 
 (defn view [view-fn]
   (let [i {:store/state @state!
-           :store/dispatch! -dispatch!}]
+           :store/dispatch! internal-dispatch!}]
     (view-fn i)))
 
 (defn dispatch! [i msg]
   ((-> i :store/dispatch!) msg))
-
-(defn msg [i]
-  (-> i :store/msg))
-
-(defn msg-type [i]
-  (-> i msg first))
-
-(defn msg-payload [i]
-  (-> i msg second))
