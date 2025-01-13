@@ -22,8 +22,8 @@
   (let [stepped (step-fn (assoc acc :store/effs []))
         state-new (merge (:store/state acc) (:store/state stepped))
         eff-new (concat (:store/effs acc) (:store/effs stepped))]
-    (println "Stepped" stepped)
-    {:store/msgs (-> stepped :store/msgs)
+    {:store/msg (-> stepped :store/msg)
+     :store/msgs (-> stepped :store/msgs)
      :store/state state-new
      :store/effs eff-new}))
 
@@ -37,7 +37,8 @@
         state-new (:store/state stepped)
         effs (:store/effs stepped)
         msgs (:store/msgs stepped)]
-    (cljs.pprint/pprint {:msg msg
+    (cljs.pprint/pprint {:message "Dispatched msg"
+                         :msg msg
                          :state-prev state-prev
                          :state-new state-new
                          :effs effs
@@ -45,7 +46,8 @@
     (doseq [msg msgs]
       (internal-dispatch! msg))
     (doseq [eff effs]
-      (cljs.pprint/pprint "running effect" eff)
+      (cljs.pprint/pprint {:message "Running effect"
+                           :eff eff})
       (eff! {:store/eff eff
              :store/state state-new
              :store/dispatch! internal-dispatch!}))
