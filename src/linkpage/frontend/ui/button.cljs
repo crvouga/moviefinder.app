@@ -1,4 +1,4 @@
-(ns linkhub.frontend.ui.button)
+(ns linkpage.frontend.ui.button)
 
 (def button-type->html-type
   {:button-type/submit "submit"
@@ -9,8 +9,8 @@
   (let [label (-> i :button/label)
         type (-> i :button/type button-type->html-type (or "button"))
         loading? (-> i :button/loading?)]
-   [:button
-    {:type type 
-     :disabled loading?
-     :aria-busy loading?}
-    label]))
+    [:button
+     {:type type
+      :disabled loading?
+      :aria-busy loading?}
+     label]))

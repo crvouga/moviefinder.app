@@ -1,4 +1,4 @@
-(ns linkhub.core.http-client
+(ns linkpage.core.http-client
   (:require [cljs.core.async :refer [chan go >! close!]]))
 
 (defn js-headers->clj [headers]
@@ -34,8 +34,8 @@
   (let [response-chan (chan)
         {:http-request/keys [method url headers body]} http-request
         init (cond-> {:method (-> method name .toUpperCase)}
-                headers (assoc :headers (clj->js headers))
-                body (assoc :body body))]
+               headers (assoc :headers (clj->js headers))
+               body (assoc :body body))]
     (-> (js/fetch url (clj->js init))
         (.then #(handle-success-response % response-chan))
         (.catch #(handle-error-response % response-chan)))

@@ -1,7 +1,7 @@
-(ns linkhub.rpc.frontend 
+(ns linkpage.rpc.frontend
   (:require
-   [linkhub.frontend.store :as store]
-   [linkhub.core.http-client :as http-client]
+   [linkpage.frontend.store :as store]
+   [linkpage.core.http-client :as http-client]
    [clojure.core.async :refer [<! go]]))
 
 (defn rpc! [msg]

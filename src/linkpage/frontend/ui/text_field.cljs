@@ -1,4 +1,4 @@
-(ns linkhub.frontend.ui.text-field)
+(ns linkpage.frontend.ui.text-field)
 
 (defn- input-msg->value [e]
   (-> e .-target .-value))
@@ -9,10 +9,10 @@
         label (:text-field/label i)
         disabled? (:text-field/disabled? i)
         required? (:text-field/required? i)]
-   [:fieldset
-    [:label label
-     [:input {:type "text"
-              :value value
-              :disabled disabled?
-              :required required?
-              :on-change #(-> % input-msg->value on-change)}]]]))
+    [:fieldset
+     [:label label
+      [:input {:type "text"
+               :value value
+               :disabled disabled?
+               :required required?
+               :on-change #(-> % input-msg->value on-change)}]]]))

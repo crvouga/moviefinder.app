@@ -1,4 +1,4 @@
-(ns linkhub.backend.env
+(ns linkpage.backend.env
   (:require ["fs" :as fs]
             ["path" :as path]
             [clojure.string]))

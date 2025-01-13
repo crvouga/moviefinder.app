@@ -1,5 +1,5 @@
-(ns linkhub.rpc.backend
-  (:require [linkhub.backend.request-handler :refer [request-handler!]]))
+(ns linkpage.rpc.backend
+  (:require [linkpage.backend.request-handler :refer [request-handler!]]))
 
 (defmulti rpc! first)
 

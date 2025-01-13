@@ -1,11 +1,11 @@
-(ns linkhub.auth.login.frontend
+(ns linkpage.auth.login.frontend
   (:require
    [clojure.core.async :refer [go <! timeout]]
-   [linkhub.frontend.routing :as routing]
-   [linkhub.frontend.store :as store]
-   [linkhub.frontend.ui.button :as button]
-   #_[linkhub.frontend.ui.form :as form]
-   [linkhub.frontend.ui.text-field :as text-field]))
+   [linkpage.frontend.routing :as routing]
+   [linkpage.frontend.store :as store]
+   [linkpage.frontend.ui.button :as button]
+   #_[linkpage.frontend.ui.form :as form]
+   [linkpage.frontend.ui.text-field :as text-field]))
 
 (defn init []
   {:store/state {::current-user [:result/not-asked]}})
@@ -14,17 +14,17 @@
 
 (defmethod step :default [i] i)
 
-(defmethod step ::clicked-get-current-user [i] 
+(defmethod step ::clicked-get-current-user [i]
   (-> i
       (update-in [:store/state] assoc ::current-user [:result/loading])
       (update-in [:store/effects] conj [::get-current-user!])))
 
 (defn get-current-user! []
   (go
-    (<! (timeout 3000)) 
+    (<! (timeout 3000))
     [:result/ok
-     {:user/user-id 1 
-      :user/username "test-user" 
+     {:user/user-id 1
+      :user/username "test-user"
       :user/email "my-email"}]))
 
 
@@ -33,7 +33,7 @@
     (let [user (<! (get-current-user!))]
       (store/dispatch! i [::got-current-user user]))))
 
-(defmethod step ::got-current-user [i] 
+(defmethod step ::got-current-user [i]
   (-> i
       (assoc-in [:store/state ::current-user] (store/msg-payload i))))
 
@@ -60,7 +60,7 @@
 ;; 
 
 (defmethod step ::inputted-phone-number [i]
-  (-> i 
+  (-> i
       (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
 
 (defmethod step ::submitted-send-code-form [i]
@@ -69,12 +69,12 @@
       (update-in [:store/effects] conj [:rpc/send! {:rpc/msg [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
                                                     :rpc/dispatch! #(vector ::sent-code %)}])))
 
-(defn sending-code? [i] 
+(defn sending-code? [i]
   (-> i :store/state ::send-code first (= :result/loading)))
 
 (defn view-send-code-form [i]
   [:form
-   {:on-submit 
+   {:on-submit
     #(do
        (.preventDefault %)
        (store/dispatch! i [::submitted-send-code-form]))}

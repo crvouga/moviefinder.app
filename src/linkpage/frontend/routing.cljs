@@ -1,6 +1,6 @@
-(ns linkhub.frontend.routing 
+(ns linkpage.frontend.routing
   (:require
-   [linkhub.frontend.store :as store]
+   [linkpage.frontend.store :as store]
    [cljs.reader :refer [read-string]]))
 
 (defn- encode [route]

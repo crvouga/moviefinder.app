@@ -1,4 +1,4 @@
-(ns linkhub.frontend.store
+(ns linkpage.frontend.store
   (:require [reagent.core :as r]
             [cljs.pprint]))
 
@@ -18,25 +18,25 @@
 
 (defmulti effect! effect-type)
 
-(defn- reducer [acc step-fn] 
-    (let [stepped (step-fn (assoc acc :store/effects []))
-          state-new (merge (:store/state acc) (:store/state stepped))
-          effect-new (concat (:store/effects acc) (:store/effects stepped))]
-      {:store/msg (-> stepped :store/msg)
-       :store/state state-new
-       :store/effects effect-new}))
+(defn- reducer [acc step-fn]
+  (let [stepped (step-fn (assoc acc :store/effects []))
+        state-new (merge (:store/state acc) (:store/state stepped))
+        effect-new (concat (:store/effects acc) (:store/effects stepped))]
+    {:store/msg (-> stepped :store/msg)
+     :store/state state-new
+     :store/effects effect-new}))
 
 (defn- -dispatch! [msg]
   (let [state-prev @state!
-        initial {:store/msg msg 
+        initial {:store/msg msg
                  :store/state state-prev
                  :store/effects []}
         stepped (reduce reducer initial @steps!)
         state-new (:store/state stepped)
         effects (:store/effects stepped)]
-    (cljs.pprint/pprint {:msg msg 
-                         :state-prev state-prev 
-                         :state-new state-new 
+    (cljs.pprint/pprint {:msg msg
+                         :state-prev state-prev
+                         :state-new state-new
                          :effects effects})
     (doseq [effect effects]
       (cljs.pprint/pprint {:effect effect})
@@ -64,7 +64,7 @@
                 :store/state state
                 :store/dispatch! -dispatch!}))))
 
-(defn register! [module] 
+(defn register! [module]
   (let [step (:store/step module)
         init (:store/init module)]
     (when init

@@ -1,7 +1,7 @@
-(ns linkhub.backend.serve-single-page-app
+(ns linkpage.backend.serve-single-page-app
   (:require ["fs" :as fs]
             ["path" :as path]
-            [linkhub.backend.request-handler :refer [request-handler!]]))
+            [linkpage.backend.request-handler :refer [request-handler!]]))
 
 (def public-dir (path/resolve "public"))
 
@@ -44,10 +44,10 @@
 
 (defn- serve-file! [file-path res]
   (fs/access file-path fs/constants.F_OK
-    (fn [err]
-      (if err 
-        (serve-file-err! res err)
-        (serve-file-ok! res file-path)))))
+             (fn [err]
+               (if err
+                 (serve-file-err! res err)
+                 (serve-file-ok! res file-path)))))
 
 (defmethod request-handler! :default [req res]
   (let [url-path (-> req .-url)

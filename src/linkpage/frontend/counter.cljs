@@ -1,6 +1,6 @@
-(ns linkhub.frontend.counter
-  (:require [linkhub.frontend.store :as store]
-            [linkhub.frontend.routing :as routing]))
+(ns linkpage.frontend.counter
+  (:require [linkpage.frontend.store :as store]
+            [linkpage.frontend.routing :as routing]))
 
 (defn init []
   {:store/state {::count 0}})
@@ -9,7 +9,7 @@
 
 (defmethod step :default [i] i)
 
-(defmethod step ::clicked-count-button [i] 
+(defmethod step ::clicked-count-button [i]
   (let [current-count (-> i :store/state ::count (or 0))
         output (assoc-in i [:store/state ::count] (inc current-count))]
     output))
@@ -26,5 +26,5 @@
 (defmethod routing/view :route/counter [i]
   (view i))
 
-(store/register! {:store/init init 
+(store/register! {:store/init init
                   :store/step step})
