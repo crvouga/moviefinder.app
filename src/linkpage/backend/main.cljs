@@ -3,6 +3,7 @@
             [linkpage.backend.request-handler :refer [request-handler!]]
             [linkpage.backend.serve-single-page-app]
             [linkpage.rpc.backend]
+            [linkpage.auth.login.backend]
             [linkpage.core.http-server :as http-server]
             [linkpage.backend.env :as env]))
 

@@ -1,4 +1,8 @@
 (ns linkpage.core.http-server.http-response)
 
-(defn end! [^js res]
-  (.end res))
+(defn set-header! [^js res key value]
+  (.setHeader res key value))
+
+(defn end!
+  ([^js res] (.end res))
+  ([^js res body] (.end res body)))

@@ -7,10 +7,12 @@
 (defmulti rpc! first)
 
 (defmethod request-handler! "/rpc" [req res]
-  (println "/rpc time" req)
   (go
-    (let [body-text (<! (http-request/body-text-chan req))
-          #_body-edn #_(<! (http-request/body-edn-chan req))]
-      (println "/rpc body-text" body-text)
-      #_(println "/rpc body-edn" body-edn)
-      (http-response/end! res))))
+    (let [body-edn (<! (http-request/body-edn-chan req))
+          rpc-res (<! (rpc! body-edn))
+          rpc-res-text-plain (pr-str rpc-res)]
+      (println "body-edn " body-edn)
+      (println "rpc-res " rpc-res)
+      (println "rpc-res-text-plain " rpc-res-text-plain)
+      (http-response/set-header! res "Content-Type" "text/plain")
+      (http-response/end! res rpc-res-text-plain))))

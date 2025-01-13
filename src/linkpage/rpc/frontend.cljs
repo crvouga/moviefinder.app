@@ -2,14 +2,21 @@
   (:require
    [linkpage.frontend.store :as store]
    [linkpage.core.http-client :as http-client]
+   [clojure.edn :as edn]
    [clojure.core.async :refer [<! go]]))
 
-(defn rpc! [msg]
-  (http-client/send!
-   {:http-request/method :http-method/post
-    :http-request/url "/rpc"
+(defn rpc-fetch! [msg]
+  (http-client/fetch!
+   {:http-request/url "/rpc"
+    :http-request/method :http-method/post
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str msg)}))
+
+(defn rpc! [msg]
+  (go
+    (let [res (<! (rpc-fetch! msg))
+          body (-> res :http-response/body edn/read-string)]
+      body)))
 
 (defmethod store/eff! :rpc/send! [i]
   (go
@@ -18,5 +25,4 @@
           map-res (-> eff-payload :rpc/res)
           res (<! (rpc! msg))
           mapped-res (map-res res)]
-      (println "mapped-res" mapped-res)
       (store/dispatch! i mapped-res))))

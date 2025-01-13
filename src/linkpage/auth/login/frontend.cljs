@@ -12,7 +12,8 @@
 
 (defmethod step :store/initialized [i]
   (-> i
-      (update :store/state merge {::current-user [:result/not-asked]})))
+      (assoc-in [:store/state ::current-user] [:result/not-asked])
+      (assoc-in [:store/state ::send-code] [:result/not-asked])))
 
 (defmethod step ::clicked-get-current-user [i]
   (-> i
@@ -62,6 +63,8 @@
 ;; 
 ;; 
 
+
+
 (defn send-code-rpc-eff [i]
   (let [phone-number (-> i :store/state ::phone-number)]
     [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number phone-number}]
@@ -71,6 +74,10 @@
   (-> i
       (update-in [:store/state] assoc ::send-code [:result/loading])
       (update-in [:store/effs] conj (send-code-rpc-eff i))))
+
+(defmethod step ::sent-code [i]
+  (-> i
+      (update-in [:store/state] assoc ::send-code (store/msg-payload i))))
 
 (defn sending-code? [i]
   (-> i :store/state ::send-code first (= :result/loading)))
@@ -85,6 +92,7 @@
     #(do
        (.preventDefault %)
        (store/dispatch! i [::submitted-send-code-form]))}
+   [:pre [:code (-> i :store/state ::send-code pr-str)]]
    [text-field/view
     {:text-field/label "Phone Number"
      :text-field/value (-> i :store/state ::phone-number)
