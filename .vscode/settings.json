@@ -4,10 +4,12 @@
         "defmethod",
         "defmulti",
         "defn",
+        "defonce",
         "doseq",
         "extname",
         "keywordize",
         "linkpage",
+        "pprint",
         "println"
     ]
 }
