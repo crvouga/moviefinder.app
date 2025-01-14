@@ -15,6 +15,10 @@
   (-> i
       (assoc-in [:store/state ::current-user] (store/msg-payload i))))
 
+#_(defmethod transition :login/authenticated [i]
+    (-> i
+        (assoc-in [:store/state ::current-user] (store/msg-payload i))))
+
 (defmulti view (fn [i] (-> i :store/state ::current-user first)))
 
 (defmethod view :result/not-asked [_i]

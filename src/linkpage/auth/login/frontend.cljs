@@ -17,7 +17,7 @@
       (assoc-in [:store/state ::verify-code] [:result/not-asked])))
 
 (defn- send-code-eff [i]
-  [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
+  [:rpc/send! {:rpc/req [:login-rpc/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
                :rpc/res #(vector ::sent-code %)}])
 
 (defmethod transition ::submitted-send-code-form [i]
@@ -27,7 +27,6 @@
 
 (defmethod transition ::sent-code [i]
   (let [sent-code (store/msg-payload i)
-
         msgs (when (result/ok? sent-code)
                [[:routing/push [:route/login-verify-code (result/payload sent-code)]]
                 [:toaster/show (toast/info "Code sent")]])]
@@ -64,7 +63,8 @@
       (assoc-in [:store/state ::code] (store/msg-payload i))))
 
 (defn verify-code-eff [i]
-  [:rpc/send! {:rpc/req [:login/verify-code {:user/code (-> i :store/state ::code)}]
+  [:rpc/send! {:rpc/req [:login-rpc/verify-code {:user/phone-number (-> i routing/route-payload :user/phone-number)
+                                                 :verify-sms/code (-> i :store/state ::code)}]
                :rpc/res #(vector ::verified-code %)}])
 
 (defmethod transition ::submitted-verify-code-form [i]
@@ -73,8 +73,12 @@
       (update-in [:store/effs] conj (verify-code-eff i))))
 
 (defmethod transition ::verified-code [i]
-  (-> i
-      (update-in [:store/state] assoc ::verify-code (store/msg-payload i))))
+  (let [payload (store/msg-payload i)
+        msgs (when (result/ok? payload)
+               [[:login/authenticated]])]
+    (-> i
+        (update-in [:store/state] assoc ::verify-code payload)
+        (update-in [:store/msgs] concat msgs))))
 
 (defn verifying-code? [i]
   (-> i :store/state ::verify-code first (= :result/loading)))

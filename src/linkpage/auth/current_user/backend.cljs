@@ -3,7 +3,7 @@
    [linkpage.rpc.backend :as rpc]
    [clojure.core.async :refer [go timeout <!]]))
 
-(defmethod rpc/rpc! :current-user/get [_req]
+(defmethod rpc/rpc! :current-user/get [_ctx _req]
   (go
     (<! (timeout 1500))
     [:result/ok {:user/user-id 1
