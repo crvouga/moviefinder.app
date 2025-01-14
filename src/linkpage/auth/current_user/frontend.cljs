@@ -21,14 +21,22 @@
 
 (defmulti view (fn [i] (-> i :store/state ::current-user first)))
 
+(defn view-centered-message [message]
+  [:div {:style {:display "flex"
+                 :justify-content "center"
+                 :align-items "center"
+                 :width "100vw"
+                 :height "100vh"}}
+   [:strong message]])
+
 (defmethod view :result/not-asked [_i]
-  [:div "Not asked"])
+  [view-centered-message "Not asked"])
 
 (defmethod view :result/loading [_i]
-  [:div "Loading current user..."])
+  [view-centered-message "Loading current user..."])
 
 (defmethod view :result/err [_i]
-  [:div "Errored while loading current user"])
+  [view-centered-message "Errored while loading current user"])
 
 (defmethod view :result/ok [i view]
   [view i])

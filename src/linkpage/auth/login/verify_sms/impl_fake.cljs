@@ -19,5 +19,5 @@
       (println "Verifying code " code " for " phone-number)
       (if (= code fake-code)
         [:result/ok i]
-        [:result/error [:verify-sms-error/wrong-code]]))))
+        [:result/error {:error/data [:verify-sms-error/wrong-code]}]))))
 

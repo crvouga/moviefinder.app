@@ -41,22 +41,25 @@
 (defn sending-code? [i]
   (-> i :store/state ::send-code first (= :result/loading)))
 
-(defmethod routing/view :route/login [i]
+(defn view-layout [title body]
   [:main.container {:style {:padding-top "4rem"}}
-   [:h1 "Login with SMS"]
-   [:section
-    [:form
-     {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
-     [text-field/view
-      {:text-field/label "Phone Number"
-       :text-field/value (-> i :store/state ::phone-number)
-       :text-field/required? true
-       :text-field/disabled? (sending-code? i)
-       :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
-     [button/view
-      {:button/type :button-type/submit
-       :button/loading? (sending-code? i)
-       :button/label "Send Code"}]]]])
+   [:header [:h1 title]]
+   [:section body]])
+
+(defmethod routing/view :route/login [i]
+  [view-layout "Login"
+   [:form
+    {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
+    [text-field/view
+     {:text-field/label "Phone Number"
+      :text-field/value (-> i :store/state ::phone-number)
+      :text-field/required? true
+      :text-field/disabled? (sending-code? i)
+      :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
+    [button/view
+     {:button/type :button-type/submit
+      :button/loading? (sending-code? i)
+      :button/label "Send Code"}]]])
 
 (defmethod transition ::inputted-code [i]
   (-> i
@@ -84,22 +87,20 @@
   (-> i :store/state ::verify-code first (= :result/loading)))
 
 (defmethod routing/view :route/login-verify-code [i]
-  [:main.container {:style {:padding-top "4rem"}}
-   [:header [:h1 "Verify Code"]]
-   [:section
-    [:form
-     {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-verify-code-form]))}
-     [:p "Enter the code we sent to " [:strong (-> i routing/route-payload :user/phone-number)]]
-     [text-field/view
-      {:text-field/label "Code"
-       :text-field/value (-> i :store/state ::code)
-       :text-field/required? true
-       :text-field/disabled? (verifying-code? i)
-       :text-field/on-change #(store/put! i [::inputted-code %])}]
-     [button/view
-      {:button/type :button-type/submit
-       :button/loading? (verifying-code? i)
-       :button/label "Verify Code"}]]]])
+  [view-layout "Verify Code"
+   [:form
+    {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-verify-code-form]))}
+    [:p "Enter the code we sent to " [:strong (-> i routing/route-payload :user/phone-number)]]
+    [text-field/view
+     {:text-field/label "Code"
+      :text-field/value (-> i :store/state ::code)
+      :text-field/required? true
+      :text-field/disabled? (verifying-code? i)
+      :text-field/on-change #(store/put! i [::inputted-code %])}]
+    [button/view
+     {:button/type :button-type/submit
+      :button/loading? (verifying-code? i)
+      :button/label "Verify Code"}]]])
 
 (store/register-transition! transition)
 
