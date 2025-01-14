@@ -3,11 +3,11 @@
             [clojure.core.async :refer [go <! timeout]]))
 
 
-(defmulti step store/msg-type)
+(defmulti transition store/msg-type)
 
-(defmethod step :default [i] i)
+(defmethod transition :default [i] i)
 
-(defmethod step :store/initialized [i]
+(defmethod transition :store/initialized [i]
   (-> i
       (assoc-in [:store/state ::toasts] [])
       (assoc-in [:store/state ::running-id] 0)))
@@ -16,7 +16,7 @@
   (-> toast
       (assoc ::id (-> i :store/state ::running-id))))
 
-(defmethod step :toaster/show [i]
+(defmethod transition :toaster/show [i]
   (let [toast (store/msg-payload i)
         toast-with-id (assoc-running-id toast i)]
     (-> i
@@ -28,9 +28,9 @@
   (let [toast (store/eff-payload i)]
     (go
       (<! (timeout (-> toast :toast/duration (or 0))))
-      (store/dispatch! i [::toast-duration-elapsed toast]))))
+      (store/put! i [::toast-duration-elapsed toast]))))
 
-(defmethod step ::toast-duration-elapsed [i]
+(defmethod transition ::toast-duration-elapsed [i]
   (let [toast (store/msg-payload i)
         toasts (-> i :store/state ::toasts)
         toasts-new (remove #{toast} toasts)]
@@ -53,4 +53,4 @@
      [:article
       (str (:toast/message toast))])])
 
-(store/register-step! step)
+(store/register-transition! transition)

@@ -1,17 +1,17 @@
 (ns linkpage.auth.current-user.frontend
   (:require [linkpage.frontend.store :as store]))
 
-(defmulti step store/msg-type)
+(defmulti transition store/msg-type)
 
-(defmethod step :default [i] i)
+(defmethod transition :default [i] i)
 
-(defmethod step :store/initialized [i]
+(defmethod transition :store/initialized [i]
   (-> i
       (update-in [:store/state] assoc ::current-user [:result/loading])
       (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:current-user/get]
                                                  :rpc/res #(vector ::got-current-user %)}])))
 
-(defmethod step ::got-current-user [i]
+(defmethod transition ::got-current-user [i]
   (-> i
       (assoc-in [:store/state ::current-user] (store/msg-payload i))))
 
@@ -29,5 +29,5 @@
 (defmethod view :result/ok [i view]
   [view i])
 
-(store/register-step! step)
+(store/register-transition! transition)
 

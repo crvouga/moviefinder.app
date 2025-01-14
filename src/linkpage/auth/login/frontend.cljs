@@ -7,83 +7,95 @@
    [linkpage.frontend.toast :as toast]
    [linkpage.frontend.ui.text-field :as text-field]))
 
-(defmulti step store/msg-type)
+(defmulti transition store/msg-type)
 
-(defmethod step :default [i] i)
+(defmethod transition :default [i] i)
 
-(defmethod step :store/initialized [i]
+(defmethod transition :store/initialized [i]
   (-> i
       (assoc-in [:store/state ::send-code] [:result/not-asked])
       (assoc-in [:store/state ::verify-code] [:result/not-asked])))
 
+(defn- send-code-eff [i]
+  [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
+               :rpc/res #(vector ::sent-code %)}])
 
-(defmethod step ::submitted-send-code-form [i]
+(defmethod transition ::submitted-send-code-form [i]
   (-> i
       (update-in [:store/state] assoc ::send-code [:result/loading])
-      (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:login/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
-                                                 :rpc/res #(vector ::sent-code %)}])))
+      (update-in [:store/effs] conj (send-code-eff i))))
 
-(defmethod step ::sent-code [i]
-  (let [sent-code (store/msg-payload i)]
+(defmethod transition ::sent-code [i]
+  (let [sent-code (store/msg-payload i)
+
+        msgs (when (result/ok? sent-code)
+               [[:routing/push [:route/login-verify-code (result/payload sent-code)]]
+                [:toaster/show (toast/info "Code sent")]])]
     (-> i
         (update-in [:store/state] assoc ::send-code sent-code)
-        (update-in [:store/msgs] concat (when (result/ok? sent-code)
-                                          [[:routing/push [:route/login-verify-code sent-code]]
-                                           [:toaster/show (toast/info "Code sent")]])))))
+        (update-in [:store/msgs] concat msgs))))
 
-(defmethod step ::inputted-phone-number [i] (-> i (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
+(defmethod transition ::inputted-phone-number [i]
+  (-> i
+      (assoc-in [:store/state ::phone-number] (store/msg-payload i))))
 
-(defn sending-code? [i] (-> i :store/state ::send-code first (= :result/loading)))
+(defn sending-code? [i]
+  (-> i :store/state ::send-code first (= :result/loading)))
 
 (defmethod routing/view :route/login [i]
-  [:main.container
-   [:header [:h1 "Login with SMS"]]
+  [:main.container {:style {:padding-top "4rem"}}
+   [:h1 "Login with SMS"]
    [:section
     [:form
-     {:on-submit
-      #(do
-         (.preventDefault %)
-         (store/dispatch! i [::submitted-send-code-form]))}
+     {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
      [text-field/view
       {:text-field/label "Phone Number"
        :text-field/value (-> i :store/state ::phone-number)
        :text-field/required? true
        :text-field/disabled? (sending-code? i)
-       :text-field/on-change #(store/dispatch! i [::inputted-phone-number %])}]
+       :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
      [button/view
       {:button/type :button-type/submit
        :button/loading? (sending-code? i)
-       :button/label "Send code"}]]]])
+       :button/label "Send Code"}]]]])
 
-(defmethod step ::inputted-code [i] (-> i (assoc-in [:store/state ::code] (store/msg-payload i))))
-(defmethod step ::submitted-verify-code-form [i]
+(defmethod transition ::inputted-code [i]
+  (-> i
+      (assoc-in [:store/state ::code] (store/msg-payload i))))
+
+(defn verify-code-eff [i]
+  [:rpc/send! {:rpc/req [:login/verify-code {:user/code (-> i :store/state ::code)}]
+               :rpc/res #(vector ::verified-code %)}])
+
+(defmethod transition ::submitted-verify-code-form [i]
   (-> i
       (update-in [:store/state] assoc ::verify-code [:result/loading])
-      (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:login/verify-code {:user/code (-> i :store/state ::code)}]
-                                                 :rpc/res #(vector ::verified-code %)}])))
-(defmethod step ::verified-code [i]
+      (update-in [:store/effs] conj (verify-code-eff i))))
+
+(defmethod transition ::verified-code [i]
   (-> i
       (update-in [:store/state] assoc ::verify-code (store/msg-payload i))))
 
+(defn verifying-code? [i]
+  (-> i :store/state ::verify-code first (= :result/loading)))
+
 (defmethod routing/view :route/login-verify-code [i]
-  [:main.container
+  [:main.container {:style {:padding-top "4rem"}}
    [:header [:h1 "Verify Code"]]
    [:section
     [:form
-     {:on-submit
-      #(do
-         (.preventDefault %)
-         (store/dispatch! i [::submitted-verify-code-form]))}
+     {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-verify-code-form]))}
+     [:p "Enter the code we sent to " [:strong (-> i routing/route-payload :user/phone-number)]]
      [text-field/view
       {:text-field/label "Code"
        :text-field/value (-> i :store/state ::code)
        :text-field/required? true
-       :text-field/disabled? (sending-code? i)
-       :text-field/on-change #(store/dispatch! i [::inputted-code %])}]
+       :text-field/disabled? (verifying-code? i)
+       :text-field/on-change #(store/put! i [::inputted-code %])}]
      [button/view
       {:button/type :button-type/submit
-       :button/loading? (sending-code? i)
-       :button/label "Send code"}]]]])
+       :button/loading? (verifying-code? i)
+       :button/label "Verify Code"}]]]])
 
-(store/register-step! step)
+(store/register-transition! transition)
 

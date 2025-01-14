@@ -25,4 +25,4 @@
           map-res (-> eff-payload :rpc/res)
           res (<! (rpc! msg))
           mapped-res (map-res res)]
-      (store/dispatch! i mapped-res))))
+      (store/put! i mapped-res))))
