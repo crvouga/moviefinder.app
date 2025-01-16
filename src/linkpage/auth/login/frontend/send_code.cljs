@@ -1,6 +1,6 @@
 (ns linkpage.auth.login.frontend.send-code
   (:require
-   [linkpage.frontend.routing :as routing]
+   [linkpage.frontend.screen :as screen]
    [linkpage.frontend.store :as store]
    [linkpage.core.result :as result]
    [linkpage.frontend.ui.button :as button]
@@ -25,7 +25,7 @@
  (fn [i]
    (let [sent-code (store/msg-payload i)
          msgs (when (result/ok? sent-code)
-                [[:routing/push [:route/login-verify-code (result/payload sent-code)]]
+                [[:screen/push [:route/login-verify-code (result/payload sent-code)]]
                  [:toaster/show (toast/info "Code sent")]])]
      (-> i
          (update-in [:store/state] assoc ::send-code sent-code)
@@ -41,8 +41,8 @@
 (defn sending-code? [i]
   (-> i :store/state ::send-code first (= :result/loading)))
 
-(routing/reg!
- :route/login
+(screen/reg!
+ :screen/login
  (fn [i]
    [view-layout "Login"
     [:form
@@ -57,19 +57,3 @@
       {:button/type :button-type/submit
        :button/loading? (sending-code? i)
        :button/label "Send Code"}]]]))
-
-(defmethod routing/view :route/login [i]
-  [view-layout "Login"
-   [:form
-    {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
-    [text-field/view
-     {:text-field/label "Phone Number"
-      :text-field/value (-> i :store/state ::phone-number (or ""))
-      :text-field/required? true
-      :text-field/disabled? (sending-code? i)
-      :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
-    [button/view
-     {:button/type :button-type/submit
-      :button/loading? (sending-code? i)
-      :button/label "Send Code"}]]])
-

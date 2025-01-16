@@ -18,3 +18,20 @@
           input (merge ctx payload)
           res (<! (verify-sms/verify-code! input))]
       res)))
+
+#_(rpc/reg!
+ :login-rpc/send-code
+ (fn [ctx req]
+   (go
+     (let [payload (second req)
+           input (merge ctx payload)
+           res (<! (verify-sms/send-code! input))]
+       res)))
+
+ :login-rpc/verify-code
+ (fn [ctx req]
+   (go
+     (let [payload (second req)
+           input (merge ctx payload)
+           res (<! (verify-sms/verify-code! input))]
+       res))))

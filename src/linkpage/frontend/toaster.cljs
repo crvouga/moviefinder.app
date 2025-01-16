@@ -2,42 +2,53 @@
   (:require [linkpage.frontend.store :as store]
             [clojure.core.async :refer [go <! timeout]]))
 
+(store/reg!
+ :toaster/show
+ (fn [i]
+   (let [toast (store/msg-payload i)
+         toast-with-id (-> toast (assoc ::id (-> i :store/state ::running-id)))]
+     (-> i
+         (update-in [:store/state ::running-id] inc)
+         (update-in [:store/state ::toasts] conj toast-with-id)
+         (update-in [:store/effs] conj [::hide-toast! toast-with-id]))))
 
-(defmulti transition store/msg-type)
+ :store/initialized
+ (fn [i]
+   (-> i
+       (update-in [:store/state] assoc ::toasts [])
+       (update-in [:store/state] assoc ::running-id 0)))
 
-(store/register-transition! transition)
+ ::toast-duration-elapsed
+ (fn [i]
+   (let [toast (store/msg-payload i)
+         toasts (-> i :store/state ::toasts)
+         toasts-new (remove #{toast} toasts)]
+     (-> i
+         (assoc-in [:store/state ::toasts] toasts-new))))
 
-(defmethod transition :default [i] i)
+ ::toast-duration-elapsed
+ (fn [i]
+   (let [toast (store/msg-payload i)
+         toasts (-> i :store/state ::toasts)
+         toasts-new (remove #{toast} toasts)]
+     (-> i
+         (assoc-in [:store/state ::toasts] toasts-new))))
 
-(defmethod transition :store/initialized [i]
-  (-> i
-      (assoc-in [:store/state ::toasts] [])
-      (assoc-in [:store/state ::running-id] 0)))
+ ::toast-duration-elapsed
+ (fn [i]
+   (let [toast (store/msg-payload i)
+         toasts (-> i :store/state ::toasts)
+         toasts-new (remove #{toast} toasts)]
+     (-> i
+         (assoc-in [:store/state ::toasts] toasts-new)))))
 
-(defn assoc-running-id [toast i]
-  (-> toast
-      (assoc ::id (-> i :store/state ::running-id))))
-
-(defmethod transition :toaster/show [i]
-  (let [toast (store/msg-payload i)
-        toast-with-id (assoc-running-id toast i)]
-    (-> i
-        (update-in [:store/state ::running-id] inc)
-        (update-in [:store/state ::toasts] conj toast-with-id)
-        (update-in [:store/effs] conj [::hide-toast! toast-with-id]))))
-
-(defmethod store/eff! ::hide-toast! [i]
-  (let [toast (store/eff-payload i)]
-    (go
-      (<! (timeout (-> toast :toast/duration (or 0))))
-      (store/put! i [::toast-duration-elapsed toast]))))
-
-(defmethod transition ::toast-duration-elapsed [i]
-  (let [toast (store/msg-payload i)
-        toasts (-> i :store/state ::toasts)
-        toasts-new (remove #{toast} toasts)]
-    (-> i
-        (assoc-in [:store/state ::toasts] toasts-new))))
+(store/reg-eff!
+ ::hide-toast!
+ (fn [i]
+   (let [toast (store/eff-payload i)]
+     (go
+       (<! (timeout (-> toast :toast/duration (or 0))))
+       (store/put! i [::toast-duration-elapsed toast])))))
 
 (defn view [i]
   [:div {:style {:position :absolute

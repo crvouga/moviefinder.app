@@ -18,6 +18,14 @@
 
 (defn register-transition! [transition] (swap! transitions! conj transition))
 
+(defn reg-eff! 
+  ([] nil)
+  ([_] nil)
+  ([eff-typ- eff-handler & rest]
+  (let [eff-handler-new (fn [i] (if (= eff-typ- (msg-type i)) (eff-handler i) i))]
+    (defmethod eff! eff-typ- [i] (eff-handler-new i))
+    (apply reg-eff! rest))))
+
 (defn reg! 
   ([] nil)
   ([_] nil)
