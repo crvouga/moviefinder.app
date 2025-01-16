@@ -47,7 +47,7 @@
     {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
     [text-field/view
      {:text-field/label "Phone Number"
-      :text-field/value (-> i :store/state ::phone-number)
+      :text-field/value (-> i :store/state ::phone-number (or ""))
       :text-field/required? true
       :text-field/disabled? (sending-code? i)
       :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
