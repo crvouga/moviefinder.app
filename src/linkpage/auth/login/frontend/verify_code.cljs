@@ -9,6 +9,8 @@
 
 (defmulti transition store/msg-type)
 
+(store/register-transition! transition)
+
 (defmethod transition :default [i] i)
 
 (defmethod transition :store/initialized [i]
@@ -57,5 +59,4 @@
       :button/loading? (loading? i)
       :button/label "Verify Code"}]]])
 
-(store/register-transition! transition)
 

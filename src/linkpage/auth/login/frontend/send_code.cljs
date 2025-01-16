@@ -10,6 +10,8 @@
 
 (defmulti transition store/msg-type)
 
+(store/register-transition! transition)
+
 (defmethod transition :default [i] i)
 
 (defmethod transition :store/initialized [i]
@@ -55,3 +57,4 @@
      {:button/type :button-type/submit
       :button/loading? (sending-code? i)
       :button/label "Send Code"}]]])
+

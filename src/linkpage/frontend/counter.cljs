@@ -4,6 +4,8 @@
 
 (defmulti transition store/msg-type)
 
+(store/register-transition! transition)
+
 (defmethod transition :default [i] i)
 
 (defmethod transition :store/initialized [i]
@@ -27,4 +29,3 @@
 (defmethod routing/view :route/counter [i]
   (view i))
 
-(store/register-transition! transition)

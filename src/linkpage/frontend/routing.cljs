@@ -5,6 +5,8 @@
 
 (defmulti transition store/msg-type)
 
+(store/register-transition! transition)
+
 (defmethod transition :default [i] i)
 
 (defmethod transition :store/initialized [i]
@@ -63,4 +65,3 @@
 (defmethod view nil []
   [:div "Loading..."])
 
-(store/register-transition! transition)

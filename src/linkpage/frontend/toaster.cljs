@@ -5,6 +5,8 @@
 
 (defmulti transition store/msg-type)
 
+(store/register-transition! transition)
+
 (defmethod transition :default [i] i)
 
 (defmethod transition :store/initialized [i]
@@ -53,4 +55,3 @@
      [:article
       (str (:toast/message toast))])])
 
-(store/register-transition! transition)
