@@ -18,6 +18,14 @@
 
 (defn register-transition! [transition] (swap! transitions! conj transition))
 
+(defn reg! 
+  ([] nil)
+  ([_] nil)
+  ([msg-type- transition & rest]
+  (let [transition-new (fn [i] (if (= msg-type- (msg-type i)) (transition i) i))]
+    (swap! transitions! conj transition-new)
+    (apply reg! rest))))
+
 (defn initialize! []
   (async/put! msg-chan! [:store/initialized]))
 

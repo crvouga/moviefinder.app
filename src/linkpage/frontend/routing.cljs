@@ -60,6 +60,11 @@
 (defn route-payload [i]
   (-> i :store/state ::route second))
 
+(def screens-by-name! (atom {}))
+
+(defn reg! [name screen]
+  (swap! screens-by-name! assoc name screen))
+
 (defmulti view route-type)
 
 (defmethod view nil []
