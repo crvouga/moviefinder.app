@@ -28,7 +28,7 @@
                                                             {:user/phone-number (-> i screen/screen-payload :user/phone-number)
                                                              :verify-sms/code (-> i :store/state ::code)}]
                                                   :rpc/res #(vector ::backend-verified-code %)}])))
- 
+
  ::backend-verified-code
  (fn [i]
    (let [payload (store/msg-payload i)
