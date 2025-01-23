@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "linkpage.app",
+      "name": "moviefinder.app",
       "dependencies": {
         "react": "^19.0.0",
         "react-dom": "^19.0.0",

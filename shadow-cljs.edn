@@ -10,8 +10,8 @@
  :builds
  {:frontend
   {:target :browser
-   :modules {:main {:init-fn linkpage.frontend/-main}}}
+   :modules {:main {:init-fn moviefinder-app.frontend/-main}}}
   :backend
   {:target :node-script
-   :main linkpage.backend/-main
+   :main moviefinder-app.backend/-main
    :output-to "out/backend/main.js"}}}
