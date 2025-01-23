@@ -47,7 +47,7 @@
  :route/login-verify-code
  (fn [i]
    [view-layout "Verify Code"
-    [:form
+    [:form.flex.flex-col.w-full.gap-6
      {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-verify-code-form]))}
      [:p "Enter the code we sent to " [:strong (-> i screen/screen-payload :user/phone-number)]]
      [text-field/view
@@ -56,6 +56,7 @@
        :text-field/required? true
        :text-field/disabled? (loading? i)
        :text-field/on-change #(store/put! i [::inputted-code %])}]
+     [:div.w-full]
      [button/view
       {:button/type :button-type/submit
        :button/loading? (loading? i)

@@ -16,6 +16,7 @@
  (fn [i]
    (-> i
        (update-in [:store/state] assoc ::toasts [])
+       (update-in [:store/state] assoc ::exiting-ids #{})
        (update-in [:store/state] assoc ::running-id 0)))
 
  ::toast-duration-elapsed
@@ -51,18 +52,9 @@
        (store/put! i [::toast-duration-elapsed toast])))))
 
 (defn view [i]
-  [:div {:style {:position :absolute
-                 :top 0
-                 :left 0
-                 :pointer-events :none
-                 :z-index 1000
-                 :width "100%"
-                 :display :flex
-                 :flex-direction :column
-                 :align-items :center
-                 :justify-content :center}}
+  [:div.absolute.top-0.left-0.w-full.p-4.pointer-events-none
    (for [toast (-> i :store/state ::toasts)]
      ^{:key toast}
-     [:article
+     [:div.p-3.bg-neutral-800.shadow-2xl.rounded.text-lg.pointer-events-auto.flex.items-center.justify-start.font-bold
       (str (:toast/message toast))])])
 

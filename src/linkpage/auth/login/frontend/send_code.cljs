@@ -44,15 +44,17 @@
 (screen/reg!
  :screen/login
  (fn [i]
-   [view-layout "Login"
-    [:form
+   [view-layout "Login with SMS"
+    [:form.flex.flex-col.w-full.gap-6
      {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
      [text-field/view
       {:text-field/label "Phone Number"
        :text-field/value (-> i :store/state ::phone-number (or ""))
        :text-field/required? true
+       :text-field/placeholder "Phone Number"
        :text-field/disabled? (sending-code? i)
        :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
+     [:div.w-full]
      [button/view
       {:button/type :button-type/submit
        :button/loading? (sending-code? i)

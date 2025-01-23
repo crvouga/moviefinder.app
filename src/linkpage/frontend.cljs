@@ -1,6 +1,6 @@
 (ns linkpage.frontend
   (:require [reagent.dom.client :as rd]
-            [linkpage.auth]
+            [linkpage.auth.frontend]
             [linkpage.auth.current-user.frontend :as current-user]
             [linkpage.rpc.frontend]
             [linkpage.frontend.toaster :as toaster]
@@ -8,9 +8,9 @@
             [linkpage.frontend.screen :as screen]))
 
 (defn view-root [i]
-  [:<>
+  [:div {:class "w-[100dvw] h-[100dvh] flex flex-col items-center justify-start"}
    (toaster/view i)
-   (current-user/view-authenticated-guard i screen/view)])
+   (current-user/view-guard i screen/view)])
 
 (defn view []
   (store/view view-root))
