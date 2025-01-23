@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "bun x shadow-cljs release frontend backend",
-    "clean": "bun x shadow-cljs clean",
-    "frontend": "bun x shadow-cljs watch frontend",
-    "backend": "bun x shadow-cljs watch backend",
-    "watch": "bun x concurrently \"npm run frontend\" \"npm run backend\"",
+    "build": "npx shadow-cljs release frontend backend",
+    "clean": "npx shadow-cljs clean",
+    "frontend": "npx shadow-cljs watch frontend",
+    "backend": "npx shadow-cljs watch backend",
+    "watch": "npx concurrently \"npm run frontend\" \"npm run backend\"",
     "start": "bun --watch out/backend/main.js",
     "preview": "npm install && npm run build && npm run start"
   },

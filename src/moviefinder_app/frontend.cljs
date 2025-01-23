@@ -9,10 +9,12 @@
             [moviefinder-app.frontend.store :as store]
             [moviefinder-app.frontend.screen :as screen]))
 
+
 (defn view-root [i]
-  [:div {:class "w-[100dvw] h-[100dvh] flex flex-col items-center justify-start"}
-   (toaster/view i)
-   (current-user/view-guard i screen/view)])
+  [:div {:class "fixed left-1/2 top-1/2 flex h-[100dvh] w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden bg-black text-white"}
+   [:div {:class "relative flex h-full max-h-[915px] w-full max-w-[520px] flex-col items-center justify-center overflow-hidden rounded min-[520px]:border"}
+    (toaster/view i)
+    (current-user/view-guard i screen/view)]])
 
 (defn view []
   (store/view view-root))
