@@ -1,4 +1,4 @@
-(ns moviefinder-app.frontend.ui.form)
+(ns moviefinder-app.core.ui.form)
 
 (defn view [props & children]
   [:form.flex.flex-col.w-full.gap-6

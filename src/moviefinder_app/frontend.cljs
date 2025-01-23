@@ -4,6 +4,7 @@
             [moviefinder-app.auth.current-user.frontend :as current-user]
             [moviefinder-app.rpc.frontend]
             [moviefinder-app.home.frontend]
+            [moviefinder-app.profile.frontend]
             [moviefinder-app.frontend.runtime]
             [moviefinder-app.frontend.toaster :as toaster]
             [moviefinder-app.frontend.store :as store]

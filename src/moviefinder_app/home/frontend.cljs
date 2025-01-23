@@ -1,9 +1,8 @@
 (ns moviefinder-app.home.frontend
-  (:require [moviefinder-app.frontend.ui.bottom-buttons :as bottom-buttons]
-            [moviefinder-app.frontend.screen :as screen]
-            [moviefinder-app.frontend.ui.top-bar :as top-bar]
-            [moviefinder-app.frontend.ui.icon :as icon]
-            [moviefinder-app.frontend.store :as store]))
+  (:require
+   [moviefinder-app.frontend.screen :as screen]
+   [moviefinder-app.core.ui.top-bar :as top-bar]
+   [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]))
 
 
 #_(def movies!
@@ -19,11 +18,5 @@
    [:div.w-full.flex-1.flex.flex-col
     [top-bar/view {:top-bar/title "Home"}]
     [:div.w-full.flex-1 "hello"]
-    [bottom-buttons/view
-     {:bottom-buttons/buttons
-      [{:bottom-button/label "Home"
-        :bottom-button/on-click #(store/put! i [:screen/clicked-link [:screen/home]])
-        :bottom-button/view-icon icon/home}
-       {:bottom-button/label "Profile"
-        :bottom-button/on-click #(store/put! i [:screen/clicked-link [:screen/profile]])
-        :bottom-button/view-icon icon/user-circle}]}]]))
+    [top-level-bottom-buttons/view i]]))
+    

@@ -3,9 +3,9 @@
    [moviefinder-app.frontend.screen :as screen]
    [moviefinder-app.frontend.store :as store]
    [moviefinder-app.core.result :as result]
-   [moviefinder-app.frontend.ui.button :as button]
+   [moviefinder-app.core.ui.button :as button]
    [moviefinder-app.auth.login.frontend.shared :refer [view-layout]]
-   [moviefinder-app.frontend.ui.text-field :as text-field]))
+   [moviefinder-app.core.ui.text-field :as text-field]))
 
 (store/reg!
  :store/initialized

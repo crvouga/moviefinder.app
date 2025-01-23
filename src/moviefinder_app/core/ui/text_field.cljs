@@ -1,4 +1,4 @@
-(ns moviefinder-app.frontend.ui.text-field)
+(ns moviefinder-app.core.ui.text-field)
 
 (defn- input-msg->value [e]
   (-> e .-target .-value))

@@ -1,4 +1,4 @@
-(ns moviefinder-app.frontend.ui.top-bar)
+(ns moviefinder-app.core.ui.top-bar)
 
 
 (defn view [i]

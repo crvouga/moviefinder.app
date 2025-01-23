@@ -58,6 +58,8 @@
      (js/window.addEventListener event #(store/put! i [::screen-changed (get-route!)])))))
 
 
+(defn screen-name [i]
+  (-> i :store/state ::screen first))
 (defn screen-payload [i]
   (-> i :store/state ::screen second))
 

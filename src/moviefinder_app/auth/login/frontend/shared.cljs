@@ -1,6 +1,6 @@
 (ns moviefinder-app.auth.login.frontend.shared
   (:require
-   [moviefinder-app.frontend.ui.top-bar :as top-bar]))
+   [moviefinder-app.core.ui.top-bar :as top-bar]))
 
 (defn view-layout [title body]
   [:main.w-full
