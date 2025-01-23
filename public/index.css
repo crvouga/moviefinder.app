@@ -1,0 +1,27 @@
+.slide-in-from-top {
+    animation: slideInFromTop 0.2s ease-out forwards;
+}
+
+@keyframes slideInFromTop {
+    0% {
+        transform: translateY(-150%);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.slide-out-to-top {
+    animation: slideOutToTop 0.2s ease-out forwards;
+}
+
+@keyframes slideOutToTop {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-150%);
+    }
+}

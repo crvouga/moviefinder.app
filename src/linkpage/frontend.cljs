@@ -3,6 +3,7 @@
             [linkpage.auth.frontend]
             [linkpage.auth.current-user.frontend :as current-user]
             [linkpage.rpc.frontend]
+            [linkpage.frontend.runtime]
             [linkpage.frontend.toaster :as toaster]
             [linkpage.frontend.store :as store]
             [linkpage.frontend.screen :as screen]))
