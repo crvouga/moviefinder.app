@@ -2,6 +2,11 @@
   (:require [clojure.core.async :refer [go chan close! <! put! go-loop]]
             [clojure.edn :as edn]))
 
+(defn url
+  "Returns the URL of the HTTP request."
+  [^js req]
+  (.-url req))
+
 (defn body-binary-chan
   "Collects binary chunks from the HTTP request into a single binary sequence."
   [^js req]

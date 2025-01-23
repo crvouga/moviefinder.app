@@ -1,20 +1,20 @@
 (ns linkpage.list.frontend)
 
 
-(defn query-my-liked-movies [input]
-  {:select [:movie/id :movie/title :movie/year :movie/plot :movie/poster]
-   :from [:movie]
-   :join [:movie/like]
-   :where [:=  (:user/id input)]})
+#_(defn query-my-liked-movies [input]
+    {:select [:movie/id :movie/title :movie/year :movie/plot :movie/poster]
+     :from [:movie]
+     :join [:movie/like]
+     :where [:=  (:user/id input)]})
 
 #_(store/sub!
- ::lists
- (fn [i]
-   {:select [:movie/id :movie/title :movie/year :movie/plot :movie/poster]
-    :from [:movie]
-    :join [:movie/like]
-    :where [:=  (:user/id i)]}))
+   ::lists
+   (fn [i]
+     {:select [:movie/id :movie/title :movie/year :movie/plot :movie/poster]
+      :from [:movie]
+      :join [:movie/like]
+      :where [:=  (:user/id i)]}))
 
-(defn view [i]
-  (let [lists (-> i :store/state ::lists)]
-    [:div ]))
+#_(defn view [i]
+    (let [lists (-> i :store/state ::lists)]
+      [:div]))

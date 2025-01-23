@@ -22,12 +22,13 @@
 
  ::submitted-verify-code-form
  (fn [i]
-   (-> i
-       (update-in [:store/state] assoc ::request [:result/loading])
-       (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:login-rpc/verify-code
-                                                            {:user/phone-number (-> i screen/screen-payload :user/phone-number)
-                                                             :verify-sms/code (-> i :store/state ::code)}]
-                                                  :rpc/res #(vector ::backend-verified-code %)}])))
+   (let [rpc-req [:login-rpc/verify-code
+                  {:user/phone-number (-> i screen/screen-payload :user/phone-number)
+                   :verify-sms/code (-> i :store/state ::code)}]]
+     (-> i
+         (update-in [:store/state] assoc ::request [:result/loading])
+         (update-in [:store/effs] conj [:rpc/send! {:rpc/req rpc-req
+                                                    :rpc/res #(vector ::backend-verified-code %)}]))))
 
  ::backend-verified-code
  (fn [i]

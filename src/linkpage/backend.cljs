@@ -1,4 +1,4 @@
-(ns linkpage.backend.main
+(ns linkpage.backend
   (:require [clojure.core.async :refer [go <!]]
             [linkpage.backend.request-handler :refer [request-handler!]]
             [linkpage.backend.serve-single-page-app]

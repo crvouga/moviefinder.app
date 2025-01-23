@@ -1,4 +1,4 @@
-(ns linkpage.frontend.main
+(ns linkpage.frontend
   (:require [reagent.dom.client :as rd]
             [linkpage.auth.login.frontend]
             [linkpage.auth.current-user.frontend :as current-user]
