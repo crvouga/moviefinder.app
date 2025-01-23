@@ -5,7 +5,7 @@
    [clojure.edn :as edn]
    [clojure.core.async :refer [<! go]]))
 
-(defn rpc-fetch! [msg]
+(defn- rpc-fetch! [msg]
   (http-client/fetch!
    {:http-request/url "/rpc"
     :http-request/method :http-method/post

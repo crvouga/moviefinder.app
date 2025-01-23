@@ -3,7 +3,7 @@
    [moviefinder-app.frontend.store :as store]
    [moviefinder-app.frontend.route :as route]))
 
-(def fallback [:screen/login])
+(def fallback [:screen/home])
 
 (defn- get-route! []
   (or (route/get!) fallback))
@@ -16,12 +16,12 @@
        (update-in [:store/effs] concat [[::get-route!]
                                         [::subscribe-route!]])))
 
- ::got-route
+ ::got-screen
  (fn [i]
    (-> i
        (assoc-in [:store/state ::screen] (store/msg-payload i))))
 
- ::route-changed
+ ::screen-changed
  (fn [i]
    (-> i
        (assoc-in [:store/state ::screen] (store/msg-payload i))))
@@ -44,7 +44,7 @@
 (store/reg-eff!
  ::get-route!
  (fn [i]
-   (store/put! i [::got-route (get-route!)]))
+   (store/put! i [::got-screen (get-route!)]))
 
  ::push!
  (fn [i]
@@ -55,7 +55,7 @@
  ::subscribe-route!
  (fn [i]
    (doseq [event ["popstate" "pushstate" "replacestate"]]
-     (js/window.addEventListener event #(store/put! i [::route-changed (get-route!)])))))
+     (js/window.addEventListener event #(store/put! i [::screen-changed (get-route!)])))))
 
 
 (defn screen-payload [i]
