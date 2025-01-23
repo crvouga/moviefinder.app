@@ -23,10 +23,9 @@
  ::toast-duration-elapsed
  (fn [i]
    (let [toast (store/msg-payload i)
-         exiting-ids (-> i :store/state ::exiting-ids (into #{}))
-         exiting-ids-new (conj exiting-ids (:toast/id toast))]
+         exiting-ids-new (-> i :store/state ::exiting-ids (into #{}) (conj (:toast/id toast)))]
      (-> i
-         (assoc-in [:store/state ::exiting-ids] exiting-ids-new)))))
+         (update :store/state assoc ::exiting-ids exiting-ids-new)))))
 
 (defn view [i]
   [:div.absolute.top-0.left-0.w-full.p-4.pointer-events-none
