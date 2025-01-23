@@ -31,18 +31,19 @@
                  :height "100vh"}}
    [:strong message]])
 
-(defmulti view (fn [i] (-> i :store/state ::current-user first)))
+(defmulti view-guard
+  (fn [i] (-> i :store/state ::current-user result/payload)))
 
-(defmethod view :result/not-asked [_i]
+(defmethod view-guard :result/not-asked [_i]
   [view-centered-message "Not asked"])
 
-(defmethod view :result/loading [_i]
+(defmethod view-guard :result/loading [_i]
   [view-centered-message "Loading current user..."])
 
-(defmethod view :result/err [_i]
+(defmethod view-guard :result/err [_i]
   [view-centered-message "Errored while loading current user"])
 
-(defmethod view :result/ok [i view]
+(defmethod view-guard :result/ok [i view]
   [view i])
 
 

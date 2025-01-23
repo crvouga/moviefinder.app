@@ -10,7 +10,7 @@
 (defn view-root [i]
   [:<>
    (toaster/view i)
-   (current-user/view i screen/view)])
+   (current-user/view-guard i screen/view)])
 
 (defn view []
   (store/view view-root))
