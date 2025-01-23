@@ -13,6 +13,17 @@
   )
 
 
+(defn conform [result]
+  (if (s/valid? :result/result result)
+    result
+    [:result/not-asked {}]))
+
+(comment
+  (conform nil)
+  (conform [:result/ok {:foo :bar}])
+  ;; 
+  )
+
 (defn payload [result]
   (second result))
 

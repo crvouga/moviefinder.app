@@ -31,19 +31,20 @@
                  :height "100vh"}}
    [:strong message]])
 
-(defmulti view-guard
-  (fn [i] (-> i :store/state ::current-user result/payload)))
+(defmulti view-authenticated-guard
+  "A multimethod that returns a view based on the current user's state"
+  (fn [i _] (-> i :store/state ::current-user result/conform result/payload)))
 
-(defmethod view-guard :result/not-asked [_i]
+(defmethod view-authenticated-guard :result/not-asked [_ _]
   [view-centered-message "Not asked"])
 
-(defmethod view-guard :result/loading [_i]
+(defmethod view-authenticated-guard :result/loading [_ _]
   [view-centered-message "Loading current user..."])
 
-(defmethod view-guard :result/err [_i]
+(defmethod view-authenticated-guard :result/err [_ _]
   [view-centered-message "Errored while loading current user"])
 
-(defmethod view-guard :result/ok [i view]
-  [view i])
+(defmethod view-authenticated-guard :result/ok [i view-fn]
+  [view-fn i])
 
 
