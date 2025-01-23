@@ -1,5 +1,6 @@
 (ns linkpage.auth.current-user.frontend
-  (:require [linkpage.frontend.store :as store]))
+  (:require [linkpage.frontend.store :as store]
+            [linkpage.core.result :as result]))
 
 (store/reg!
  :store/initialized
@@ -8,11 +9,14 @@
        (update-in [:store/state] assoc ::current-user [:result/loading])
        (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:current-user/get]
                                                   :rpc/res #(vector ::got-current-user %)}])))
- 
+
  :login/authenticated
  (fn [i]
-   (-> i
-       (assoc-in [:store/state ::current-user] (store/msg-payload i))))
+   (let [current-user (-> i :store/state ::current-user)
+         payload (store/msg-payload i)
+         current-user-new (or (result/ok? payload) current-user)]
+     (-> i
+         (assoc-in [:store/state ::current-user] current-user-new))))
 
  ::got-current-user
  (fn [i]

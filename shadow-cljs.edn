@@ -10,8 +10,8 @@
  :builds
  {:frontend
   {:target :browser
-   :modules {:main {:init-fn linkpage.frontend.main/-main}}}
+   :modules {:main {:init-fn linkpage.frontend/-main}}}
   :backend
   {:target :node-script
-   :main linkpage.backend.main/-main
+   :main linkpage.backend/-main
    :output-to "out/backend/main.js"}}}

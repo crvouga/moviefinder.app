@@ -19,3 +19,4 @@ out
 .clj-kondo
 .lsp
 .env
+.calva

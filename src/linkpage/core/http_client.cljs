@@ -8,7 +8,7 @@
 (defn js-headers->clj [headers]
   (-> headers
       .entries
-      .from
+      js/Array.from
       (js->clj :keywordize-keys true)
       tuples-to-map))
 

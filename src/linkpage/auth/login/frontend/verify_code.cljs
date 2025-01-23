@@ -34,14 +34,14 @@
  (fn [i]
    (let [payload (store/msg-payload i)
          msgs (when (result/ok? payload)
-                [[:login/authenticated]])]
+                [[:login/authenticated payload]])]
      (-> i
          (update-in [:store/state] assoc ::request payload)
          (update-in [:store/msgs] concat msgs)))))
 
 
 (defn loading? [i]
-  (-> i :store/state ::request first (= :result/loading)))
+  (-> i :store/state ::request result/loading?))
 
 (screen/reg!
  :route/login-verify-code
