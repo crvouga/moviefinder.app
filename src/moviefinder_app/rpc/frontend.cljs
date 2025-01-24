@@ -3,7 +3,8 @@
    [moviefinder-app.frontend.store :as store]
    [moviefinder-app.core.http-client :as http-client]
    [clojure.edn :as edn]
-   [clojure.core.async :refer [<! go]]))
+   [clojure.core.async :refer [<! go]]
+   [moviefinder-app.core.result :as result]))
 
 
 
@@ -17,8 +18,12 @@
 (defn rpc! [msg]
   (go
     (let [res (<! (rpc-fetch! msg))
-          body (-> res :http-response/body edn/read-string)]
-      body)))
+          body (-> res :http-response/body)
+          body-edn (-> body edn/read-string)
+          ok? (-> res :http-response/ok?)]
+      (if ok?
+        (result/conform body-edn)
+        [:result/err "Errored while requesting from backend"]))))
 
 (defmethod store/eff! :rpc/send! [i]
   (go

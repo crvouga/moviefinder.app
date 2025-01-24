@@ -31,10 +31,13 @@
   [:div.absolute.top-0.left-0.w-full.p-4.pointer-events-none
    (for [toast (-> i :store/state ::toasts)
          :let [exiting? (contains? (-> i :store/state ::exiting-ids) (:toast/id toast))
-               toast-id (:toast/id toast)]]
+               toast-id (:toast/id toast)
+               variant (-> toast :toast/variant (or :toast-variant/info))]]
      ^{:key toast-id}
-     [:div.p-3.bg-neutral-800.shadow-2xl.rounded.text-lg.pointer-events-auto.flex.items-center.justify-start.font-bold.slide-in-from-top
+     [:div.p-3.shadow-2xl.rounded.text-lg.pointer-events-auto.flex.items-center.justify-start.font-bold.slide-in-from-top
       {:id (str "toast-" toast-id)
-       :class (str (when exiting? " slide-out-to-top"))}
+       :class (str (when exiting? " slide-out-to-top")
+                   (when (= variant :toast-variant/info) " bg-neutral-800")
+                   (when (= variant :toast-variant/error) " bg-red-600"))}
       (str (:toast/message toast))])])
 

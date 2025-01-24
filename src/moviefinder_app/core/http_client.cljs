@@ -17,14 +17,16 @@
       (.then (fn [data]
                (go
                  (>! response-chan
-                     {:http-response/status (.-status response)
+                     {:http-response/ok? (.-ok response)
+                      :http-response/status (.-status response)
                       :http-response/headers (js-headers->clj (.-headers response))
                       :http-response/body data})
                  (close! response-chan))))))
 
 (defn on-error-response [error response-chan]
   (go
-    (>! response-chan {:http-response/error (str error)})
+    (>! response-chan {:http-response/ok? false
+                       :http-response/error (str error)})
     (close! response-chan)))
 
 (defn fetch!

@@ -27,7 +27,9 @@
 (defn logged-out? [i]
   (let [current-user (-> i :store/state ::current-user result/conform)
         payload (result/payload current-user)]
-    (and (result/ok? current-user) (nil? payload))))
+    (or (not (result/ok? current-user))
+        (and (result/ok? current-user)
+             (-> payload :user/user-id nil?)))))
 (defmulti view-guard
   (fn [i _] (-> i :store/state ::current-user result/conform first)))
 

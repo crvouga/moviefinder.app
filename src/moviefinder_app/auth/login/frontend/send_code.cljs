@@ -23,10 +23,16 @@
 
  ::backend-sent-code
  (fn [i]
-   (let [sent-code (store/msg-payload i)
-         msgs (when (result/ok? sent-code)
+   (let [sent-code (-> i store/msg-payload result/conform)
+         msgs (cond
+                (result/ok? sent-code)
                 [[:screen/push [:route/login-verify-code (result/payload sent-code)]]
-                 [:toaster/show (toast/info "Code sent")]])]
+                 [:toaster/show (toast/info "Code sent")]]
+
+                (result/err? sent-code)
+                [[:toaster/show (toast/error "Failed to send code")]]
+
+                :else [])]
      (-> i
          (update-in [:store/state] assoc ::send-code sent-code)
          (update-in [:store/msgs] concat msgs))))

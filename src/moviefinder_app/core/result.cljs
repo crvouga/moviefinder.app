@@ -34,6 +34,10 @@
   (and (s/valid? :result/result result)
        (= (first result) :result/ok)))
 
+(defn err? [result]
+  (and (s/valid? :result/result result)
+       (= (first result) :result/err)))
+
 (defn loading? [result]
   (and (s/valid? :result/result result)
        (= (first result) :result/loading)))
