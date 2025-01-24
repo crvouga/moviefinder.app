@@ -1,5 +1,5 @@
 
-FROM node:14
+FROM oven/bun:latest
 
 RUN apt-get update && apt-get install -y \
     openjdk-11-jdk
@@ -7,15 +7,16 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY package*.json ./
+COPY bun.lock ./
 
-RUN ["npm", "install"]
+RUN ["bun", "install"]
 
 COPY . .
 
-RUN ["npm", "run", "build"]
+RUN ["bun", "run", "build"]
 
 ARG PORT
 
 EXPOSE $PORT
 
-CMD ["npm", "run", "start"]
+CMD ["bun", "run", "start"]
