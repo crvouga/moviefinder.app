@@ -5,9 +5,7 @@
   "scripts": {
     "build": "bun x shadow-cljs release frontend backend",
     "clean": "bun x shadow-cljs clean",
-    "frontend": "bun x shadow-cljs watch frontend",
-    "backend": "bun x shadow-cljs watch backend",
-    "watch": "bun x concurrently \"bun frontend\" \"bun backend\"",
+    "watch": "bun x shadow-cljs watch frontend backend",
     "start": "bun out/backend/main.js",
     "preview": "bun install && bun run build && bun run start"
   },
