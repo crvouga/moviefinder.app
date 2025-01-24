@@ -6,11 +6,16 @@
    [clojure.core.async :refer [<! go]]
    [moviefinder-app.core.result :as result]))
 
+(def backend-url-dev "http://localhost:5000")
+(def backend-url-prod "")
+(defn dev? [] (= (.-hostname js/window.location) "localhost"))
+(def backend-url (if (dev?) backend-url-dev backend-url-prod))
 
+(println "backend-url: " backend-url)
 
 (defn- rpc-fetch! [msg]
   (http-client/fetch!
-   {:http-request/url (str js/moviefinder_app.BACKEND_URL "/rpc")
+   {:http-request/url (str backend-url "/rpc")
     :http-request/method :http-method/post
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str msg)}))
