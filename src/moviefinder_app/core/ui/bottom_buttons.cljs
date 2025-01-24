@@ -2,7 +2,7 @@
 
 
 (defn view [i]
-  [:div.flex.w-full.items-center.h-16
+  [:div.flex.w-full.items-center.h-20
    (for [button (-> i :bottom-buttons/buttons)
          :let [on-click (-> button  :bottom-button/on-click)
                label (-> button :bottom-button/label)

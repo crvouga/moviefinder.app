@@ -1,5 +1,6 @@
 (ns moviefinder-app.frontend.toaster
-  (:require [moviefinder-app.frontend.store :as store]))
+  (:require [moviefinder-app.frontend.store :as store]
+            [moviefinder-app.core.ui.icon-button :as icon-button]))
 
 (store/reg!
  :store/initialized
@@ -39,5 +40,7 @@
        :class (str (when exiting? " slide-out-to-top")
                    (when (= variant :toast-variant/info) " bg-neutral-800")
                    (when (= variant :toast-variant/error) " bg-red-600"))}
-      (str (:toast/message toast))])])
+      [:p.flex-1 (str (:toast/message toast))]
+      [icon-button/view {:icon-button/on-click #(store/put! i [::clicked-close-toast-button toast-id])
+                         :icon-button/view-icon icon/x-mark}]])])
 

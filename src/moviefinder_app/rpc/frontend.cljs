@@ -6,7 +6,7 @@
    [clojure.core.async :refer [<! go]]
    [moviefinder-app.core.result :as result]))
 
-(def backend-url-dev "http://localhost:5000")
+(def backend-url-dev "http://localhost:5002")
 (def backend-url-prod "")
 (defn dev? [] (= (.-hostname js/window.location) "localhost"))
 (def backend-url (if (dev?) backend-url-dev backend-url-prod))

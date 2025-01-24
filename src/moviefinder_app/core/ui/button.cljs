@@ -18,7 +18,7 @@
       :on-click on-click
       :aria-busy loading?
       :class (str
-              "bg-blue-500 text-white py-3 px-4 rounded flex items-center justify-center font-bold text-lg relative "
+              "bg-blue-500 text-white py-3 px-4 rounded flex items-center justify-center font-bold text-lg relative cursor-pointer "
               (if full? "w-full " "w-fit ")
               (when (not loading?)
                 "hover:opacity-75 focus:opacity-75 active:opacity-75 ")

@@ -4,8 +4,8 @@
    [moviefinder-app.frontend.store :as store]
    [moviefinder-app.core.result :as result]
    [moviefinder-app.core.ui.button :as button]
-   [moviefinder-app.auth.login.frontend.shared :refer [view-layout]]
-   [moviefinder-app.core.ui.text-field :as text-field]))
+   [moviefinder-app.core.ui.text-field :as text-field]
+   [moviefinder-app.core.ui.top-bar :as top-bar]))
 
 (store/reg!
  :store/initialized
@@ -44,10 +44,12 @@
   (-> i :store/state ::request result/loading?))
 
 (screen/reg!
- :route/login-verify-code
+ :screen/login-verify-code
  (fn [i]
-   [view-layout "Verify Code"
-    [:form.flex.flex-col.w-full.gap-6
+   [:div.w-full.flex-1
+    [top-bar/view {:top-bar/title "Verify Code"
+                   :top-bar/on-back #(store/put! i [:screen/clicked-link [:screen/login]])}]
+    [:form.flex.flex-col.w-full.gap-6.p-6
      {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-verify-code-form]))}
      [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/screen-payload :user/phone-number)]]
      [text-field/view

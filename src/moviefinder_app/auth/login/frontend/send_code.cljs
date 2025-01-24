@@ -4,9 +4,9 @@
    [moviefinder-app.frontend.store :as store]
    [moviefinder-app.core.result :as result]
    [moviefinder-app.core.ui.button :as button]
-   [moviefinder-app.auth.login.frontend.shared :refer [view-layout]]
    [moviefinder-app.frontend.toast :as toast]
-   [moviefinder-app.core.ui.text-field :as text-field]))
+   [moviefinder-app.core.ui.text-field :as text-field]
+   [moviefinder-app.core.ui.top-bar :as top-bar]))
 
 (store/reg!
  :store/initialized
@@ -26,7 +26,7 @@
    (let [sent-code (-> i store/msg-payload result/conform)
          msgs (cond
                 (result/ok? sent-code)
-                [[:screen/push [:route/login-verify-code (result/payload sent-code)]]
+                [[:screen/push [:screen/login-verify-code (result/payload sent-code)]]
                  [:toaster/show (toast/info "Code sent")]]
 
                 (result/err? sent-code)
@@ -50,15 +50,16 @@
 (screen/reg!
  :screen/login
  (fn [i]
-   [view-layout "Login with SMS"
-    [:form.flex.flex-col.w-full.gap-6
+   [:div.w-full.flex-1
+    [top-bar/view {:top-bar/title "Login with SMS"
+                   :top-bar/on-back #(store/put! i [:screen/clicked-link [:screen/profile]])}]
+    [:form.flex.flex-col.w-full.gap-6.p-6
      {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
      [text-field/view
       {:text-field/label "Phone Number"
        :text-field/value (-> i :store/state ::phone-number (or ""))
        :text-field/required? true
        :text-field/type :text-field-type/number-pad
-       :text-field/placeholder "Phone Number"
        :text-field/disabled? (sending-code? i)
        :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
      [:div.w-full]
