@@ -49,7 +49,7 @@
    [view-layout "Verify Code"
     [:form.flex.flex-col.w-full.gap-6
      {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-verify-code-form]))}
-     [:p "Enter the code we sent to " [:strong (-> i screen/screen-payload :user/phone-number)]]
+     [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/screen-payload :user/phone-number)]]
      [text-field/view
       {:text-field/label "Code"
        :text-field/value (-> i :store/state ::code)
@@ -60,4 +60,5 @@
      [button/view
       {:button/type :button-type/submit
        :button/loading? (loading? i)
+       :button/full? true
        :button/label "Verify Code"}]]]))

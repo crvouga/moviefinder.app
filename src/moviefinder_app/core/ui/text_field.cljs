@@ -12,7 +12,7 @@
         required? (:text-field/required? i)]
     [:fieldset.flex.flex-col.gap-2
      [:label.font-bold.flex.flex-col.gap-2 label
-      [:input.p-4.text-lg.bg-neutral-800
+      [:input.p-4.text-lg.bg-neutral-800.rounded.overflow-hidden
        {:type "text"
         :value value
         :placeholder placeholder

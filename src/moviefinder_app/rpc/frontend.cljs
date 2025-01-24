@@ -5,9 +5,11 @@
    [clojure.edn :as edn]
    [clojure.core.async :refer [<! go]]))
 
+
+
 (defn- rpc-fetch! [msg]
   (http-client/fetch!
-   {:http-request/url "/rpc"
+   {:http-request/url (str js/moviefinder_app.BACKEND_URL "/rpc")
     :http-request/method :http-method/post
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str msg)}))

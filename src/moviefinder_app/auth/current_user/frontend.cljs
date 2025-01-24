@@ -24,6 +24,10 @@
    (-> i
        (assoc-in [:store/state ::current-user] (store/msg-payload i)))))
 
+(defn logged-out? [i]
+  (let [current-user (-> i :store/state ::current-user)
+        payload (result/payload current-user)]
+    (and (result/ok? current-user) (nil? payload))))
 (defmulti view-guard
   (fn [i _] (-> i :store/state ::current-user result/conform first)))
 

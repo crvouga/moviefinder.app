@@ -10,6 +10,7 @@
  :builds
  {:frontend
   {:target :browser
+   :closure-defines {moviefinder-app/BACKEND_URL #shadow/env "BACKEND_URL" }
    :modules {:main {:init-fn moviefinder-app.frontend/-main}}}
   :backend
   {:target :node-script

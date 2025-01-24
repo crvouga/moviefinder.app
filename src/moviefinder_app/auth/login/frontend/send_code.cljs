@@ -57,5 +57,6 @@
      [:div.w-full]
      [button/view
       {:button/type :button-type/submit
+       :button/full? true
        :button/loading? (sending-code? i)
        :button/label "Send Code"}]]]))
