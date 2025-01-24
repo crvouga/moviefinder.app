@@ -53,6 +53,7 @@
      [text-field/view
       {:text-field/label "Code"
        :text-field/value (-> i :store/state ::code)
+       :text-field/type :text-field-type/number-pad
        :text-field/required? true
        :text-field/disabled? (loading? i)
        :text-field/on-change #(store/put! i [::inputted-code %])}]

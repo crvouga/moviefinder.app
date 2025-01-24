@@ -51,6 +51,7 @@
       {:text-field/label "Phone Number"
        :text-field/value (-> i :store/state ::phone-number (or ""))
        :text-field/required? true
+       :text-field/type :text-field-type/number-pad
        :text-field/placeholder "Phone Number"
        :text-field/disabled? (sending-code? i)
        :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
