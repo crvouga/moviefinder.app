@@ -28,10 +28,13 @@
 
  :screen/clicked-link
  (fn [i]
-   (let [screen-new (store/msg-payload i)]
-     (-> i
-         (assoc-in [:store/state ::screen] screen-new)
-         (update-in [:store/effs] conj [::push! screen-new]))))
+   (let [screen-new (store/msg-payload i)
+         current-screen (-> i :store/state ::screen)]
+     (if (= screen-new current-screen)
+       i
+       (-> i
+           (assoc-in [:store/state ::screen] screen-new)
+           (update-in [:store/effs] conj [::push! screen-new])))))
 
  :screen/push
  (fn [i]
@@ -60,6 +63,7 @@
 
 (defn screen-name [i]
   (-> i :store/state ::screen first))
+
 (defn screen-payload [i]
   (-> i :store/state ::screen second))
 

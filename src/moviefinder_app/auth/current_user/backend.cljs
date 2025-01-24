@@ -6,7 +6,7 @@
 (defmethod rpc/rpc! :current-user/get [_ctx _req]
   (go
     (<! (timeout 1500))
-    [:result/ok nil]
+    [:result/ok]
     #_[:result/ok {:user/user-id 1
                    :user/username "test-user"
                    :user/email "my-email"}]))
