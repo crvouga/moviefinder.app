@@ -42,5 +42,6 @@
                    (when (= variant :toast-variant/error) " bg-red-600"))}
       [:p.flex-1 (str (:toast/message toast))]
       [icon-button/view {:icon-button/on-click #(store/put! i [::clicked-close-toast-button toast-id])
-                         :icon-button/view-icon icon/x-mark}]])])
+                        ;;  :icon-button/view-icon icon/x-mark
+                         }]])])
 
