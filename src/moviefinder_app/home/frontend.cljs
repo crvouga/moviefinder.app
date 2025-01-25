@@ -31,9 +31,16 @@
 (screen/reg!
  :screen/home
  (fn [i]
-   [:div.w-full.flex-1.flex.flex-col
+   [:div.w-full.flex-1.flex.flex-col.overflow-hidden
     [top-bar/view {:top-bar/title "Home"}]
     (let [query-result (db/to-query-result i popular-media-query)]
-      [:div.w-full.flex-1
-       [:code (pr-str query-result)]])
+      [:div.w-full.flex-1.overflow-y-auto
+       (for [row (:query-result/rows query-result)]
+         ^{:key row}
+         [:div.flex.flex-col.p-4
+          [:h3 (:media/title row)]
+          [:p (:media/year row)]
+          [:p (:media/popularity row)]
+          [:p (:media/genre-ids row)]
+          #_[:img {:src (:media/poster-url row) :alt (:media/title row) :width 200 :height 300}]])])
     [top-level-bottom-buttons/view i]]))
