@@ -2,7 +2,6 @@
   (:require
    [clojure.core.async :refer [<! go timeout]]
    [core.tmdb-api.discover.movie]
-   [moviefinder-app.media.media-db.impl-fake.fake-data :refer [medias]]
    [moviefinder-app.media.media-db.interface :as media-db]))
 
 
@@ -24,6 +23,5 @@
 
 (defmethod media-db/query-chan! :media-db-impl/tmdb-api [q]
   (go
-    (<! (timeout 100))
-    (core.tmdb-api.discover.movie/fetch {})
-    (->> (to-query-result q medias))))
+    (let [medias (<! (core.tmdb-api.discover.movie/fetch-chan {}))]
+      (->> (to-query-result q medias)))))

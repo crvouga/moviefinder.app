@@ -29,7 +29,7 @@
                        :http-response/error (str error)})
     (close! response-chan)))
 
-(defn fetch!
+(defn fetch-chan!
   "Sends an HTTP request using the Fetch API.
    Accepts an `http-request` map with:
    - :http-request/method (:http-method/get, :http-method/post, :http-method/put, :http-method/delete, etc.)

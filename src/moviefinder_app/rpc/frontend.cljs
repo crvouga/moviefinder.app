@@ -14,7 +14,7 @@
 (println "backend-url: " backend-url)
 
 (defn- rpc-fetch! [msg]
-  (http-client/fetch!
+  (http-client/fetch-chan!
    {:http-request/url (str backend-url "/rpc")
     :http-request/method :http-method/post
     :http-request/headers {"Content-Type" "text/plain"}
