@@ -5,28 +5,21 @@
    [core.ui.top-bar :as top-bar]
    [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [moviefinder-app.media.media-db.interface :as media-db]
-   [moviefinder-app.frontend.ctx :refer [ctx]]
-   [clojure.core.async :refer [go-loop <! >!]]
-   [moviefinder-app.frontend.store :as store]))
+   [moviefinder-app.frontend.ctx :refer [ctx]]))
 
 (def popular-media-query
   {:query/limit 10
    :query/offset 0
    :query/select [:media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
+   :query/order [:media/popularity :desc]
    :query/where [:and
                  [:> :media/popularity 80]
-                 [:= :media/media-type :media-type/movie]]
-   :query/order [:media/popularity :desc]})
+                 [:= :media/media-type :media-type/movie]]})
 
 (def popular-media-query-msg-chan!
-  (-> popular-media-query
-      (merge ctx)
-      (media-db/query-chan!)))
+  (media-db/query-chan! ctx popular-media-query))
 
-(go-loop []
-  (when-let [result (<! popular-media-query-msg-chan!)]
-    (>! store/msg-chan! [:db/got-query-result result])
-    (recur)))
+(db/put-got-query-result! popular-media-query-msg-chan!)
 
 (screen/reg!
  :screen/home

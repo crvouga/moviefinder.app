@@ -1,10 +1,8 @@
 (ns moviefinder-app.media.media-db.impl-tmdb-api.impl
   (:require
-   [clojure.core.async :refer [<! go timeout]]
+   [clojure.core.async :refer [<! go]]
    [core.tmdb-api.discover.movie]
    [moviefinder-app.media.media-db.interface :as media-db]))
-
-
 
 (defn to-query-result [q medias]
   (let [total (count medias)

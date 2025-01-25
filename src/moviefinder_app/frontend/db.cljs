@@ -1,6 +1,7 @@
 (ns moviefinder-app.frontend.db
   (:require
-   [moviefinder-app.frontend.store :as store]))
+   [moviefinder-app.frontend.store :as store]
+   [clojure.core.async :refer [go-loop <! >!]]))
 
 (defn- map-vals [f m]
   (into {} (map (fn [[k v]] [k (f v)]) m)))
@@ -51,3 +52,9 @@
         entities (->> query-result :query-result/row-ids (map (-> state :db/entity-by-id)))]
     (-> query-result
         (assoc :query-result/rows entities))))
+
+(defn put-got-query-result! [query-result-chan!]
+  (go-loop []
+    (when-let [query-result (<! query-result-chan!)]
+      (>! store/msg-chan! [:db/got-query-result query-result])
+      (recur))))
