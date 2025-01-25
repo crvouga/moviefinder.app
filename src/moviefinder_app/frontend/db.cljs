@@ -8,15 +8,8 @@
 (defn- to-primary-key [i]
   (-> i  :query-result/primary-key))
 
-(defn query-to-key [query]
+(defn- query-to-key [query]
   (select-keys query [:query/where :query/order :query/limit :query/offset]))
-
-(defn to-query-result [i query]
-  (let [state (-> i :store/state)
-        query-result (-> state :db/query-result-by-query (get (query-to-key query)))
-        entities (->> query-result :query-result/row-ids (map (-> state :db/entity-by-id)))]
-    (-> query-result
-        (assoc :query-result/rows entities))))
 
 (defn- update-entity-ids-by-query [i]
   (let [payload (-> i store/msg-payload)
@@ -29,7 +22,6 @@
     (-> i
         (assoc-in [:store/state :db/query-result-by-query query] query-result))))
 
-
 (defn- to-entity-by-id [i]
   (->> i
        :query-result/rows
@@ -37,7 +29,8 @@
        (map-vals first)
        (into {})))
 
-(defn update-entities-by-id [i]
+
+(defn- update-entities-by-id [i]
   (let [payload (-> i store/msg-payload)
         entity-by-id-payload (to-entity-by-id payload)
         entity-by-id (-> i :store/state :db/entity-by-id)
@@ -51,3 +44,10 @@
    (-> i
        update-entities-by-id
        update-entity-ids-by-query)))
+
+(defn to-query-result [i query]
+  (let [state (-> i :store/state)
+        query-result (-> state :db/query-result-by-query (get (query-to-key query)))
+        entities (->> query-result :query-result/row-ids (map (-> state :db/entity-by-id)))]
+    (-> query-result
+        (assoc :query-result/rows entities))))
