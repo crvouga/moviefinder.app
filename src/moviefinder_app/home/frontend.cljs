@@ -2,15 +2,20 @@
   (:require
    [moviefinder-app.frontend.screen :as screen]
    [moviefinder-app.core.ui.top-bar :as top-bar]
-   [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]))
+   [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
+   [moviefinder-app.media.media-db.interface :as media-db]
+   [moviefinder-app.frontend.ctx :refer [ctx]]))
 
 
 #_(def movies!
-    (db-conn-sql/watch
+    (sql/watch
      db-conn
      [:select [:media/title :media/year :media/genre-ids]
       :from :media
       :order-by [:media/popularity :desc]]))
+
+(println "query=" (media-db/query  (merge ctx {:query/limit 10
+                                               :query/offset 0})))
 
 (screen/reg!
  :screen/home

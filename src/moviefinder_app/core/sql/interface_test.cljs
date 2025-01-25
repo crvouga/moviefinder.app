@@ -1,11 +1,11 @@
-(ns moviefinder-app.core.db-conn-sql.interface-test
-  (:require [moviefinder-app.core.db-conn-sql.interface :as db-conn-sql]
-            [moviefinder-app.core.db-conn-sql.impl]))
+(ns moviefinder-app.core.sql.interface-test
+  (:require [moviefinder-app.core.sql.interface :as sql]
+            [moviefinder-app.core.sql.impl]))
 
 (def db-conn
-  (db-conn-sql/new {:db-conn-sql/impl :db-conn-sql-impl/pglite}))
+  (sql/new {:sql/impl :sql-impl/pglite}))
 
-(db-conn-sql/query
+(sql/query
  db-conn
  "CREATE TABLE IF NOT EXISTS movies (
   id INTEGER PRIMARY KEY, 
@@ -13,7 +13,7 @@
   year INTEGER, 
   rating REAL)")
 
-(db-conn-sql/query
+(sql/query
  db-conn
  [:insert-into [:movies]
   :columns [:title :year :rating]

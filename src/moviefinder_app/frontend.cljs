@@ -1,5 +1,6 @@
 (ns moviefinder-app.frontend
   (:require [reagent.dom.client :as rd]
+            [moviefinder-app.media.frontend]
             [moviefinder-app.auth.frontend]
             [moviefinder-app.rpc.frontend]
             [moviefinder-app.home.frontend]

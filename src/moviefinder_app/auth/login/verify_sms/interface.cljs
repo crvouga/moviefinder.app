@@ -1,8 +1,12 @@
 (ns moviefinder-app.auth.login.verify-sms.interface)
 
-(defmulti send-code! :verify-sms/impl)
+(defmulti send-code!
+  "Send a verification code to :user/phone-number"
+  :verify-sms/impl)
 
-(defmulti verify-code! :verify-sms/impl)
+(defmulti verify-code!
+  "Verify the given :verify-sms/code against :user/phone-number"
+  :verify-sms/impl)
 
 (defmulti error->message first)
 

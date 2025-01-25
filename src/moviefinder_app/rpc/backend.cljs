@@ -1,7 +1,7 @@
 (ns moviefinder-app.rpc.backend
   (:require [clojure.core.async :refer [go <!]]
             [moviefinder-app.backend.request-handler :refer [request-handler!]]
-            [moviefinder-app.ctx :refer [ctx]]
+            [moviefinder-app.frontend.ctx :refer [ctx]]
             [moviefinder-app.core.http-server.http-request :as http-request]
             [moviefinder-app.core.http-server.http-response :as http-response]))
 
