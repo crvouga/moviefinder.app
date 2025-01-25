@@ -1,6 +1,6 @@
-(ns moviefinder-app.core.sql.impl-pglite
+(ns core.sql.impl-pglite
   (:require #_["@electric-sql/pglite" :as pglite]
-   [moviefinder-app.core.sql.interface :as sql]))
+   [core.sql.interface :as sql]))
 
 (defmethod sql/new :sql-impl/pglite
   [i]

@@ -1,5 +1,5 @@
-(ns moviefinder-app.core.ui.button
-  (:require [moviefinder-app.core.ui.icon :as icon]))
+(ns core.ui.button
+  (:require [core.ui.icon :as icon]))
 
 (def button-type->html-type
   {:button-type/submit "submit"

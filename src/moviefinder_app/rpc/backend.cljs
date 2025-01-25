@@ -2,8 +2,8 @@
   (:require [clojure.core.async :refer [go <!]]
             [moviefinder-app.backend.request-handler :refer [request-handler!]]
             [moviefinder-app.frontend.ctx :refer [ctx]]
-            [moviefinder-app.core.http-server.http-request :as http-request]
-            [moviefinder-app.core.http-server.http-response :as http-response]))
+            [core.http-server.http-request :as http-request]
+            [core.http-server.http-response :as http-response]))
 
 (defmulti rpc! (fn [_ctx req] (first req)))
 

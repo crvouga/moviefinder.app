@@ -1,8 +1,8 @@
 (ns moviefinder-app.frontend.ui.top-level-bottom-buttons
   (:require
    [moviefinder-app.frontend.store :as store]
-   [moviefinder-app.core.ui.icon :as icon]
-   [moviefinder-app.core.ui.bottom-buttons :as bottom-buttons]
+   [core.ui.icon :as icon]
+   [core.ui.bottom-buttons :as bottom-buttons]
    [moviefinder-app.frontend.screen :as screen]))
 
 

@@ -1,7 +1,7 @@
 (ns moviefinder-app.profile.login-cta
   (:require
-   [moviefinder-app.core.ui.icon :as icon]
-   [moviefinder-app.core.ui.button :as button]
+   [core.ui.icon :as icon]
+   [core.ui.button :as button]
    [moviefinder-app.frontend.store :as store]))
 
 

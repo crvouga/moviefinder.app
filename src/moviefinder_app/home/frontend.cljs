@@ -2,7 +2,7 @@
   (:require
    [moviefinder-app.frontend.screen :as screen]
    [moviefinder-app.frontend.db :as db]
-   [moviefinder-app.core.ui.top-bar :as top-bar]
+   [core.ui.top-bar :as top-bar]
    [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [moviefinder-app.media.media-db.interface :as media-db]
    [moviefinder-app.frontend.ctx :refer [ctx]]

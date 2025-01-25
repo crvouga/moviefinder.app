@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.ui.icon)
+(ns core.ui.icon)
 
 
 (defn spinner [props]

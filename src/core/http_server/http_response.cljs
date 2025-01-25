@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.http-server.http-response)
+(ns core.http-server.http-response)
 
 (defn set-header! [^js res key value]
   (.setHeader res key value))

@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.env
+(ns core.env
   (:require ["fs" :as fs]
             ["path" :as path]
             [clojure.string]))

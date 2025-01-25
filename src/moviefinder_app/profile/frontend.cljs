@@ -1,7 +1,7 @@
 (ns moviefinder-app.profile.frontend
   (:require
    [moviefinder-app.frontend.screen :as screen]
-   [moviefinder-app.core.ui.top-bar :as top-bar]
+   [core.ui.top-bar :as top-bar]
    [moviefinder-app.profile.login-cta :as login-cta]
    [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [moviefinder-app.auth.current-user.frontend :as current-user]))

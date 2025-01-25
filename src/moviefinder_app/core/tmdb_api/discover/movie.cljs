@@ -1,1 +1,0 @@
-(ns moviefinder-app.core.tmdb-api.discover.movie)

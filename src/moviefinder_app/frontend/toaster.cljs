@@ -1,6 +1,6 @@
 (ns moviefinder-app.frontend.toaster
   (:require [moviefinder-app.frontend.store :as store]
-            [moviefinder-app.core.ui.icon-button :as icon-button]))
+            [core.ui.icon-button :as icon-button]))
 
 (store/reg!
  :store/initialized

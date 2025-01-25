@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.result
+(ns core.result
   (:require [clojure.spec.alpha :as s]))
 
 

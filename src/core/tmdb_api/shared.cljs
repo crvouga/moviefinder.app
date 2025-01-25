@@ -1,5 +1,5 @@
-(ns moviefinder-app.core.tmdb-api.shared
-  (:require [moviefinder-app.core.env :as env]))
+(ns core.tmdb-api.shared
+  (:require [core.env :as env]))
 
 
 (def api-read-access-token (env/get! "TMDB_API_READ_ACCESS_TOKEN"))

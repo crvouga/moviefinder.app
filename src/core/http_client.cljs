@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.http-client
+(ns core.http-client
   (:require [cljs.core.async :refer [chan go >! close!]]))
 
 (defn to-map-keyword [k] (if (string? k) (keyword k) k))

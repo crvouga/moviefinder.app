@@ -2,11 +2,11 @@
   (:require
    [moviefinder-app.frontend.screen :as screen]
    [moviefinder-app.frontend.store :as store]
-   [moviefinder-app.core.result :as result]
-   [moviefinder-app.core.ui.button :as button]
+   [core.result :as result]
+   [core.ui.button :as button]
    [moviefinder-app.frontend.toast :as toast]
-   [moviefinder-app.core.ui.text-field :as text-field]
-   [moviefinder-app.core.ui.top-bar :as top-bar]))
+   [core.ui.text-field :as text-field]
+   [core.ui.top-bar :as top-bar]))
 
 (store/reg!
  :store/initialized

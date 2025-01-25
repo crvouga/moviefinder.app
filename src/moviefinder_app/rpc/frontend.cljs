@@ -1,10 +1,10 @@
 (ns moviefinder-app.rpc.frontend
   (:require
    [moviefinder-app.frontend.store :as store]
-   [moviefinder-app.core.http-client :as http-client]
+   [core.http-client :as http-client]
    [clojure.edn :as edn]
    [clojure.core.async :refer [<! go]]
-   [moviefinder-app.core.result :as result]))
+   [core.result :as result]))
 
 (def backend-url-dev "http://localhost:5002")
 (def backend-url-prod "")

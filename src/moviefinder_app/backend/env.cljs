@@ -1,5 +1,5 @@
 (ns moviefinder-app.backend.env
-  (:require [moviefinder-app.core.env :as env]))
+  (:require [core.env :as env]))
 
 
 (def port-env (env/get! "PORT"))

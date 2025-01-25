@@ -1,6 +1,6 @@
-(ns moviefinder-app.core.sql.interface-test
-  (:require [moviefinder-app.core.sql.interface :as sql]
-            [moviefinder-app.core.sql.impl]))
+(ns core.sql.interface-test
+  (:require [core.sql.interface :as sql]
+            [core.sql.impl]))
 
 (def db-conn
   (sql/new {:sql/impl :sql-impl/pglite}))

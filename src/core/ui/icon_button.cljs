@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.ui.icon-button)
+(ns core.ui.icon-button)
 
 (defn view [i]
   (let [view-icon (-> i :icon-button/view-icon)

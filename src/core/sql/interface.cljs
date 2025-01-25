@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.sql.interface)
+(ns core.sql.interface)
 
 (defmulti new
   "Create a new db connection"

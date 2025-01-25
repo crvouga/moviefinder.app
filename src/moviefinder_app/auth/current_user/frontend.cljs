@@ -1,6 +1,6 @@
 (ns moviefinder-app.auth.current-user.frontend
   (:require [moviefinder-app.frontend.store :as store]
-            [moviefinder-app.core.result :as result]
+            [core.result :as result]
             [moviefinder-app.frontend.ui.loading-state-logo :as loading-state-logo]))
 
 (store/reg!

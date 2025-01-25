@@ -17,6 +17,7 @@
         "pprint",
         "println",
         "pushstate",
-        "replacestate"
+        "replacestate",
+        "tmdb"
     ]
 }

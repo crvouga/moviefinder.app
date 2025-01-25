@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.http-server.http-request
+(ns core.http-server.http-request
   (:require [clojure.core.async :refer [go chan close! <! put! go-loop]]
             [clojure.edn :as edn]))
 

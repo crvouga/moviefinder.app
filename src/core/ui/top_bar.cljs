@@ -1,7 +1,7 @@
-(ns moviefinder-app.core.ui.top-bar
+(ns core.ui.top-bar
   (:require
-   [moviefinder-app.core.ui.icon-button :as icon-button]
-   [moviefinder-app.core.ui.icon :as icon]))
+   [core.ui.icon-button :as icon-button]
+   [core.ui.icon :as icon]))
 
 
 (defn view [i]

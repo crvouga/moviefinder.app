@@ -1,4 +1,4 @@
-(ns moviefinder-app.core.ui.bottom-buttons)
+(ns core.ui.bottom-buttons)
 
 
 (defn view [i]
