@@ -1,13 +1,14 @@
 (ns moviefinder-app.frontend
   (:require [reagent.dom.client :as rd]
+            [moviefinder-app.frontend.store :as store]
             [moviefinder-app.media.frontend]
             [moviefinder-app.auth.frontend]
             [moviefinder-app.rpc.frontend]
             [moviefinder-app.home.frontend]
             [moviefinder-app.profile.frontend]
+            [moviefinder-app.frontend.db]
             [moviefinder-app.frontend.runtime]
             [moviefinder-app.frontend.toaster :as toaster]
-            [moviefinder-app.frontend.store :as store]
             [moviefinder-app.frontend.screen :as screen]))
 
 

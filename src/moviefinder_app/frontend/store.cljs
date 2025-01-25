@@ -5,7 +5,7 @@
 
 (defonce ^:private state! (r/atom {}))
 (def ^:private transitions! (atom #{}))
-(def ^:private msg-chan! (chan))
+(def msg-chan! (chan))
 
 (def msg-type (comp first :store/msg))
 (def msg-payload (comp second :store/msg))
@@ -13,7 +13,6 @@
 (def eff-payload (comp second :store/eff))
 
 (defn put! [i msg] ((-> i :store/put!) msg))
-
 
 
 #_(defn register-transition! [transition] (swap! transitions! conj transition))
