@@ -2,7 +2,7 @@
   (:require [moviefinder-app.frontend.store :as store]
             [core.ui.icon-button :as icon-button]))
 
-(store/reg!
+(store/register!
  :store/initialized
  (fn [i]
    (-> i

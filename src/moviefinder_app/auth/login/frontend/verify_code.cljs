@@ -7,7 +7,7 @@
    [core.ui.text-field :as text-field]
    [core.ui.top-bar :as top-bar]))
 
-(store/reg!
+(store/register!
  :store/initialized
  (fn [i]
    (-> i
@@ -43,7 +43,7 @@
 (defn loading? [i]
   (-> i :store/state ::request result/loading?))
 
-(screen/reg!
+(screen/register!
  :screen/login-verify-code
  (fn [i]
    [:div.w-full.flex-1

@@ -14,12 +14,9 @@
 
 (defn put! [i msg] ((-> i :store/put!) msg))
 
-
-#_(defn register-transition! [transition] (swap! transitions! conj transition))
-
 (defmulti eff! eff-type)
 
-(defn reg-eff!
+(defn register-eff!
   ([] nil)
   ([_] nil)
   ([eff-type- eff-handler & rest]
@@ -27,15 +24,15 @@
      (defmethod eff! eff-type- [i]
        (eff-handler-new i))
 
-     (apply reg-eff! rest))))
+     (apply register-eff! rest))))
 
-(defn reg!
+(defn register!
   ([] nil)
   ([_] nil)
   ([msg-type- transition & rest]
    (let [transition-new (fn [i] (if (= msg-type- (msg-type i)) (transition i) i))]
      (swap! transitions! conj transition-new)
-     (apply reg! rest))))
+     (apply register! rest))))
 
 (defn initialize! []
   (async/put! msg-chan! [:store/initialized]))

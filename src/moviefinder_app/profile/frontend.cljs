@@ -7,7 +7,7 @@
    [moviefinder-app.auth.current-user.frontend :as current-user]))
 
 
-(screen/reg!
+(screen/register!
  :screen/profile
  (fn [i]
    [:div.w-full.flex-1.flex.flex-col

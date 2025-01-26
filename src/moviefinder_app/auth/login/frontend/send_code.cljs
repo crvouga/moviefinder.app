@@ -8,7 +8,7 @@
    [core.ui.text-field :as text-field]
    [core.ui.top-bar :as top-bar]))
 
-(store/reg!
+(store/register!
  :store/initialized
  (fn [i]
    (-> i
@@ -47,7 +47,7 @@
 (defn sending-code? [i]
   (-> i :store/state ::send-code first (= :result/loading)))
 
-(screen/reg!
+(screen/register!
  :screen/login
  (fn [i]
    [:div.w-full.flex-1

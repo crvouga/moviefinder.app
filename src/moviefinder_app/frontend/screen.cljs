@@ -8,7 +8,7 @@
 (defn- get-route! []
   (or (route/get!) fallback))
 
-(store/reg!
+(store/register!
  :store/initialized
  (fn [i]
    (-> i
@@ -44,7 +44,7 @@
          (update-in [:store/effs] conj [::push! screen-new])))))
 
 
-(store/reg-eff!
+(store/register-eff!
  ::get-route!
  (fn [i]
    (store/put! i [::got-screen (get-route!)]))
@@ -69,7 +69,7 @@
 
 (def view-screen-by-name! (atom {}))
 
-(defn reg! [name view-screen]
+(defn register! [name view-screen]
   (println "reg! name" name)
   (swap! view-screen-by-name! assoc name view-screen))
 

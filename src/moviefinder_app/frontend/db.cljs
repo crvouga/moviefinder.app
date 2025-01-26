@@ -39,7 +39,7 @@
     (-> i
         (assoc-in [:store/state :db/entity-by-id] entity-by-id-merged))))
 
-(store/reg!
+(store/register!
  :db/got-query-result
  (fn [i]
    (-> i

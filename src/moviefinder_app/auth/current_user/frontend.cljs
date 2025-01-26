@@ -3,7 +3,7 @@
             [core.result :as result]
             [moviefinder-app.frontend.ui.loading-state-logo :as loading-state-logo]))
 
-(store/reg!
+(store/register!
  :store/initialized
  (fn [i]
    (-> i

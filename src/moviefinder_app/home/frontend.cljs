@@ -16,12 +16,12 @@
                  [:> :media/popularity 80]
                  [:= :media/media-type :media-type/movie]]})
 
-(def popular-media-query-msg-chan!
-  (media-db/query-chan! ctx popular-media-query))
 
-(db/put-got-query-result! popular-media-query-msg-chan!)
+(def query-result-chan! (media-db/query-chan! ctx popular-media-query))
 
-(screen/reg!
+(db/put-got-query-result! query-result-chan!)
+
+(screen/register!
  :screen/home
  (fn [i]
    [:div.w-full.flex-1.flex.flex-col.overflow-hidden
