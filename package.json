@@ -6,6 +6,7 @@
     "build": "bun x shadow-cljs release frontend backend",
     "clean": "bun x shadow-cljs clean",
     "watch": "bun x shadow-cljs watch frontend backend",
+    "stop": "bun x shadow-cljs stop frontend backend",
     "start": "bun out/backend/main.js",
     "preview": "bun install && bun run build && bun run start"
   },

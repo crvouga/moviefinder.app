@@ -19,5 +19,6 @@
     (let [body-edn (<! (http-request/body-edn-chan req))
           rpc-res (<! (rpc! ctx body-edn))
           rpc-res-text-plain (pr-str rpc-res)]
+      (http-response/allow-cors! res)
       (http-response/set-header! res "Content-Type" "text/plain")
       (http-response/end! res rpc-res-text-plain))))
