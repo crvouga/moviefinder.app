@@ -9,6 +9,8 @@
         "extname",
         "fieldset",
         "keywordize",
+        "Linecap",
+        "Linejoin",
         "mapcat",
         "moviefinder",
         "multimethod",

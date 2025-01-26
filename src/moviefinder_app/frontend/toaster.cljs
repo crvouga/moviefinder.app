@@ -1,6 +1,7 @@
 (ns moviefinder-app.frontend.toaster
   (:require [moviefinder-app.frontend.store :as store]
-            [core.ui.icon-button :as icon-button]))
+            [core.ui.icon-button :as icon-button]
+            [core.ui.icon :as icon]))
 
 (store/register!
  :store/initialized
@@ -20,6 +21,12 @@
          (assoc-in [:store/state ::toasts] #{toast-with-id})
          (update-in [:store/effs] conj [:runtime/sleep {:sleep/duration (-> toast :toast/duration (or 0))
                                                         :sleep/msgs #{[::toast-duration-elapsed toast-with-id]}}]))))
+
+ ::clicked-close-toast-button
+ (fn [i]
+   (let [toast-id (store/msg-payload i)]
+     (-> i
+         (update-in [:store/state ::exiting-ids] conj toast-id))))
 
  ::toast-duration-elapsed
  (fn [i]
@@ -42,6 +49,5 @@
                    (when (= variant :toast-variant/error) " bg-red-600"))}
       [:p.flex-1 (str (:toast/message toast))]
       [icon-button/view {:icon-button/on-click #(store/put! i [::clicked-close-toast-button toast-id])
-                        ;;  :icon-button/view-icon icon/x-mark
-                         }]])])
+                         :icon-button/view-icon icon/x-mark}]])])
 
