@@ -4,9 +4,9 @@
             [clojure.core.async :refer [go <!]]
             [moviefinder-app.media.media-db.interface :as interface]
             [moviefinder-app.media.media-db.backend]
-            [moviefinder-app.backend.ctx :as ctx]))
+            [moviefinder-app.backend.config :as config]))
 
-(def implementations [{:tmdb/api-key (ctx/secrets :tmdb/api-key)
+(def implementations [{:tmdb/api-key (config/config :tmdb/api-key)
                        :media-db/impl :media-db-impl/tmdb-api}
                       #_{:media-db/impl :media-db-impl/fake}])
 

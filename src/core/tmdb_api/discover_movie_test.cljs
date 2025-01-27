@@ -2,7 +2,7 @@
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [clojure.core.async :refer [go <!]]
             [core.tmdb-api.discover-movie :as discover-movie]
-            [moviefinder-app.backend.ctx :as ctx]
+            [moviefinder-app.backend.config :as config]
             [cljs.spec.alpha :as s]))
 
 
@@ -11,7 +11,7 @@
     (async
      done
      (go
-       (let [params (merge ctx/secrets
+       (let [params (merge config/config
                            {:tmdb/language "en-US"
                             :tmdb/sort-by "popularity.desc"
                             :tmdb/include-adult false

@@ -4,11 +4,11 @@
    [core.http-client :as http-client]
    [clojure.edn :as edn]
    [clojure.core.async :refer [<! go]]
-   [moviefinder-app.frontend.ctx :refer [ctx]]))
+   [moviefinder-app.frontend.config :refer [config]]))
 
 (defn- rpc-fetch! [req]
   (http-client/fetch-chan!
-   {:http-request/url (str (:wire/backend-url ctx) "/rpc")
+   {:http-request/url (str (:wire/backend-url config) "/rpc")
     :http-request/method :http-method/post
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str req)}))

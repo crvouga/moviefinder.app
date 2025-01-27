@@ -5,7 +5,7 @@
    [core.ui.top-bar :as top-bar]
    [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [moviefinder-app.media.media-db.interface :as media-db]
-   [moviefinder-app.frontend.ctx :refer [ctx]]))
+   [moviefinder-app.frontend.config :refer [config]]))
 
 (def popular-media-query
   {:query/limit 10
@@ -17,7 +17,7 @@
                  [:= :media/media-type :media-type/movie]]})
 
 
-(def query-result-chan! (media-db/query-result-chan! (merge ctx popular-media-query)))
+(def query-result-chan! (media-db/query-result-chan! (merge config popular-media-query)))
 
 (db/put-query-result! query-result-chan!)
 
