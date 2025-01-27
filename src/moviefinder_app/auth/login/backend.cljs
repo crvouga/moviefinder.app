@@ -9,12 +9,12 @@
                 :user/phone-number "1234567890"
                 :user/name "John Doe"})
 
-(defmethod rpc/rpc! :login-rpc/send-code [req]
+(defmethod rpc/rpc! :rpc/send-code [req]
   (go
     (let [res (<! (verify-sms/send-code! (second req)))]
       res)))
 
-(defmethod rpc/rpc! :login-rpc/verify-code [req]
+(defmethod rpc/rpc! :rpc/verify-code [req]
   (go
     (let [res (<! (verify-sms/verify-code! (second req)))
           ok? (-> res :result/type (= :result/ok))

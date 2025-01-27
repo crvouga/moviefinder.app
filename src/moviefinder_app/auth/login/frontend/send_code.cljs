@@ -17,7 +17,7 @@
  (fn [i]
    (-> i
        (update-in [:store/state] assoc ::send-code {:result/type :result/loading})
-       (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:login-rpc/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
+       (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:rpc/send-code {:user/phone-number (-> i :store/state ::phone-number)}]
                                                   :rpc/res #(vector ::backend-sent-code %)}])))
 
  ::backend-sent-code

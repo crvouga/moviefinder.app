@@ -22,7 +22,7 @@
 
  ::submitted-verify-code-form
  (fn [i]
-   (let [rpc-req [:login-rpc/verify-code
+   (let [rpc-req [:rpc/verify-code
                   {:user/phone-number (-> i screen/screen-payload :user/phone-number)
                    :verify-sms/code (-> i :store/state ::code)}]]
      (-> i
