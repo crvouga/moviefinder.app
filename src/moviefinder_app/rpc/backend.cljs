@@ -3,13 +3,14 @@
             [moviefinder-app.backend.request-handler :refer [request-handler!]]
             [moviefinder-app.backend.config :as config]
             [core.http-server.http-request :as http-request]
-            [core.http-server.http-response :as http-response]))
+            [core.http-server.http-response :as http-response]
+            [clojure.pprint :refer [pprint]]))
 
 (defmulti rpc! first)
 
 (defmethod rpc! :default [req]
   (go
-    (println "rpc! :default " req)
+    (pprint {:msg "rpc! :default" :req req})
     {:result/type :result/err
      :error/message "Unknown rpc method"
      :rpc/req req}))
@@ -23,11 +24,9 @@
           rpc-req-input [rpc-req-name rpc-req-input-payload]
           rpc-res-unsafe (<! (rpc! rpc-req-input))
           rpc-res (config/dissoc-config rpc-res-unsafe)]
-      (println
-       "\nrpc:" rpc-req-name
-       "\nreq:" rpc-req
-       "\nres:" rpc-res
-       "\n")
+      (pprint {:rpc rpc-req-name
+               :req rpc-req
+               :res rpc-res})
       rpc-res)))
 
 (defmethod request-handler! "/rpc" [req res]
