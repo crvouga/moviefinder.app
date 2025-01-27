@@ -7,7 +7,7 @@
                   :user/phone-number "1234567890"
                   :user/name "John Doe"})
 
-(defmethod rpc/rpc! :current-user/get [_req]
+(defmethod rpc/rpc! :rpc/get-current-user [_req]
   (go
-    (<! (timeout 1500))
+    (<! (timeout 100))
     (merge #_fake-user {:result/type :result/ok})))

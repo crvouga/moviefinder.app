@@ -7,7 +7,7 @@
  (fn [i]
    (-> i
        (update-in [:store/state] assoc ::current-user {:result/type :result/loading})
-       (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:current-user/get]
+       (update-in [:store/effs] conj [:rpc/send! {:rpc/req [:rpc/get-current-user]
                                                   :rpc/res #(vector ::got-current-user %)}])))
 
  :login/authenticated
