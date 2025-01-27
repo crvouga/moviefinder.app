@@ -1,7 +1,7 @@
 (ns moviefinder-app.media.media-db.interface
   (:require [cljs.spec.alpha :as s]
             [clojure.core.async :refer [go]]
-            [moviefinder-app.media.media]))
+            [moviefinder-app.media.entity]))
 
 
 (s/def :query/where vector?)
