@@ -34,10 +34,10 @@
 (defn- update-entities-by-id [i]
   (let [payload (-> i store/msg-payload)
         entity-by-id-payload (to-entity-by-id payload)
-        entity-by-id (-> i :store/state ::row-by-id)
+        entity-by-id (-> i :store/state ::entity-by-id)
         entity-by-id-merged (merge-with merge entity-by-id entity-by-id-payload)]
     (-> i
-        (assoc-in [:store/state ::row-by-id] entity-by-id-merged))))
+        (assoc-in [:store/state ::entity-by-id] entity-by-id-merged))))
 
 
 (store/register!
@@ -45,7 +45,7 @@
  (fn [i]
    (-> i
        (update :store/state assoc
-               ::row-by-id {}
+               ::entity-by-id {}
                ::query-result-by-query {})))
 
 
@@ -58,7 +58,7 @@
 (defn to-query-result [i query]
   (let [state (-> i :store/state)
         query-result (-> state ::query-result-by-query (get (query-to-key query)))
-        entities (->> query-result :query-result/row-ids (map (-> state ::row-by-id)))]
+        entities (->> query-result :query-result/row-ids (map (-> state ::entity-by-id)))]
     (-> query-result
         (assoc :query-result/rows entities))))
 
@@ -67,3 +67,6 @@
     (when-let [query-result (<! query-result-chan!)]
       (>! store/msg-chan! [:db/got-query-result query-result])
       (recur))))
+
+(defn to-entity [i entity-id]
+  (-> i :store/state ::entity-by-id (get entity-id)))
