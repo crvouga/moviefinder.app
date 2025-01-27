@@ -18,6 +18,6 @@
                 :query-result/primary-key :media/id
                 :query-result/rows items}))))
 
-(defmethod media-db/query-chan! :media-db-impl/tmdb-api [q]
+(defmethod media-db/query-result-chan! :media-db-impl/tmdb-api [q]
   (go
     (->> (to-query-result q medias))))

@@ -21,7 +21,7 @@
                          (select-keys [:query-result/limit :query-result/offset :query-result/total :query-result/primary-key])
                          (assoc :query-result/row-ids entity-ids))]
     (-> i
-        (assoc-in [:store/state :db/query-result-by-query query] query-result))))
+        (assoc-in [:store/state ::query-result-by-query query] query-result))))
 
 (defn- to-entity-by-id [i]
   (->> i
@@ -34,12 +34,21 @@
 (defn- update-entities-by-id [i]
   (let [payload (-> i store/msg-payload)
         entity-by-id-payload (to-entity-by-id payload)
-        entity-by-id (-> i :store/state :db/entity-by-id)
+        entity-by-id (-> i :store/state ::row-by-id)
         entity-by-id-merged (merge-with merge entity-by-id entity-by-id-payload)]
     (-> i
-        (assoc-in [:store/state :db/entity-by-id] entity-by-id-merged))))
+        (assoc-in [:store/state ::row-by-id] entity-by-id-merged))))
+
 
 (store/register!
+ :store/initialized
+ (fn [i]
+   (-> i
+       (update :store/state assoc
+               ::row-by-id {}
+               ::query-result-by-query {})))
+
+
  :db/got-query-result
  (fn [i]
    (-> i
@@ -48,12 +57,12 @@
 
 (defn to-query-result [i query]
   (let [state (-> i :store/state)
-        query-result (-> state :db/query-result-by-query (get (query-to-key query)))
-        entities (->> query-result :query-result/row-ids (map (-> state :db/entity-by-id)))]
+        query-result (-> state ::query-result-by-query (get (query-to-key query)))
+        entities (->> query-result :query-result/row-ids (map (-> state ::row-by-id)))]
     (-> query-result
         (assoc :query-result/rows entities))))
 
-(defn put-got-query-result! [query-result-chan!]
+(defn put-query-result! [query-result-chan!]
   (go-loop []
     (when-let [query-result (<! query-result-chan!)]
       (>! store/msg-chan! [:db/got-query-result query-result])
