@@ -34,7 +34,7 @@
         (for [row (:query-result/rows query-result)]
           ^{:key row}
           [:swiper-slide {}
-           [:button.w-full.h-full.overflow-hidden
+           [:button.w-full.h-full.overflow-hidden.cursor-pointer
             {:on-click #(store/put! i [:screen/clicked-link [:screen/media-details (select-keys row [:media/id])]])}
             [:img.w-full.h-full.object-cover {:src (:media/poster-url row) :alt (:media/title row)}]]])]]
 
