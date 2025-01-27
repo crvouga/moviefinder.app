@@ -1,21 +1,22 @@
 (ns moviefinder-app.backend
   (:require [clojure.core.async :refer [go <!]]
             [moviefinder-app.backend.request-handler :refer [request-handler!]]
+            [moviefinder-app.backend.ctx :as ctx]
             [moviefinder-app.backend.serve-single-page-app]
             [moviefinder-app.rpc.backend]
             [moviefinder-app.auth.backend]
             [moviefinder-app.media.backend]
-            [core.http-server :as http-server]
-            [moviefinder-app.backend.env :as env]))
+            [core.http-server :as http-server]))
 
 (defn request-handler-root! [req res]
   (request-handler! req res))
 
 (defn start-http-server! []
   (go
-    (let [http-server! (http-server/new! request-handler-root!)]
-      (<! (http-server/listen! http-server! env/port))
-      (println (str "Server is running... http://localhost:" env/port)))))
+    (let [http-server! (http-server/new! request-handler-root!)
+          port (ctx/ctx :http-server/port)]
+      (<! (http-server/listen! http-server! port))
+      (println (str "Server is running... http://localhost:" port)))))
 
 (defn -main []
   (go

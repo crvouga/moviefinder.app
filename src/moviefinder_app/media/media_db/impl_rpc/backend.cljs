@@ -1,6 +1,5 @@
 (ns moviefinder-app.media.media-db.impl-rpc.backend
   (:require [clojure.core.async :refer [<! go]]
-            [core.tmdb-api.discover.movie]
             [moviefinder-app.media.media-db.impl-tmdb-api.impl]
             [moviefinder-app.media.media-db.interface :as media-db]
             [moviefinder-app.rpc.backend :as rpc]))

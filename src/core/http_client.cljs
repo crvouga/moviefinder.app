@@ -1,5 +1,5 @@
 (ns core.http-client
-  (:require [cljs.core.async :refer [chan go >! close! <!]]))
+  (:require [cljs.core.async :refer [chan go >! close!]]))
 
 (defn to-map-keyword [k] (if (string? k) (keyword k) k))
 (defn to-map-entry [[k v]] [(to-map-keyword k) v])
@@ -47,7 +47,7 @@
    - :http-request/body (optional, the request body as a string or FormData for POST/PUT requests)
    Returns a channel containing the HTTP response map."
   [http-request]
-  (println "http-request" http-request)
+  #_(println "http-request" http-request)
   (let [response-chan (chan)
         {:http-request/keys [method url headers body]} http-request
         init (cond-> {:method (-> method name .toUpperCase)}
@@ -57,23 +57,3 @@
         (.then #(on-success-response % response-chan))
         (.catch #(on-error-response % response-chan)))
     response-chan))
-
-
-(comment
-  (go
-    (let [response (<! (fetch-chan! {:http-request/method :http-method/get
-                                     :http-request/url "https://api.themoviedb.org/3/discover/movie"
-                                     :http-request/headers {"Authorization" "Bearer 1234567890"}}))]
-      (println "GET Response:" response)
-      response))
-
-  ;; Test POST request
-  (go
-    (let [response (<! (fetch-chan! {:http-request/method :http-method/post
-                                     :http-request/url "https://jsonplaceholder.typicode.com/posts"
-                                     :http-request/headers {"Content-Type" "application/json"}
-                                     :http-request/body (js/JSON.stringify (clj->js {:title "Test Post"
-                                                                                     :body "This is a test post"
-                                                                                     :userId 1}))}))]
-      (println "POST Response:" response)
-      response)))

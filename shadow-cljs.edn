@@ -14,4 +14,8 @@
   :backend
   {:target :node-script
    :main moviefinder-app.backend/-main
-   :output-to "out/backend/main.js"}}}
+   :output-to "out/backend/main.js"}
+  :test
+  {:target :node-test
+   :output-to "out/test/test.js"
+   :autorun true}}}

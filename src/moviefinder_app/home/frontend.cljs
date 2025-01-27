@@ -10,9 +10,9 @@
 (def popular-media-query
   {:query/limit 10
    :query/offset 0
-   :query/select [:media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
+   :query/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
    :query/order [:media/popularity :desc]
-   :query/where [:and
+   :query/where [:query/and
                  [:> :media/popularity 80]
                  [:= :media/media-type :media-type/movie]]})
 
