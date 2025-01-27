@@ -72,12 +72,15 @@
 (defn register! [name view-screen]
   (println "reg! name" name)
   (swap! view-screen-by-name! assoc name view-screen))
-
 (defn view [i]
-  (let [screen (-> i :store/state ::screen (or fallback))
-        screen-name (first screen)
-        view-screen (@view-screen-by-name! screen-name)]
-    (if view-screen
-      [view-screen i]
-      [:div "No screen found for " (pr-str screen-name)])))
-
+  (let [current-screen (-> i :store/state ::screen (or fallback))
+        current-screen-name (first current-screen)]
+    [:div.w-full.h-full.bg-black
+     (for [[screen-name view-screen] @view-screen-by-name!]
+       ^{:key screen-name}
+       [:div.w-full.h-full.overflow-hidden.flex.flex-col
+        {:data-screen-name screen-name
+         :class (when (not= screen-name current-screen-name) "hidden")}
+        (if view-screen
+          [view-screen i]
+          [:div "No screen found for " (pr-str screen-name)])])]))
