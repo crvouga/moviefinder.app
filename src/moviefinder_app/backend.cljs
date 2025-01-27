@@ -4,6 +4,7 @@
             [moviefinder-app.backend.serve-single-page-app]
             [moviefinder-app.rpc.backend]
             [moviefinder-app.auth.backend]
+            [moviefinder-app.media.backend]
             [core.http-server :as http-server]
             [moviefinder-app.backend.env :as env]))
 

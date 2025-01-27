@@ -9,7 +9,8 @@
     (<! (timeout 1500))
     (let [phone-number (-> i :user/phone-number)]
       (println "Sending code " fake-code " to " phone-number)
-      [:result/ok i])))
+      (merge i {:result/type :result/ok}))))
+
 
 (defmethod verify-code! :verify-sms-impl/fake [i]
   (go
@@ -18,6 +19,7 @@
           code (-> i :verify-sms/code)]
       (println "Verifying code " code " for " phone-number)
       (if (= code fake-code)
-        [:result/ok i]
-        [:result/error {:error/data [:verify-sms-error/wrong-code]}]))))
+        (merge i {:result/type :result/ok})
+        (merge i {:result/type :result/err
+                  :error/data {:verify-sms/error :verify-sms-error/wrong-code}})))))
 

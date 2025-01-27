@@ -5,33 +5,18 @@
    [moviefinder-app.auth.login.verify-sms.interface :as verify-sms]
    [clojure.core.async :refer [go <!]]))
 
-(defmethod rpc/rpc! :login-rpc/send-code [ctx req]
+(def fake-user {:user/id "123"
+                :user/phone-number "1234567890"
+                :user/name "John Doe"})
+
+(defmethod rpc/rpc! :login-rpc/send-code [req]
   (go
-    (let [payload (second req)
-          input (merge ctx payload)
-          res (<! (verify-sms/send-code! input))]
+    (let [res (<! (verify-sms/send-code! (second req)))]
       res)))
 
-(defmethod rpc/rpc! :login-rpc/verify-code [ctx req]
+(defmethod rpc/rpc! :login-rpc/verify-code [req]
   (go
-    (let [payload (second req)
-          input (merge ctx payload)
-          res (<! (verify-sms/verify-code! input))]
+    (let [res (<! (verify-sms/verify-code! (second req)))
+          ok? (-> res :result/type (= :result/ok))
+          res (if ok? (merge res fake-user) res)]
       res)))
-
-#_(rpc/reg!
-   :login-rpc/send-code
-   (fn [ctx req]
-     (go
-       (let [payload (second req)
-             input (merge ctx payload)
-             res (<! (verify-sms/send-code! input))]
-         res)))
-
-   :login-rpc/verify-code
-   (fn [ctx req]
-     (go
-       (let [payload (second req)
-             input (merge ctx payload)
-             res (<! (verify-sms/verify-code! input))]
-         res))))

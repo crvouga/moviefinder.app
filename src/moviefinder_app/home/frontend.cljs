@@ -17,7 +17,7 @@
                  [:= :media/media-type :media-type/movie]]})
 
 
-(def query-result-chan! (media-db/query-chan! ctx popular-media-query))
+(def query-result-chan! (media-db/query-chan! (merge ctx popular-media-query)))
 
 (db/put-got-query-result! query-result-chan!)
 

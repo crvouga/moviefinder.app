@@ -3,10 +3,11 @@
    [moviefinder-app.rpc.backend :as rpc]
    [clojure.core.async :refer [go timeout <!]]))
 
-(defmethod rpc/rpc! :current-user/get [_ctx _req]
+#_(def fake-user {:user/id "123"
+                  :user/phone-number "1234567890"
+                  :user/name "John Doe"})
+
+(defmethod rpc/rpc! :current-user/get [_req]
   (go
     (<! (timeout 1500))
-    [:result/ok]
-    #_[:result/ok {:user/user-id 1
-                   :user/username "test-user"
-                   :user/email "my-email"}]))
+    (merge #_fake-user {:result/type :result/ok})))

@@ -64,7 +64,7 @@
         effs (->> transitioned :store/effs (filter vector?))
         msgs (->> transitioned :store/msgs (filter vector?))]
     (cljs.pprint/pprint {:msg msg
-                         :state-new state-new
+                        ;;  :state-new state-new
                          :effs effs
                          :msgs msgs})
     (reset! state! state-new)

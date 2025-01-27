@@ -1,8 +1,7 @@
 (ns moviefinder-app.media.media-db.impl-tmdb-api.impl
-  (:require
-   [clojure.core.async :refer [<! go]]
-   [core.tmdb-api.discover.movie]
-   [moviefinder-app.media.media-db.interface :as media-db]))
+  (:require [clojure.core.async :refer [go]]
+            [moviefinder-app.media.media-db.impl-fake.fake-data :refer [medias]]
+            [moviefinder-app.media.media-db.interface :as media-db]))
 
 (defn to-query-result [q medias]
   (let [total (count medias)
@@ -21,5 +20,4 @@
 
 (defmethod media-db/query-chan! :media-db-impl/tmdb-api [q]
   (go
-    (let [medias (<! (core.tmdb-api.discover.movie/fetch-chan {}))]
-      (->> (to-query-result q medias)))))
+    (->> (to-query-result q medias))))
