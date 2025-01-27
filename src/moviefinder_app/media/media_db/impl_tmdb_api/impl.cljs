@@ -28,13 +28,12 @@
         items (->> (:tmdb/results input)
                    (map tmdb-movie->media)
                    (map #(assoc-image-urls input %)))]
-    (-> input
-        (merge {:query-result/query input
-                :query-result/limit limit
-                :query-result/offset offset
-                :query-result/total total
-                :query-result/primary-key :media/id
-                :query-result/rows items}))))
+    {:query-result/query input
+     :query-result/limit limit
+     :query-result/offset offset
+     :query-result/total total
+     :query-result/primary-key :media/id
+     :query-result/rows items}))
 
 (defmethod media-db/query-result-chan! :media-db-impl/tmdb-api [q]
   (go
