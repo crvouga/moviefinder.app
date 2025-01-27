@@ -5,7 +5,8 @@
    [core.ui.top-bar :as top-bar]
    [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [moviefinder-app.media.media-db.interface :as media-db]
-   [moviefinder-app.frontend.config :refer [config]]))
+   [moviefinder-app.frontend.config :refer [config]]
+   [moviefinder-app.frontend.store :as store]))
 
 (def popular-media-query
   {:query/limit 10
@@ -33,7 +34,8 @@
         (for [row (:query-result/rows query-result)]
           ^{:key row}
           [:swiper-slide {}
-           [:div.w-full.h-full.overflow-hidden
+           [:button.w-full.h-full.overflow-hidden
+            {:on-click #(store/put! i [:screen/clicked-link [:screen/media-details row]])}
             [:img.w-full.h-full.object-cover {:src (:media/poster-url row) :alt (:media/title row)}]]])]]
 
       [top-level-bottom-buttons/view i]])))
