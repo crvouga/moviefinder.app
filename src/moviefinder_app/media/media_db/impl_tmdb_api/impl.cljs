@@ -28,7 +28,7 @@
         items (->> (:tmdb/results input)
                    (map tmdb-movie->media)
                    (map #(assoc-image-urls input %)))]
-    {:query-result/query input
+    {:query-result/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
      :query-result/limit limit
      :query-result/offset offset
      :query-result/total total
