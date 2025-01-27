@@ -1,11 +1,13 @@
 (ns moviefinder-app.frontend.store
   (:require [cljs.pprint]
+            ["react-dom/client" :as rd]
             [reagent.core :as r]))
 
-(defonce ^:private state! (r/atom {}))
+(defonce ^:private state! (atom {}))
 (def ^:private transitions! (atom #{}))
 (def ^:private msg-queue! (atom []))
 (def ^:private processing-msg (atom false))
+(def ^:private view-fn! (atom nil))
 
 (def msg-type (comp first :store/msg))
 (def msg-payload (comp second :store/msg))
@@ -13,6 +15,17 @@
 (def eff-payload (comp second :store/eff))
 
 (defmulti eff! eff-type)
+
+(defonce ^:private root
+  (let [dom-root (.getElementById js/document "root")]
+    (rd/createRoot dom-root)))
+
+(defn- render! [put!]
+  (when-let [view-fn @view-fn!]
+    (.render root
+             (r/as-element
+              [view-fn {:store/state @state!
+                        :store/put! put!}]))))
 
 (defn- process-msg! [msg]
   (let [state-prev @state!
@@ -40,6 +53,7 @@
                          :effs effs
                          :msgs msgs})
     (reset! state! state-new)
+    (render! process-msg!)
     (doseq [msg msgs]
       (if @processing-msg
         (swap! msg-queue! conj msg)
@@ -78,10 +92,6 @@
      (swap! transitions! conj transition-new)
      (apply register! rest))))
 
-(defn initialize! []
+(defn initialize! [view-fn]
+  (reset! view-fn! view-fn)
   (put! nil [:store/initialized]))
-
-(defn view [view-fn]
-  (let [i {:store/state @state!
-           :store/put! put!}]
-    (view-fn i)))

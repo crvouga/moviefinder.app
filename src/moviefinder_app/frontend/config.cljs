@@ -1,6 +1,6 @@
 (ns moviefinder-app.frontend.config)
 
-(def backend-url-dev "http://localhost:5002")
+(def backend-url-dev "http://localhost:8888")
 (def backend-url-prod "")
 (defn dev? []
   (try
