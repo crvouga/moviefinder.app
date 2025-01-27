@@ -29,7 +29,7 @@
       [top-bar/view {:top-bar/title "Home"}]
       #_[:code (->> query-result :query-result/rows (take 1) pr-str)]
       [:div.w-full.flex-1.overflow-hidden
-       [:swiper-container {:class "w-full h-full"}
+       [:swiper-container {:class "w-full h-full" :direction :vertical}
         (for [row (:query-result/rows query-result)]
           ^{:key row}
           [:swiper-slide {}
