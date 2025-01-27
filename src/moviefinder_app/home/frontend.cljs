@@ -31,6 +31,7 @@
        (for [row (:query-result/rows query-result)]
          ^{:key row}
          [:div.flex.flex-col.p-4
+          [:img {:src (:media/poster-url row) :alt (:media/title row) :width 200 :height 300}]
           [:h3 (:media/title row)]
           [:p (:media/year row)]
           [:p (:media/popularity row)]
