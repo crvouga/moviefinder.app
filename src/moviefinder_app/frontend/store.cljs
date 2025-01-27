@@ -94,4 +94,4 @@
 
 (defn initialize! [view-fn]
   (reset! view-fn! view-fn)
-  (put! nil [:store/initialized]))
+  (process-msg! [:store/initialized]))
