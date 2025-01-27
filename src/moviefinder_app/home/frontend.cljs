@@ -35,7 +35,7 @@
           ^{:key row}
           [:swiper-slide {}
            [:button.w-full.h-full.overflow-hidden
-            {:on-click #(store/put! i [:screen/clicked-link [:screen/media-details row]])}
+            {:on-click #(store/put! i [:screen/clicked-link [:screen/media-details (select-keys row [:media/id])]])}
             [:img.w-full.h-full.object-cover {:src (:media/poster-url row) :alt (:media/title row)}]]])]]
 
       [top-level-bottom-buttons/view i]])))
