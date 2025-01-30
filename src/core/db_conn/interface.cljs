@@ -1,4 +1,4 @@
-(ns core.sql.interface)
+(ns core.db-conn.interface)
 
 (defmulti new!
   "Create a new db connection"

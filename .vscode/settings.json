@@ -13,6 +13,7 @@
         "fdef",
         "fieldset",
         "gobj",
+        "honeysql",
         "keywordize",
         "Linecap",
         "Linejoin",
@@ -26,6 +27,7 @@
         "println",
         "pushstate",
         "replacestate",
+        "seancorfield",
         "tmdb"
     ]
 }
