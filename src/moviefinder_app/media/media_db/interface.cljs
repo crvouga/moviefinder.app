@@ -25,8 +25,9 @@
                 :query-result/primary-key
                 :query-result/rows]))
 
-(defmulti query-result-chan! :media-db/impl)
-
+(defmulti query-result-chan!
+  "Used for querying media data from the database using query spec"
+  :media-db/impl)
 
 (def empty-query-result
   {:query-result/limit 25
@@ -42,3 +43,15 @@
            :error/data q
            :query-result/query q
            :query-result/rows [])))
+
+
+(defmulti put-chan!
+  "Used for inserting media data into the database"
+  :media-db/impl)
+
+(defmethod put-chan! :default [q]
+  (go
+    (assoc empty-query-result
+           :result/type :result/error
+           :error/message "Media db implementation not found"
+           :error/data q)))
