@@ -37,7 +37,8 @@
      :query-result/primary-key :media/id
      :query-result/rows items}))
 
-(defmethod media-db/query-result-chan! :media-db-impl/tmdb-api [q]
+
+(defn discover-query-result-chan! [q]
   (go
     (let [_limit (-> q :query/limit (or 25))
           offset (-> q :query/offset (or 0))
@@ -51,4 +52,11 @@
           discover-movie-response (<! (core.tmdb-api.discover-movie/fetch-chan! params))
           response (merge params discover-movie-response configuration-response)
           query-result (to-query-result response)]
+      query-result)))
+
+
+
+(defmethod media-db/query-result-chan! :media-db-impl/tmdb-api [q]
+  (go
+    (let [query-result (<! (discover-query-result-chan! q))]
       query-result)))

@@ -11,7 +11,7 @@
 
 (def configs-read-only
   [config-pglite
-   {:media-db/impl :media-db-impl/fake}
+   #_{:media-db/impl :media-db-impl/fake}
    {:tmdb/api-key (config/config :tmdb/api-key)
     :media-db/impl :media-db-impl/tmdb-api
     :query/limit 10
