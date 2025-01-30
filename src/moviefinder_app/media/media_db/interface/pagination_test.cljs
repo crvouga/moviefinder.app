@@ -1,0 +1,39 @@
+(ns moviefinder-app.media.media-db.interface.pagination-test
+  (:require [cljs.test :refer-macros [deftest testing is async]]
+            [clojure.core.async :refer [go <!]]
+            [moviefinder-app.media.media-db.interface :as interface]
+            [moviefinder-app.media.media-db.backend]
+            [moviefinder-app.media.media-db.interface.fixture :as fixture]))
+
+(deftest pagination-test
+  (testing "query-result-chan! returns correct paginated subsets"
+    (async done
+           (go
+             (doseq [config fixture/configs]
+               (let [full-query (merge config {:query/limit 20 :query/offset 0})
+                     query1 (merge config {:query/limit 5 :query/offset 0})
+                     query2 (merge config {:query/limit 5 :query/offset 5})
+                     full-result (<! (interface/query-result-chan! full-query))
+                     result1 (<! (interface/query-result-chan! query1))
+                     result2 (<! (interface/query-result-chan! query2))
+                     full-rows (:query-result/rows full-result)]
+
+                 ; Test paginated results are subsequences of full result
+                 (is (= (:query-result/rows result1)
+                        (take 5 full-rows))
+                     "First page should match first 5 items of full result")
+
+                 (is (= (:query-result/rows result2)
+                        (take 5 (drop 5 full-rows)))
+                     "Second page should match items 6-10 of full result")
+
+                 ; Test returned limit/offset match input
+                 (is (= (:query-result/limit result1) 5)
+                     "Returned limit should match input")
+                 (is (= (:query-result/offset result1) 0)
+                     "Returned offset should match input")
+                 (is (= (:query-result/limit result2) 5)
+                     "Returned limit should match input")
+                 (is (= (:query-result/offset result2) 5)
+                     "Returned offset should match input")))
+             (done)))))

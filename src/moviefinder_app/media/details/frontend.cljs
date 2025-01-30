@@ -3,13 +3,15 @@
    [moviefinder-app.frontend.screen :as screen]
    [core.ui.top-bar :as top-bar]
    [moviefinder-app.frontend.store :as store]
-   [moviefinder-app.frontend.db :as db]))
+   [moviefinder-app.frontend.db :as db]
+   [core.ui.image :as image]))
 
 
 (defn view-backdrop [i]
-  [:img.w-full.aspect-video.object-cover
-   {:src (:media/backdrop-url i)
-    :alt (:media/title i)}])
+  [image/view
+   {:class "w-full aspect-video object-cover"
+    :image/url (:media/backdrop-url i)
+    :image/alt (:media/title i)}])
 
 (defn view-top-bar [i]
   [top-bar/view

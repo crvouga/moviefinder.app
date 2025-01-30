@@ -2,6 +2,8 @@
   (:require
    [moviefinder-app.frontend.screen :as screen]
    [moviefinder-app.frontend.db :as db]
+   [core.ui.image :as image]
+   [core.ui.image-preload :as image-preload]
    [core.ui.top-bar :as top-bar]
    [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [moviefinder-app.media.media-db.interface :as media-db]
@@ -9,7 +11,7 @@
    [moviefinder-app.frontend.store :as store]))
 
 (def popular-media-query
-  {:query/limit 10
+  {:query/limit 25
    :query/offset 0
    :query/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
    :query/order [:media/popularity :desc]
@@ -29,10 +31,13 @@
   [:swiper-slide {}
    [:button.w-full.h-full.overflow-hidden.cursor-pointer
     {:on-click #(on-slide-click i row)}
-    [:img.w-full.h-full.object-cover {:src (:media/poster-url row) :alt (:media/title row)}]]])
+    [image-preload/view {:image/url (:media/backdrop-url row)}]
+    [image/view {:image/url (:media/poster-url row)
+                 :image/alt (:media/title row)
+                 :class "w-full h-full"}]]])
 
 (defn view-swiper [i rows]
-  [:swiper-container {:class "w-full flex-" :direction :vertical}
+  [:swiper-container {:class "w-full flex-1 overflow-hidden" :direction :vertical}
    (for [row rows]
      ^{:key row}
      [view-swiper-slide i row])])
@@ -45,4 +50,6 @@
      [:div.w-full.flex-1.flex.flex-col.overflow-hidden
       [top-bar/view {:top-bar/title "Home"}]
       [view-swiper i rows]
+      (when (empty? rows)
+        [image/image {:class "w-full h-full"}])
       [top-level-bottom-buttons/view i]])))

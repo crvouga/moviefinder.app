@@ -27,7 +27,9 @@
         offset (-> input :query/offset (or 0))
         items (->> (:tmdb/results input)
                    (map tmdb-movie->media)
-                   (map #(assoc-image-urls input %)))]
+                   (map #(assoc-image-urls input %))
+                   (drop offset)
+                   (take limit))]
     {:query-result/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
      :query-result/limit limit
      :query-result/offset offset
@@ -37,11 +39,14 @@
 
 (defmethod media-db/query-result-chan! :media-db-impl/tmdb-api [q]
   (go
-    (let [params (merge q {:tmdb/language "en-US"
+    (let [_limit (-> q :query/limit (or 25))
+          offset (-> q :query/offset (or 0))
+          page (inc (quot offset 20)) ; TMDB uses 1-based page numbers, each page has 20 items
+          params (merge q {:tmdb/language "en-US"
                            :tmdb/sort-by "popularity.desc"
                            :tmdb/include-adult false
                            :tmdb/include-video false
-                           :tmdb/page 1})
+                           :tmdb/page page})
           configuration-response (<! (core.tmdb-api.configuration/fetch-chan! q))
           discover-movie-response (<! (core.tmdb-api.discover-movie/fetch-chan! params))
           response (merge params discover-movie-response configuration-response)

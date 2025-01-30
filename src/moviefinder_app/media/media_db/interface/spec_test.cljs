@@ -1,19 +1,11 @@
-(ns moviefinder-app.media.media-db.interface-test
+(ns moviefinder-app.media.media-db.interface.spec-test
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [cljs.spec.alpha :as s]
             [clojure.core.async :refer [go <!]]
             [moviefinder-app.media.media-db.interface :as interface]
             [moviefinder-app.media.media-db.backend]
-            [moviefinder-app.backend.config :as config]))
+            [moviefinder-app.media.media-db.interface.fixture :as fixture]))
 
-
-(def configs [{:tmdb/api-key (config/config :tmdb/api-key)
-               :media-db/impl :media-db-impl/tmdb-api
-               :query/limit 10
-               :query/offset 0}
-              #_{:media-db/impl :media-db-impl/fake
-                 :query/limit 10
-                 :query/offset 0}])
 
 (defn test-query [config]
   (merge config {:query/limit 10
@@ -23,7 +15,7 @@
   (testing "query-result-chan! returns spec valid response"
     (async done
            (go
-             (doseq [config configs]
+             (doseq [config fixture/configs]
                (let [query (test-query config)
                      result (<! (interface/query-result-chan! query))]
                  (is (s/valid? :query-result/query-result result)
@@ -34,7 +26,7 @@
   (testing "query-result-chan! returns non-empty results"
     (async done
            (go
-             (doseq [config configs]
+             (doseq [config fixture/configs]
                (let [query (test-query config)
                      result (<! (interface/query-result-chan! query))]
                  (is (seq (:query-result/rows result))
@@ -54,7 +46,7 @@
   (testing "query-result-chan! returns results with valid poster and backdrop URLs"
     (async done
            (go
-             (doseq [config configs]
+             (doseq [config fixture/configs]
                (let [query (test-query config)
                      result (<! (interface/query-result-chan! query))]
                  (doseq [row (:query-result/rows result)]
