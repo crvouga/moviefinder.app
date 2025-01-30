@@ -1,4 +1,4 @@
-(ns moviefinder-app.media.media-db.interface.query-by-id-test
+(ns moviefinder-app.media.media-db.interface.put-then-query-by-id-test
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [clojure.core.async :refer [go <!]]
             [moviefinder-app.media.media-db.interface :as media-db]
