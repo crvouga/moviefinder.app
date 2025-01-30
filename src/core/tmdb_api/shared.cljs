@@ -1,6 +1,8 @@
 (ns core.tmdb-api.shared
   (:require [clojure.string :as str]
-            [cljs.spec.alpha :as s]))
+            [cljs.spec.alpha :as s]
+            [core.map-ext :as map-ext]
+            [core.json :as json]))
 
 (s/def :tmdb/id number?)
 (s/def :tmdb/title string?)
@@ -64,44 +66,28 @@
      :http-request/query-params query-params
      :http-request/headers {"Authorization" (str "Bearer " api-key)}}))
 
-(defn- convert-keys-recursively [data key-fn]
-  (cond
-    (nil? data) nil
-
-    (map? data)
-    (->> data
-         (map (fn [[k v]] [(key-fn k) (convert-keys-recursively v key-fn)]))
-         (into {}))
-
-    (sequential? data)
-    (mapv #(convert-keys-recursively % key-fn) data)
-
-    :else data))
-
 (def ^:private empty-response
   {:tmdb/results []
    :tmdb/page 0
    :tmdb/total-pages 0
    :tmdb/total-results 0})
 
-(defn- parse-json [body]
-  (try
-    (when (string? body)
-      (-> body
-          js/JSON.parse
-          (js->clj :keywordize-keys true)))
-    (catch :default _e
-      nil)))
+(defn- map-response-ok [response]
+  (let [body (:http-response/body response)
+        parsed (or (json/json->clj body) body)]
+    (if parsed
+      (map-ext/convert-keys-recursively parsed external-key->namespace-key)
+      (assoc empty-response
+             :tmdb/error "Error parsing response"
+             :http-response/body body))))
+
+(defn- map-response-error [response]
+  (assoc empty-response
+         :tmdb/error (str "HTTP request failed: " (:http-response/status response))
+         :http-response/body (:http-response/body response)))
 
 (defn map-response [response]
   (if (:http-response/ok? response)
-    (let [body (:http-response/body response)
-          parsed (or (parse-json body) body)]
-      (if parsed
-        (convert-keys-recursively parsed external-key->namespace-key)
-        (assoc empty-response
-               :tmdb/error "Error parsing response"
-               :http-response/body body)))
-    (assoc empty-response
-           :tmdb/error (str "HTTP request failed: " (:http-response/status response))
-           :http-response/body (:http-response/body response))))
+    (map-response-ok response)
+    (map-response-error response)))
+          

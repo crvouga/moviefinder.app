@@ -3,28 +3,19 @@
             ["path" :as path]
             [clojure.string :as str]))
 
-(defn- parse-env-line [line] (str/split line #"=" 2))
+(defn load-env! []
+  (let [env-path (.resolve path ".env")
+        exists? (.existsSync fs env-path)]
+    (when exists?
+      (let [content (.readFileSync fs env-path "utf8")]
+        (doseq [line (clojure.string/split content #"\n")]
+          (let [[key value] (clojure.string/split line #"=" 2)]
+            (when (and key value)
+              (aset js/process.env (clojure.string/trim key) (clojure.string/trim value)))))))))
 
-(defn- valid-env-pair? [[k v]] (and k v))
-
-(defn- set-env! [[k v]]
-  (aset js/process.env (str/trim k) (str/trim v)))
-
-(defn- read-env-file! [path]
-  (->> (.readFileSync fs path "utf8")
-       (str/split #"\n")
-       (map parse-env-line)
-       (filter valid-env-pair?)
-       (run! set-env!)))
-
-(defn- load-env! []
-  (let [env-path (.resolve path ".env")]
-    (if-not (.existsSync fs env-path)
-      (js/console.warn "No .env file found")
-      (read-env-file! env-path))))
+(load-env!)
 
 (defn get! [key]
-  (load-env!)
   (aget js/process.env key))
 
 (defn get-else-throw! [key]
