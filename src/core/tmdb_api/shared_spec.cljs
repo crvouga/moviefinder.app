@@ -1,4 +1,4 @@
-(ns core.tmdb-api.spec
+(ns core.tmdb-api.shared-spec
   (:require [cljs.spec.alpha :as s]))
 
 (s/def :tmdb/id number?)

@@ -22,20 +22,27 @@
 
 (db/put-query-result! query-result-chan!)
 
+(defn on-slide-click [i row]
+  (store/put! i [:screen/clicked-link [:screen/media-details (select-keys row [:media/id])]]))
+
+(defn view-swiper-slide [i row]
+  [:swiper-slide {}
+   [:button.w-full.h-full.overflow-hidden.cursor-pointer
+    {:on-click #(on-slide-click i row)}
+    [:img.w-full.h-full.object-cover {:src (:media/poster-url row) :alt (:media/title row)}]]])
+
+(defn view-swiper [i rows]
+  [:swiper-container {:class "w-full flex-" :direction :vertical}
+   (for [row rows]
+     ^{:key row}
+     [view-swiper-slide i row])])
+
 (screen/register!
  :screen/home
  (fn [i]
-   (let [query-result (db/to-query-result i popular-media-query)]
+   (let [query-result (db/to-query-result i popular-media-query)
+         rows (:query-result/rows query-result)]
      [:div.w-full.flex-1.flex.flex-col.overflow-hidden
       [top-bar/view {:top-bar/title "Home"}]
-      #_[:code (->> query-result :query-result/rows (take 1) pr-str)]
-      [:div.w-full.flex-1.overflow-hidden
-       [:swiper-container {:class "w-full h-full" :direction :vertical}
-        (for [row (:query-result/rows query-result)]
-          ^{:key row}
-          [:swiper-slide {}
-           [:button.w-full.h-full.overflow-hidden.cursor-pointer
-            {:on-click #(store/put! i [:screen/clicked-link [:screen/media-details (select-keys row [:media/id])]])}
-            [:img.w-full.h-full.object-cover {:src (:media/poster-url row) :alt (:media/title row)}]]])]]
-
+      [view-swiper i rows]
       [top-level-bottom-buttons/view i]])))
