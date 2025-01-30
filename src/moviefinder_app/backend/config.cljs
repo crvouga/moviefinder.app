@@ -1,16 +1,9 @@
 (ns moviefinder-app.backend.config
-  (:require
-   [core.env :as env]
-   [clojure.string :as str]))
+  (:require [core.env :as env]))
 
-(def api-key (str/trim (env/get! "TMDB_API_READ_ACCESS_TOKEN")))
+(def api-key (-> "TMDB_API_READ_ACCESS_TOKEN" env/get-else-throw!))
 
-(def port-env (env/get! "PORT"))
-
-(when-not port-env
-  (throw (js/Error. "PORT environment variable is not set")))
-
-(def port (js/parseInt port-env))
+(def port (-> "PORT" env/get-else-throw! js/parseInt))
 
 (def config {:tmdb/api-key api-key
              :http-server/port port

@@ -1,7 +1,7 @@
 (ns core.env
   (:require ["fs" :as fs]
             ["path" :as path]
-            [clojure.string]))
+            [clojure.string :as str]))
 
 (defn load-env []
   (let [env-path (.resolve path ".env")
@@ -17,3 +17,10 @@
 
 (defn get! [key]
   (aget js/process.env key))
+
+(defn get-else-throw! [key]
+  (let [value (get! key)
+        valid? (and (string? value) (str/trim value))]
+    (when-not valid?
+      (throw (js/Error. (str key " environment variable is not set"))))
+    value))

@@ -27,25 +27,24 @@
               [view-fn {:store/state @state!
                         :store/put! put!}]))))
 
+(defn- apply-transition [acc transition-fn]
+  (let [msg (-> acc :store/msg)
+        transitioned (transition-fn (assoc acc :store/effs [] :store/msgs []))
+        state-new (merge (:store/state acc) (:store/state transitioned))
+        eff-new (concat (:store/effs acc) (:store/effs transitioned))
+        msgs-new (concat (:store/msgs acc) (:store/msgs transitioned))]
+    {:store/msg msg
+     :store/msgs msgs-new
+     :store/state state-new
+     :store/effs eff-new}))
+
 (defn- process-msg! [msg]
   (let [state-prev @state!
         acc {:store/msg msg
              :store/state state-prev
              :store/effs []
              :store/msgs []}
-        transitioned (reduce
-                      (fn [acc transition-fn]
-                        (let [msg (-> acc :store/msg)
-                              transitioned (transition-fn (assoc acc :store/effs [] :store/msgs []))
-                              state-new (merge (:store/state acc) (:store/state transitioned))
-                              eff-new (concat (:store/effs acc) (:store/effs transitioned))
-                              msgs-new (concat (:store/msgs acc) (:store/msgs transitioned))]
-                          {:store/msg msg
-                           :store/msgs msgs-new
-                           :store/state state-new
-                           :store/effs eff-new}))
-                      acc
-                      @transitions!)
+        transitioned (reduce apply-transition acc @transitions!)
         state-new (-> transitioned :store/state)
         effs (->> transitioned :store/effs (filter vector?))
         msgs (->> transitioned :store/msgs (filter vector?))]
@@ -54,14 +53,22 @@
                          :msgs msgs})
     (reset! state! state-new)
     (render! process-msg!)
+
     (doseq [msg msgs]
       (if @processing-msg
         (swap! msg-queue! conj msg)
-        (process-msg!  msg)))
+        (process-msg! msg)))
+
     (doseq [eff effs]
       (eff! {:store/eff eff
              :store/state! state!
              :store/put! process-msg!}))))
+
+(defn- process-queued-msgs! []
+  (when-let [queued-msgs (seq @msg-queue!)]
+    (reset! msg-queue! [])
+    (doseq [msg queued-msgs]
+      (process-msg! msg))))
 
 (defn put! [_ msg]
   (if @processing-msg
@@ -69,10 +76,7 @@
     (do
       (reset! processing-msg true)
       (process-msg! msg)
-      (when-let [queued-msgs (seq @msg-queue!)]
-        (reset! msg-queue! [])
-        (doseq [msg queued-msgs]
-          (process-msg! msg)))
+      (process-queued-msgs!)
       (reset! processing-msg false))))
 
 (defn register-eff!

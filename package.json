@@ -5,7 +5,9 @@
   "scripts": {
     "build": "bun x shadow-cljs release frontend backend",
     "clean": "bun x shadow-cljs clean",
+    "open": "open http://localhost:9630",
     "watch": "bun x shadow-cljs watch frontend backend",
+    "dev": "bun run open && bun run watch",
     "stop": "bun x shadow-cljs stop frontend backend",
     "start": "bun out/backend/main.js",
     "preview": "bun install && bun run build && bun run start",
