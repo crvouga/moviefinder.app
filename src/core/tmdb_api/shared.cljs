@@ -1,37 +1,8 @@
 (ns core.tmdb-api.shared
   (:require [clojure.string :as str]
-            [cljs.spec.alpha :as s]
             [core.map-ext :as map-ext]
             [core.json :as json]))
 
-(s/def :tmdb/id number?)
-(s/def :tmdb/title string?)
-(s/def :tmdb/release-date string?)
-(s/def :tmdb/overview string?)
-(s/def :tmdb/poster-path string?)
-(s/def :tmdb/vote-average number?)
-(s/def :tmdb/vote-count number?)
-(s/def :tmdb/popularity number?)
-(s/def :tmdb/movie
-  (s/keys :opt [:tmdb/id
-                :tmdb/title
-                :tmdb/release-date
-                :tmdb/overview
-                :tmdb/poster-path
-                :tmdb/vote-average
-                :tmdb/vote-count
-                :tmdb/popularity]))
-(s/def :tmdb/page number?)
-(s/def :tmdb/total-pages number?)
-(s/def :tmdb/total-results number?)
-(s/def :tmdb/results
-  (s/coll-of :tmdb/movie))
-
-(s/def :tmdb/response
-  (s/keys :req [:tmdb/results
-                :tmdb/page
-                :tmdb/total-pages
-                :tmdb/total-results]))
 
 (def ^:private base-url "https://api.themoviedb.org/3")
 
@@ -55,11 +26,11 @@
        (filter first)
        (into {})))
 
+(defn ->api-key [params]
+  (some-> params :tmdb/api-key (or "") (str/replace #"\"" "")))
+
 (defn build-request [endpoint params]
-  (let [api-key (some-> params
-                        :tmdb/api-key
-                        (or "")
-                        (str/replace #"\"" ""))
+  (let [api-key (->api-key params)
         query-params (build-query-params params)]
     {:http-request/method :http-method/get
      :http-request/url (str base-url endpoint)
@@ -76,7 +47,7 @@
   (let [body (:http-response/body response)
         parsed (or (json/json->clj body) body)]
     (if parsed
-      (map-ext/convert-keys-recursively parsed external-key->namespace-key)
+      (map-ext/map-keys-recursively parsed external-key->namespace-key)
       (assoc empty-response
              :tmdb/error "Error parsing response"
              :http-response/body body))))

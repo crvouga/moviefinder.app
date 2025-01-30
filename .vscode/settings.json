@@ -9,6 +9,7 @@
         "dissoc",
         "doseq",
         "extname",
+        "fdef",
         "fieldset",
         "keywordize",
         "Linecap",
