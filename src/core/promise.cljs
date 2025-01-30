@@ -6,6 +6,6 @@
     (-> promise
         (.then #(put! c %))
         (.catch #(put! c {:result/type :result/error
-                          :error/message (.-message %)
+                          :error/message "unknown error"
                           :error/data %})))
     c))

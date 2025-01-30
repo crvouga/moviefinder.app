@@ -3,29 +3,14 @@
             [core.db-conn.interface :as db-conn]
             [core.promise :as promise]
             [cljs.core.async :refer [go <!]]
-            [honey.sql :as sql]))
-
+            [core.sql :as sql]))
 
 (defn- result-js->clj [result]
   (-> result
       (js->clj :keywordize-keys true)))
 
-(defn- get-sql [query]
-  (if (string? query)
-    query
-    (let [[sql & params] (sql/format query)]
-      (if (empty? params)
-        sql
-        (reduce (fn [sql param]
-                  (.replace sql "?"
-                            (if (string? param)
-                              (str "'" param "'")
-                              (str param))))
-                sql
-                params)))))
-
 (defn query-chan! [i]
-  (let [raw-sql (-> i :sql/query get-sql)
+  (let [raw-sql (-> i :sql/query sql/query->raw-sql)
         pglite-inst (-> i ::pglite-inst)
         result-promise (.query pglite-inst raw-sql)
         result-chan (promise/->chan result-promise)]
