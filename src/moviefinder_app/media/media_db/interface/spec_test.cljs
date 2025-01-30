@@ -15,7 +15,7 @@
   (testing "query-result-chan! returns spec valid response"
     (async done
            (go
-             (doseq [config fixture/configs]
+             (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
                      result (<! (interface/query-result-chan! query))]
                  (is (s/valid? :query-result/query-result result)
@@ -26,7 +26,7 @@
   (testing "query-result-chan! returns non-empty results"
     (async done
            (go
-             (doseq [config fixture/configs]
+             (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
                      result (<! (interface/query-result-chan! query))]
                  (is (seq (:query-result/rows result))
@@ -46,7 +46,7 @@
   (testing "query-result-chan! returns results with valid poster and backdrop URLs"
     (async done
            (go
-             (doseq [config fixture/configs]
+             (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
                      result (<! (interface/query-result-chan! query))]
                  (doseq [row (:query-result/rows result)]

@@ -9,7 +9,7 @@
   (testing "query-result-chan! returns correct paginated subsets"
     (async done
            (go
-             (doseq [config fixture/configs]
+             (doseq [config fixture/configs-read-only]
                (let [full-query (merge config {:query/limit 20 :query/offset 0})
                      query1 (merge config {:query/limit 5 :query/offset 0})
                      query2 (merge config {:query/limit 5 :query/offset 5})
