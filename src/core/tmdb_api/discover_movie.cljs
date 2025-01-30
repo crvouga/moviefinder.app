@@ -3,14 +3,14 @@
   (:require [clojure.core.async :refer [go <!]]
             [core.http-client :as http-client]
             [core.tmdb-api.shared :as shared]
-            [core.tmdb-api.shared-spec]))
+            [core.tmdb-api.shared-spec :as shared-spec]))
 
 (defn fetch-chan!
   "Returns a channel containing a :tmdb/response"
   [params]
   (go
-    (->> params
+    (-> params
          (shared/build-request "/discover/movie") 
          http-client/fetch-chan! 
          <!
-         shared/map-response)))
+         (shared/map-response  shared-spec/tmdb-results-empty))))

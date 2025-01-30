@@ -29,7 +29,7 @@
 (defn ->api-key [params]
   (some-> params :tmdb/api-key (or "") (str/replace #"\"" "")))
 
-(defn build-request [endpoint params]
+(defn build-request [params endpoint]
   (let [api-key (->api-key params)
         query-params (build-query-params params)]
     {:http-request/method :http-method/get
@@ -37,28 +37,26 @@
      :http-request/query-params query-params
      :http-request/headers {"Authorization" (str "Bearer " api-key)}}))
 
-(def ^:private empty-response
-  {:tmdb/results []
-   :tmdb/page 0
-   :tmdb/total-pages 0
-   :tmdb/total-results 0})
-
-(defn- map-response-ok [response]
+(defn- map-response-ok [response empty-response]
   (let [body (:http-response/body response)
         parsed (or (json/json->clj body) body)]
     (if parsed
       (map-ext/map-keys-recursively parsed external-key->namespace-key)
-      (assoc empty-response
-             :tmdb/error "Error parsing response"
-             :http-response/body body))))
+      (when empty-response
+        (assoc empty-response
+               :tmdb/error "Error parsing response"
+               :http-response/body body)))))
 
-(defn- map-response-error [response]
-  (assoc empty-response
-         :tmdb/error (str "HTTP request failed: " (:http-response/status response))
-         :http-response/body (:http-response/body response)))
+(defn- map-response-error [response empty-response]
+  (when empty-response
+    (assoc empty-response
+           :tmdb/error (str "HTTP request failed: " (:http-response/status response))
+           :http-response/body (:http-response/body response))))
 
-(defn map-response [response]
-  (if (:http-response/ok? response)
-    (map-response-ok response)
-    (map-response-error response)))
-          
+(defn map-response
+  ([response]
+   (map-response response {}))
+  ([response empty-response]
+   (if (:http-response/ok? response)
+     (map-response-ok response empty-response)
+     (map-response-error response empty-response))))

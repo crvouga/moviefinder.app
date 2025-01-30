@@ -1,3 +1,4 @@
+;; https://developer.themoviedb.org/reference/configuration-details
 (ns core.tmdb-api.configuration
   (:require [clojure.core.async :refer [go <!]]
             [core.http-client :as http-client]
@@ -49,7 +50,7 @@
   (go
     (if-let [cached (@configuration-cache input)]
       cached
-      (let [request (shared/build-request "/configuration" input)
+      (let [request (shared/build-request input "/configuration")
             response (<! (http-client/fetch-chan! request))
             mapped-response (shared/map-response response)]
         (swap! configuration-cache assoc input mapped-response)

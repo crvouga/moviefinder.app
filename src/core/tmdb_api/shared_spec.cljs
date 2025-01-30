@@ -29,3 +29,9 @@
                 :tmdb/page
                 :tmdb/total-pages
                 :tmdb/total-results]))
+
+(def tmdb-results-empty
+  {:tmdb/results []
+   :tmdb/page 0
+   :tmdb/total-pages 0
+   :tmdb/total-results 0})
