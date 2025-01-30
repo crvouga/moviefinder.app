@@ -12,7 +12,7 @@
 (def config {:tmdb/api-key api-key
              :http-server/port port
              :verify-sms/impl :verify-sms-impl/fake
-             :sql/impl :sql-impl/pglite})
+             :db-conn/impl :db-conn-impl/pglite})
 
 (defn assoc-config
   "assoc application configuration to map"

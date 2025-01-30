@@ -2,7 +2,7 @@
 
 (defmulti new!
   "Create a new db connection"
-  :sql/impl)
+  :db-conn/impl)
 
 (defmulti query-chan!
   "Query the db and return the result
@@ -12,4 +12,4 @@
    :sql/rows is the rows returned by the query
    :sql/columns is the columns returned by the query
    "
-  :sql/impl)
+  :db-conn/impl)

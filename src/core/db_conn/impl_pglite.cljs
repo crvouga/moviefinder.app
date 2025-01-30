@@ -9,29 +9,31 @@
   (-> result
       (js->clj :keywordize-keys true)))
 
+(defn print-result [result]
+  (println "[db-conn]"
+           (select-keys result [:result/type :error/data :error/message :db-conn/raw-sql :db-conn/query :db-conn/rows])
+           "\n")
+  result)
+
 (defn query-chan! [i]
-  (let [raw-sql (-> i :sql/query sql/query->raw-sql)
+  (let [raw-sql (-> i :db-conn/query sql/query->raw-sql)
         pglite-inst (-> i ::pglite-inst)
         result-promise (.query pglite-inst raw-sql)
         result-chan (promise/->chan result-promise)]
     (go
       (let [result-js (<! result-chan)
             result (result-js->clj result-js)
-            mapped-result (merge i result {:sql/raw-sql raw-sql
-                                           :sql/rows (-> result :rows)})]
-        (println "[db-conn]"
-                 (select-keys mapped-result [:result/type :error/data :error/message :sql/raw-sql :sql/query :sql/rows])
-                 "\n")
+            mapped-result (merge i result {:db-conn/raw-sql raw-sql
+                                           :db-conn/rows (-> result :rows)})]
+        (print-result mapped-result)
         mapped-result))))
 
-(defmethod db-conn/new! :sql-impl/pglite
+(defmethod db-conn/new! :db-conn-impl/pglite
   [i]
   (let [pglite-inst (pglite/PGlite.)]
-    (assoc i
-           :sql/impl :sql-impl/pglite
-           ::pglite-inst pglite-inst)))
+    (assoc i ::pglite-inst pglite-inst)))
 
-(defmethod db-conn/query-chan! :sql-impl/pglite [i]
+(defmethod db-conn/query-chan! :db-conn-impl/pglite [i]
   (query-chan! i))
 
 

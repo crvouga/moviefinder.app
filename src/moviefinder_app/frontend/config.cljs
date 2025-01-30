@@ -11,4 +11,4 @@
 (def config {:wire/backend-url backend-url
              :verify-sms/impl :verify-sms-impl/fake
              :media-db/impl :media-db-impl/rpc
-             :sql/impl :sql-impl/pglite})
+             :db-conn/impl :db-conn-impl/pglite})

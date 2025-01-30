@@ -1,4 +1,4 @@
-(ns moviefinder-app.media.media-db.impl-pg.impl
+(ns moviefinder-app.media.media-db.impl-db-conn.impl
   (:require
    [moviefinder-app.media.media-db.interface :as media-db]
    [cljs.core.async :refer [go]]))
