@@ -10,7 +10,7 @@
 (def config-pglite (merge db-conn-pglite {:media-db/impl :media-db-impl/db-conn}))
 
 (def configs-read-only
-  [#_config-pglite
+  [config-pglite
    {:media-db/impl :media-db-impl/fake}
    {:tmdb/api-key (config/config :tmdb/api-key)
     :media-db/impl :media-db-impl/tmdb-api

@@ -2,7 +2,7 @@
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [cljs.spec.alpha :as s]
             [clojure.core.async :refer [go <!]]
-            [moviefinder-app.media.media-db.interface :as interface]
+            [moviefinder-app.media.media-db.interface :as media-db]
             [moviefinder-app.media.media-db.backend]
             [moviefinder-app.media.media-db.interface.fixture :as fixture]))
 
@@ -17,7 +17,7 @@
            (go
              (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
-                     result (<! (interface/query-result-chan! query))]
+                     result (<! (media-db/query-result-chan! query))]
                  (is (s/valid? :query-result/query-result result)
                      (str "Invalid query result for implementation " (:media-db/impl config)))))
              (done)))))
@@ -27,8 +27,9 @@
     (async done
            (go
              (doseq [config fixture/configs-read-only]
-               (let [query (test-query config)
-                     result (<! (interface/query-result-chan! query))]
+               (let [_put-result (<! (media-db/put-chan! (assoc config :media/entity fixture/test-media)))
+                     query (test-query config)
+                     result (<! (media-db/query-result-chan! query))]
                  (is (seq (:query-result/rows result))
                      (str "Query result should not be empty for implementation " (:media-db/impl config)))))
              (done)))))
@@ -48,7 +49,7 @@
            (go
              (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
-                     result (<! (interface/query-result-chan! query))]
+                     result (<! (media-db/query-result-chan! query))]
                  (doseq [row (:query-result/rows result)]
                    (is (valid-url? (:media/poster-url row))
                        (str "Invalid or missing poster URL for implementation " (:media-db/impl config)))
