@@ -22,24 +22,24 @@
                  :media/poster-url "http://test.com/poster.jpg"
                  :media/backdrop-url "http://test.com/backdrop.jpg"})
 
-#_(deftest put-and-query-test
-    (testing "Can put and query media using pg implementation"
-      (async done
-             (go
-               (doseq [config configs]
-                 (let [put-result (<! (interface/put-chan! (assoc config :media/entity test-media)))
-                       query (merge config
-                                    {:query/limit 10
-                                     :query/offset 0
-                                     :query/where [:= :media/id "test-id"]})
-                       query-result (<! (interface/query-result-chan! query))]
+(deftest put-and-query-test
+  (testing "Can put and query media using pg implementation"
+    (async done
+           (go
+             (doseq [config configs]
+               (let [put-result (<! (interface/put-chan! (assoc config :media/entity test-media)))
+                     query (merge config
+                                  {:query/limit 10
+                                   :query/offset 0
+                                   :query/where [:= :media/id "test-id"]})
+                     query-result (<! (interface/query-result-chan! query))]
 
-                   (is (= :result/ok (:result/type put-result))
-                       "Put operation should succeed")
+                 (is (= :result/ok (:result/type put-result))
+                     "Put operation should succeed")
 
-                   (is (= 1 (count (:query-result/rows query-result)))
-                       "Should find exactly one result")
+                 (is (= 1 (count (:query-result/rows query-result)))
+                     "Should find exactly one result")
 
-                   (is (= test-media (first (:query-result/rows query-result)))
-                       "Retrieved media should match inserted media")))
-               (done)))))
+                 (is (= test-media (first (:query-result/rows query-result)))
+                     "Retrieved media should match inserted media")))
+             (done)))))
