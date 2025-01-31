@@ -9,7 +9,7 @@
   (-> result
       (js->clj :keywordize-keys true)))
 
-(defn print-result [result]
+(defn- print-result [result]
   (println "[db-conn]"
            (select-keys result [:result/type :error/data :error/message :db-conn/raw-sql :db-conn/query :db-conn/rows])
            "\n")
@@ -25,7 +25,7 @@
             result (result-js->clj result-js)
             mapped-result (merge i result {:db-conn/raw-sql raw-sql
                                            :db-conn/rows (-> result :rows)})]
-        (print-result mapped-result)
+        #_(print-result mapped-result)
         mapped-result))))
 
 (defmethod db-conn/new! :db-conn-impl/pglite

@@ -18,6 +18,6 @@
                      result (<! (media-db/query-result-chan! query))
                      first-result (first (:query-result/rows result))]
 
-                 (is (= "123" (:media/id first-result))
+                 (is (= "123" (-> first-result :media/id str))
                      (str "Media ID should match for implementation " (:media-db/impl config)))))
              (done)))))
