@@ -9,13 +9,17 @@
 
 (def config-pglite (merge db-conn-pglite {:media-db/impl :media-db-impl/db-conn}))
 
+(def config-tmdb-api {:media-db/impl :media-db-impl/tmdb-api
+                      :tmdb/api-key (config/config :tmdb/api-key)
+                      :query/limit 10
+                      :query/offset 0})
+
+(def config-fake {:media-db/impl :media-db-impl/fake})
+
 (def configs-read-only
   [config-pglite
-   #_{:media-db/impl :media-db-impl/fake}
-   {:tmdb/api-key (config/config :tmdb/api-key)
-    :media-db/impl :media-db-impl/tmdb-api
-    :query/limit 10
-    :query/offset 0}])
+   config-tmdb-api
+   #_config-fake])
 
 (def configs [config-pglite])
 

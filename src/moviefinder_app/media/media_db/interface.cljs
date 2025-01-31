@@ -4,6 +4,9 @@
             [moviefinder-app.media.entity]))
 
 
+
+
+
 (s/def :query/where vector?)
 (s/def :query/limit number?)
 (s/def :query/offset number?)
@@ -25,16 +28,25 @@
                 :query-result/primary-key
                 :query-result/rows]))
 
-(defmulti query-result-chan!
-  "Used for querying media data from the database using query spec"
-  :media-db/impl)
-
 (def empty-query-result
   {:query-result/limit 25
    :query-result/offset 0
    :query-result/total 0
    :query-result/primary-key :media/id
    :query-result/rows []})
+
+
+
+(defmulti new!
+  "Used for creating a new media db implementation"
+  :media-db/impl)
+
+(defmethod new! :default [q]
+  q)
+
+(defmulti query-result-chan!
+  "Used for querying media data from the database using query spec"
+  :media-db/impl)
 
 (defmethod query-result-chan! :default [q]
   (go
@@ -44,14 +56,14 @@
            :query-result/query q
            :query-result/rows [])))
 
-
 (defmulti put-chan!
   "Used for inserting media data into the database"
   :media-db/impl)
 
 (defmethod put-chan! :default [q]
   (go
-    (assoc empty-query-result
+    (assoc q
            :result/type :result/error
            :error/message "Media db implementation not found"
            :error/data q)))
+

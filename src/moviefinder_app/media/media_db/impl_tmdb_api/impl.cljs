@@ -7,7 +7,7 @@
             [moviefinder-app.media.media-db.impl-tmdb-api.query-plan-item.index]
             [moviefinder-app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]))
 
-(defn to-query-plan [q]
+(defn to-query-plan-items [q]
   (let [where (:query/where q)]
     (cond
       (nil? where)
@@ -20,15 +20,15 @@
 
       (and (vector? where)
            (= :or (first where)))
-      (mapcat #(to-query-plan (assoc q :query/where %)) (rest where))
+      (mapcat #(to-query-plan-items (assoc q :query/where %)) (rest where))
 
       :else
       [[:tmdb-query-plan-item/discover-movie q]])))
 
 
-(defn query-plan-query-results-chan! [q]
+(defn query-plan-query-results-chan! [query-plan-items]
   (go-loop [query-results []
-            query-plan-items (to-query-plan q)]
+            query-plan-items query-plan-items]
     (if (empty? query-plan-items)
       query-results
       (recur (conj query-results (<! (query-plan-item/query-result-chan! (first query-plan-items))))
@@ -36,6 +36,7 @@
 
 (defmethod media-db/query-result-chan! :media-db-impl/tmdb-api [q]
   (go
-    (let [query-results (<! (query-plan-query-results-chan! q))
+    (let [query-plan-items (to-query-plan-items q)
+          query-results (<! (query-plan-query-results-chan! query-plan-items))
           query-result (first query-results)]
       query-result)))
