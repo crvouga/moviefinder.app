@@ -6,8 +6,9 @@
    [core.ui.image-preload :as image-preload]
    [core.ui.top-bar :as top-bar]
    [moviefinder-app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
-   [moviefinder-app.media.media-db.interface :as media-db]
    [moviefinder-app.frontend.config :refer [config]]
+   [moviefinder-app.media.media-db.frontend]
+   [moviefinder-app.media.media-db.interface :as media-db]
    [moviefinder-app.frontend.store :as store]))
 
 (def popular-media-query
@@ -51,5 +52,5 @@
       [top-bar/view {:top-bar/title "Home"}]
       [view-swiper i rows]
       (when (empty? rows)
-        [image/image {:class "w-full h-full"}])
+        [image/view {:class "w-full h-full"}])
       [top-level-bottom-buttons/view i]])))

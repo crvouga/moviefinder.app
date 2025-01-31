@@ -3,6 +3,7 @@
    [moviefinder-app.media.media-db.interface :as media-db]
    [cljs.core.async :refer [go <!]]
    [clojure.set]
+   [core.db-conn.impl]
    [core.db-conn.interface :as db-conn]
    [moviefinder-app.media.media-db.impl-db-conn.migrations :as migrations]))
 
@@ -71,10 +72,11 @@
                                               :order-by (or order [[:media/id :desc]])
                                               :limit limit
                                               :offset offset}})))
-          rows (map row->media (:db-conn/rows result))]
-      {:query-result/query config
-       :query-result/rows rows
-       :query-result/limit limit
-       :query-result/offset offset
-       :query-result/total total
-       :query-result/primary-key :media/id})))
+          rows (map row->media (:db-conn/rows result))
+          query-result {:query-result/query config
+                        :query-result/rows rows
+                        :query-result/limit limit
+                        :query-result/offset offset
+                        :query-result/total total
+                        :query-result/primary-key :media/id}]
+      query-result)))

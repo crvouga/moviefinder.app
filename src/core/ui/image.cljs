@@ -1,19 +1,19 @@
 (ns core.ui.image
   (:require [reagent.core :as r]))
 
-(defn skeleton-surface []
+(defn- skeleton-surface []
   [:div
    {:class "absolute inset-0 bg-neutral-600 animate-pulse rounded"
     :aria-busy true}])
 
-(defn is-image-loaded? [url]
+(defn- is-image-loaded? [url]
   (when url
     (let [img (js/Image.)]
       (= (.-complete img)
          (do (set! (.-src img) url)
              (.-complete img))))))
 
-(defn image [i loading!]
+(defn- image [i loading!]
   [:img {:alt (:image/alt i)
          :src (:image/url i)
          :aria-hidden (not @loading!)

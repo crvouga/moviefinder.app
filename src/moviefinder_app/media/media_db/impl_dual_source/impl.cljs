@@ -9,9 +9,11 @@
             secondary (-> q :media-db-impl-dual-source/secondary)
             primary-result (<! (media-db/query-result-chan! primary))]
         (>! result-chan primary-result)
+        (println "primary-result" primary-result)
         (go
           (let [secondary-result (<! (media-db/query-result-chan! secondary))]
             (doseq [entity (:query-result/rows secondary-result)]
+              (println "putting entity into primary" (-> entity :media/title))
               (<! (media-db/put-chan! (assoc primary :media/entity entity))))))
 
         (close! result-chan)))

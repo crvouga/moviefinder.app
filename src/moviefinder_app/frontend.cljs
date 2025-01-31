@@ -1,9 +1,9 @@
 (ns moviefinder-app.frontend
   (:require [moviefinder-app.frontend.store :as store]
             [moviefinder-app.media.frontend]
+            [moviefinder-app.home.frontend]
             [moviefinder-app.auth.frontend]
             [moviefinder-app.rpc.frontend]
-            [moviefinder-app.home.frontend]
             [moviefinder-app.profile.frontend]
             [moviefinder-app.frontend.db]
             [moviefinder-app.frontend.runtime]
