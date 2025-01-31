@@ -25,7 +25,7 @@
             result (result-js->clj result-js)
             mapped-result (merge i result {:db-conn/raw-sql raw-sql
                                            :db-conn/rows (-> result :rows)})]
-        #_(print-result mapped-result)
+        (print-result mapped-result)
         mapped-result))))
 
 (defmethod db-conn/new! :db-conn-impl/pglite
