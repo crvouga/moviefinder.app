@@ -30,12 +30,12 @@
 
 (defn view-swiper-slide [i row]
   [:swiper-slide {}
-   [:button.w-full.h-full.overflow-hidden.cursor-pointer
+   [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
     {:on-click #(on-slide-click i row)}
     [image-preload/view {:image/url (:media/backdrop-url row)}]
     [image/view {:image/url (:media/poster-url row)
                  :image/alt (:media/title row)
-                 :class "w-full h-full"}]]])
+                 :class "pointer-events-none w-full h-full"}]]])
 
 (defn view-swiper [i rows]
   [:swiper-container {:class "w-full flex-1 overflow-hidden" :direction :vertical}
