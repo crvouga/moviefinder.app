@@ -3,7 +3,7 @@
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [clojure.core.async :refer [go <!]]
             [core.tmdb-api.movie-details :as movie-details]
-            [moviefinder-app.backend.config :as config]
+            [app.backend.config :as config]
             [cljs.spec.alpha :as s]))
 
 (deftest fetch-movie-details-test

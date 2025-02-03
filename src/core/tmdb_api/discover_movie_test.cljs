@@ -2,7 +2,7 @@
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [clojure.core.async :refer [go <!]]
             [core.tmdb-api.discover-movie :as discover-movie]
-            [moviefinder-app.backend.config :as config]
+            [app.backend.config :as config]
             [cljs.spec.alpha :as s]))
 
 

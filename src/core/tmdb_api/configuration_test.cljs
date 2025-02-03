@@ -3,7 +3,7 @@
             [clojure.core.async :refer [go <!]]
             [core.tmdb-api.configuration :as configuration]
             [cljs.spec.alpha :as s]
-            [moviefinder-app.backend.config :as config]))
+            [app.backend.config :as config]))
 
 (deftest fetch-configuration-test
   (testing "fetching configuration from TMDB API"
