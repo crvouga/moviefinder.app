@@ -28,7 +28,7 @@
 (defn on-slide-click [i row]
   (store/put! i [:screen/clicked-link [:screen/media-details (select-keys row [:media/id])]]))
 
-(defn view-swiper-slide [i row]
+(defn- view-swiper-slide [i row]
   [:swiper-slide {}
    [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
     {:on-click #(on-slide-click i row)}
@@ -37,7 +37,7 @@
                  :image/alt (:media/title row)
                  :class "pointer-events-none w-full h-full"}]]])
 
-(defn view-swiper [i rows]
+(defn- view-swiper [i rows]
   [:swiper-container {:class "w-full flex-1 overflow-hidden" :direction :vertical}
    (for [row rows]
      ^{:key row}
