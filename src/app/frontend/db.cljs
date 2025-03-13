@@ -13,7 +13,7 @@
   (select-keys query [:query/where :query/order :query/limit :query/offset]))
 
 (defn- update-entity-ids-by-query [i]
-  (let [payload (-> i store/msg-payload)
+  (let [payload (-> i store/to-msg-payload)
         query (-> payload :query-result/query query-to-key)
         primary-key (-> payload :query-result/primary-key)
         entity-ids (->> payload :query-result/rows (map primary-key))
@@ -32,7 +32,7 @@
 
 
 (defn- update-entities-by-id [i]
-  (let [payload (-> i store/msg-payload)
+  (let [payload (-> i store/to-msg-payload)
         entity-by-id-payload (to-entity-by-id payload)
         entity-by-id (-> i :store/state ::entity-by-id)
         entity-by-id-merged (merge-with merge entity-by-id entity-by-id-payload)]

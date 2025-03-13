@@ -6,7 +6,7 @@
             [app.rpc.frontend]
             [app.profile.frontend]
             [app.frontend.db]
-            [app.frontend.runtime]
+            [app.frontend.sleep]
             [app.frontend.toaster :as toaster]
             [app.frontend.screen :as screen]))
 

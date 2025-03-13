@@ -9,12 +9,12 @@
 (def ^:private processing-msg (atom false))
 (def ^:private view-fn! (atom nil))
 
-(def msg-type (comp first :store/msg))
-(def msg-payload (comp second :store/msg))
-(def eff-type (comp first :store/eff))
-(def eff-payload (comp second :store/eff))
+(def to-msg-type (comp first :store/msg))
+(def to-msg-payload (comp second :store/msg))
+(def to-eff-type (comp first :store/eff))
+(def to-eff-payload (comp second :store/eff))
 
-(defmulti eff! eff-type)
+(defmulti eff! to-eff-type)
 
 (defonce ^:private root
   (let [dom-root (.getElementById js/document "root")]
@@ -83,7 +83,7 @@
   ([] nil)
   ([_] nil)
   ([eff-type- eff-handler & rest]
-   (let [eff-handler-new (fn [i] (if (= eff-type- (eff-type i)) (eff-handler i) i))]
+   (let [eff-handler-new (fn [i] (if (= eff-type- (to-eff-type i)) (eff-handler i) i))]
      (defmethod eff! eff-type- [i]
        (eff-handler-new i))
      (apply register-eff! rest))))
@@ -92,7 +92,7 @@
   ([] nil)
   ([_] nil)
   ([msg-type- transition & rest]
-   (let [transition-new (fn [i] (if (= msg-type- (msg-type i)) (transition i) i))]
+   (let [transition-new (fn [i] (if (= msg-type- (to-msg-type i)) (transition i) i))]
      (swap! transitions! conj transition-new)
      (apply register! rest))))
 

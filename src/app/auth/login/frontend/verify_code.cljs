@@ -17,7 +17,7 @@
  ::inputted-code
  (fn [i]
    (-> i
-       (assoc-in [:store/state ::code] (store/msg-payload i))))
+       (assoc-in [:store/state ::code] (store/to-msg-payload i))))
 
 
  ::submitted-verify-code-form
@@ -32,7 +32,7 @@
 
  ::backend-verified-code
  (fn [i]
-   (let [payload (store/msg-payload i)
+   (let [payload (store/to-msg-payload i)
          current-user-id (-> payload :user/id)
          msgs (if (and current-user-id (-> payload :result/type (= :result/ok)))
                 ;; 

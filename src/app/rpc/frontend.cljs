@@ -28,7 +28,7 @@
 (defmethod store/eff! :rpc/send! [i]
   (println "store/eff! :rpc/send! " i)
   (go
-    (let [eff-payload (store/eff-payload i)
+    (let [eff-payload (store/to-eff-payload i)
           req (-> eff-payload :rpc/req)
           map-res (-> eff-payload :rpc/res)
           res (<! (rpc-chan! req))

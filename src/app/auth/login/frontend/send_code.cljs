@@ -22,7 +22,7 @@
 
  ::backend-sent-code
  (fn [i]
-   (let [sent-code (-> i store/msg-payload)
+   (let [sent-code (-> i store/to-msg-payload)
          msgs (cond
                 (-> sent-code :result/type (= :result/ok))
                 [[:screen/push [:screen/login-verify-code sent-code]]
@@ -40,7 +40,7 @@
  ::inputted-phone-number
  (fn [i]
    (-> i
-       (assoc-in [:store/state ::phone-number] (store/msg-payload i)))))
+       (assoc-in [:store/state ::phone-number] (store/to-msg-payload i)))))
 
 
 (defn sending-code? [i]

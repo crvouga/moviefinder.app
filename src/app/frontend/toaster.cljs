@@ -14,7 +14,7 @@
 
  :toaster/show
  (fn [i]
-   (let [toast (store/msg-payload i)
+   (let [toast (store/to-msg-payload i)
          toast-with-id (-> toast (assoc :toast/id (-> i :store/state ::running-id)))]
      (-> i
          (update-in [:store/state ::running-id] inc)
@@ -24,13 +24,13 @@
 
  ::clicked-close-toast-button
  (fn [i]
-   (let [toast-id (store/msg-payload i)]
+   (let [toast-id (store/to-msg-payload i)]
      (-> i
          (update-in [:store/state ::exiting-ids] conj toast-id))))
 
  ::toast-duration-elapsed
  (fn [i]
-   (let [toast (store/msg-payload i)
+   (let [toast (store/to-msg-payload i)
          exiting-ids-new (-> i :store/state ::exiting-ids (into #{}) (conj (:toast/id toast)))]
      (-> i
          (update :store/state assoc ::exiting-ids exiting-ids-new)))))

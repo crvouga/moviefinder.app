@@ -19,16 +19,16 @@
  ::got-screen
  (fn [i]
    (-> i
-       (assoc-in [:store/state ::screen] (store/msg-payload i))))
+       (assoc-in [:store/state ::screen] (store/to-msg-payload i))))
 
  ::screen-changed
  (fn [i]
    (-> i
-       (assoc-in [:store/state ::screen] (store/msg-payload i))))
+       (assoc-in [:store/state ::screen] (store/to-msg-payload i))))
 
  :screen/clicked-link
  (fn [i]
-   (let [screen-new (store/msg-payload i)
+   (let [screen-new (store/to-msg-payload i)
          current-screen (-> i :store/state ::screen)]
      (if (= screen-new current-screen)
        i
@@ -38,7 +38,7 @@
 
  :screen/push
  (fn [i]
-   (let [screen-new (store/msg-payload i)]
+   (let [screen-new (store/to-msg-payload i)]
      (-> i
          (assoc-in [:store/state ::screen] screen-new)
          (update-in [:store/effs] conj [::push! screen-new])))))
@@ -51,7 +51,7 @@
 
  ::push!
  (fn [i]
-   (let [route (store/eff-payload i)
+   (let [route (store/to-eff-payload i)
          encoded (route/encode route)]
      (js/window.history.pushState nil nil encoded)))
 

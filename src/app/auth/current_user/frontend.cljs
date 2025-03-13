@@ -13,7 +13,7 @@
  :login/authenticated
  (fn [i]
    (let [current-user (-> i :store/state ::current-user)
-         payload (store/msg-payload i)
+         payload (store/to-msg-payload i)
          current-user-new (if (-> payload :result/type (= :result/ok)) payload current-user)]
      (-> i
          (assoc-in [:store/state ::current-user] current-user-new))))
@@ -21,7 +21,7 @@
  ::got-current-user
  (fn [i]
    (-> i
-       (assoc-in [:store/state ::current-user] (-> i store/msg-payload (assoc :result/type :result/ok))))))
+       (assoc-in [:store/state ::current-user] (-> i store/to-msg-payload (assoc :result/type :result/ok))))))
 
 (defn loading? [i]
   (-> i :store/state ::current-user :result/type (= :result/loading)))

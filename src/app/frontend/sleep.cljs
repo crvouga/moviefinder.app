@@ -1,9 +1,9 @@
-(ns app.frontend.runtime
+(ns app.frontend.sleep
   (:require [clojure.core.async :refer [go <! timeout]]
             [app.frontend.store :as store]))
 
 (defn sleep-eff! [i]
-  (let [payload (store/eff-payload i)
+  (let [payload (store/to-eff-payload i)
         duration (-> payload :sleep/duration (or 0))
         msgs (-> payload :sleep/msgs (or []))]
     (go
