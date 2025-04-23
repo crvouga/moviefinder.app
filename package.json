@@ -17,7 +17,6 @@
     "shadow-cljs": "2.28.20"
   },
   "dependencies": {
-    "@electric-sql/pglite": "^0.2.16",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

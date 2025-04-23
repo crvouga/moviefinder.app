@@ -48,22 +48,22 @@
 
 (screen/register!
  :screen/login
- (fn [i]
+ (fn [{:keys [put! read!]}]
    [:div.w-full.flex-1
     [top-bar/view {:top-bar/title "Login with SMS"
-                   :top-bar/on-back #(store/put! i [:screen/clicked-link [:screen/profile]])}]
+                   :top-bar/on-back #(put! [:screen/clicked-link [:screen/profile]])}]
     [:form.flex.flex-col.w-full.gap-6.p-6
-     {:on-submit #(do (.preventDefault %) (store/put! i [::submitted-send-code-form]))}
+     {:on-submit #(do (.preventDefault %) (put! [::submitted-send-code-form]))}
      [text-field/view
       {:text-field/label "Phone Number"
-       :text-field/value (-> i :store/state ::phone-number)
+       :text-field/value (-> (read!) :store/state ::phone-number)
        :text-field/required? true
        :text-field/type :text-field-type/number-pad
-       :text-field/disabled? (sending-code? i)
-       :text-field/on-change #(store/put! i [::inputted-phone-number %])}]
+       :text-field/disabled? (sending-code? (read!))
+       :text-field/on-change #(put! [::inputted-phone-number %])}]
      [:div.w-full]
      [button/view
       {:button/type :button-type/submit
        :button/full? true
-       :button/loading? (sending-code? i)
+       :button/loading? (sending-code? (read!))
        :button/label "Send Code"}]]]))

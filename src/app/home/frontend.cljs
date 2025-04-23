@@ -28,6 +28,8 @@
 (defn on-slide-click [i row]
   (store/put! i [:screen/clicked-link [:screen/media-details (select-keys row [:media/id])]]))
 
+
+
 (defn- view-swiper-slide [i row]
   [:swiper-slide {}
    [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
@@ -46,6 +48,7 @@
 (screen/register!
  :screen/home
  (fn [i]
+   (println "home" i)
    (let [query-result (db/to-query-result i popular-media-query)
          rows (:query-result/rows query-result)]
      [:div.w-full.flex-1.flex.flex-col.overflow-hidden

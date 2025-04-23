@@ -1,86 +1,63 @@
 (ns app.frontend.screen
-  (:require
-   [app.frontend.store :as store]
-   [app.frontend.route :as route]))
+  (:require [app.frontend.route :as route]
+            [core.program :as p]
+            [clojure.core.async :as a]))
 
-(def fallback [:screen/home])
+(defn- fallback [] [:screen/profile])
 
-(defn- get-route! []
-  (or (route/get!) fallback))
+(defn saga [p]
+  (p/put! p [::set-screen (p/eff! p [::get-screen])])
 
-(store/register!
- :store/initialized
- (fn [i]
-   (-> i
-       (update-in [:store/state] assoc ::screen nil)
-       (update-in [:store/effs] concat [[::get-route!]
-                                        [::subscribe-route!]])))
+  (a/go-loop []
+    (let [msg (a/<! (p/take! p :screen/clicked-link))]
+      (p/put! p [::set-screen (second msg)])
+      (p/eff! p [::push-screen! (second msg)])
+      (recur)))
 
- ::got-screen
- (fn [i]
-   (-> i
-       (assoc-in [:store/state ::screen] (store/to-msg-payload i))))
+  (a/go-loop []
+    (let [msg (a/<! (p/take! p ::got-screen))]
+      (p/put! p [::set-screen (second msg)])
+      (recur)))
 
- ::screen-changed
- (fn [i]
-   (-> i
-       (assoc-in [:store/state ::screen] (store/to-msg-payload i))))
+  (doseq [event ["popstate" "pushstate" "replacestate"]]
+    (js/window.addEventListener event #(p/put! p [::got-screen (p/eff! p [::get-screen])]))))
 
- :screen/clicked-link
- (fn [i]
-   (let [screen-new (store/to-msg-payload i)
-         current-screen (-> i :store/state ::screen)]
-     (if (= screen-new current-screen)
-       i
-       (-> i
-           (assoc-in [:store/state ::screen] screen-new)
-           (update-in [:store/effs] conj [::push! screen-new])))))
+(defmethod p/reducer ::set-screen [state msg]
+  (assoc state ::screen (second msg)))
 
- :screen/push
- (fn [i]
-   (let [screen-new (store/to-msg-payload i)]
-     (-> i
-         (assoc-in [:store/state ::screen] screen-new)
-         (update-in [:store/effs] conj [::push! screen-new])))))
+(defmethod p/eff! ::push-screen! [_ msg]
+  (let [encoded-route (route/encode (second msg))]
+    (js/window.history.pushState nil nil (str "/" encoded-route))))
 
+(defmethod p/eff! ::get-screen [_]
+  (or (route/get!) (fallback)))
 
-(store/register-eff!
- ::get-route!
- (fn [i]
-   (store/put! i [::got-screen (get-route!)]))
+;; 
+;; 
+;; 
+;; 
+;; 
 
- ::push!
- (fn [i]
-   (let [route (store/to-eff-payload i)
-         encoded (route/encode route)]
-     (js/window.history.pushState nil nil encoded)))
+(defn screen-name [i] (-> i ::screen first))
 
- ::subscribe-route!
- (fn [i]
-   (doseq [event ["popstate" "pushstate" "replacestate"]]
-     (js/window.addEventListener event #(store/put! i [::screen-changed (get-route!)])))))
+(defn screen-payload [i] (-> i ::screen second))
 
-
-(defn screen-name [i]
-  (-> i :store/state ::screen first))
-
-(defn screen-payload [i]
-  (-> i :store/state ::screen second))
-
-(def view-screen-by-name! (atom {}))
+(def ^:private view-screen-by-name! (atom {}))
 
 (defn register! [name view-screen]
-  (println "reg! name" name)
+  (println "register!" name view-screen)
   (swap! view-screen-by-name! assoc name view-screen))
-(defn view [i]
-  (let [current-screen (-> i :store/state ::screen (or fallback))
+
+(defn view [input]
+  (let [current-screen (-> input :read! deref ::screen (or (fallback)))
         current-screen-name (first current-screen)]
     [:div.w-full.h-full.bg-black
+     [:code (pr-str {:current-screen current-screen})]
      (for [[screen-name view-screen] @view-screen-by-name!]
        ^{:key screen-name}
        [:div.w-full.h-full.overflow-hidden.flex.flex-col
         {:data-screen-name screen-name
          :class (when (not= screen-name current-screen-name) "hidden")}
         (if view-screen
-          [view-screen i]
+          [view-screen input]
           [:div "No screen found for " (pr-str screen-name)])])]))

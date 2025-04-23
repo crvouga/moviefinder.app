@@ -8,7 +8,7 @@
 (def ^:private msg-queue! (atom []))
 (def ^:private processing-msg (atom false))
 (def ^:private view-fn! (atom nil))
-
+(def ^:private sagas! (atom []))
 (def to-msg-type (comp first :store/msg))
 (def to-msg-payload (comp second :store/msg))
 (def to-eff-type (comp first :store/eff))
@@ -16,16 +16,16 @@
 
 (defmulti eff! to-eff-type)
 
-(defonce ^:private root
-  (let [dom-root (.getElementById js/document "root")]
-    (rd/createRoot dom-root)))
+#_(defonce ^:private root
+    (let [dom-root (.getElementById js/document "root")]
+      (rd/createRoot dom-root)))
 
 (defn- render! [put!]
-  (when-let [view-fn @view-fn!]
-    (.render root
-             (r/as-element
-              [view-fn {:store/state @state!
-                        :store/put! put!}]))))
+  #_(when-let [view-fn @view-fn!]
+      (.render root
+               (r/as-element
+                [view-fn {:store/state @state!
+                          :store/put! put!}]))))
 
 (defn- apply-transition [acc transition-fn]
   (let [msg (-> acc :store/msg)
@@ -48,9 +48,9 @@
         state-new (-> transitioned :store/state)
         effs (->> transitioned :store/effs (filter vector?))
         msgs (->> transitioned :store/msgs (filter vector?))]
-    (cljs.pprint/pprint {:msg msg
-                         :effs effs
-                         :msgs msgs})
+    #_(cljs.pprint/pprint {:msg msg
+                           :effs effs
+                           :msgs msgs})
     (reset! state! state-new)
     (render! process-msg!)
 
@@ -95,6 +95,8 @@
    (let [transition-new (fn [i] (if (= msg-type- (to-msg-type i)) (transition i) i))]
      (swap! transitions! conj transition-new)
      (apply register! rest))))
+
+
 
 (defn initialize! [view-fn]
   (reset! view-fn! view-fn)

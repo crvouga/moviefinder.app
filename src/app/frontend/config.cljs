@@ -1,7 +1,7 @@
 (ns app.frontend.config
   (:require
-  ;;  [core.db-conn.interface :as db-conn]
-  ;;  [core.db-conn.impl]
+   ;;  [core.db-conn.interface :as db-conn]
+   ;;  [core.db-conn.impl]
    [cljs.pprint :refer [pprint]]))
 
 (def backend-url-dev "http://localhost:8888")
@@ -10,7 +10,9 @@
   (try
     (= (.-hostname js/window.location) "localhost")
     (catch js/Error _ false)))
-(def backend-url (if (dev?) backend-url-dev backend-url-prod))
+
+(def backend-url (if (or false (dev?)) backend-url-dev backend-url-prod))
+
 
 ;; (def db (db-conn/new! {:db-conn/impl :db-conn-impl/pglite}))
 (def db {})
