@@ -1,25 +1,27 @@
 (ns core.program
   (:require
-   [clojure.core.async :as async]))
+   [clojure.core.async :as async]
+   [clojure.pprint :as pprint]))
 
 (def ^:private state! (atom {}))
+
+
 (def ^:private msg-chan! (async/chan))
 (def ^:private msg-mult! (async/mult msg-chan!))
-(def ^:private eff-handlers! (atom {}))
-(def ^:private reducers! (atom {}))
+
+(def ^:private eff-fns! (atom {}))
+(def ^:private reducer-fns! (atom {}))
 
 
 (defn put! [msg]
-  (println "put!" msg)
   (let [state-prev @state!
-        reducer-fn (get @reducers! (constantly state-prev))
+        reducer-fn (get @reducer-fns! (first msg) (constantly state-prev))
         state-new (reducer-fn state-prev msg)
         _ (reset! state! state-new)]
-    (println "reducer" reducer-fn "state-prev" state-prev "state-new" state-new))
+    (pprint/pprint {:put! msg}))
   (async/put! msg-chan! msg))
 
 (defn take! [msg-type]
-  (println "register take!" msg-type)
   (let [ch (async/chan)]
     (async/tap msg-mult! ch)
     (async/go-loop []
@@ -27,7 +29,6 @@
         (if (or (= msg-type :*)
                 (= (first msg) msg-type))
           (do
-            (println "take!" msg)
             (async/close! ch)
             msg)
           (recur))))))
@@ -35,13 +36,16 @@
 (defn read! []
   @state!)
 
-(defn eff! [eff-type]
-  (let [eff-fn (get @eff-handlers! eff-type)]
-    (println "eff!" eff-fn)
-    (eff-fn)))
+(defn reg-reducer [msg-type reducer-fn]
+  (pprint/pprint {:reg-reducer msg-type})
+  (swap! reducer-fns! assoc msg-type reducer-fn))
+
+(defn eff! [msg]
+  (pprint/pprint {:eff msg})
+  (let [maybe-eff-fn! (get @eff-fns! (first msg))
+        eff-fn! (or maybe-eff-fn! (constantly nil))]
+    (eff-fn! msg)))
 
 (defn reg-eff [eff-type eff-fn]
-  (swap! eff-handlers! assoc eff-type eff-fn))
-
-(defn reg-reducer [msg-type reducer-fn]
-  (swap! reducers! assoc msg-type reducer-fn))
+  (pprint/pprint {:reg-eff eff-type})
+  (swap! eff-fns! assoc eff-type eff-fn))

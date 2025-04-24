@@ -9,6 +9,7 @@
     "defonce",
     "defprotocol",
     "deftype",
+    "disj",
     "dissoc",
     "doseq",
     "doto",

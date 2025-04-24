@@ -9,7 +9,8 @@
    [app.frontend.config :refer [config]]
    [app.media.media-db.frontend]
    [app.media.media-db.interface :as media-db]
-   [app.frontend.store :as store]))
+   [clojure.core.async :as a]
+   [core.program :as p]))
 
 (def popular-media-query
   {:query/limit 25
@@ -20,40 +21,45 @@
                  [:> :media/popularity 80]
                  [:= :media/media-type :media-type/movie]]})
 
-
-(def query-result-chan! (media-db/query-result-chan! (merge config popular-media-query)))
-
-(db/put-query-result! query-result-chan!)
-
-(defn on-slide-click [i row]
-  (store/put! i [:screen/clicked-link [:screen/media-details (select-keys row [:media/id])]]))
-
+(a/go-loop []
+  (let [query (merge config popular-media-query)
+        query-result (a/<! (media-db/query-result-chan! query))]
+    (p/put! [:db/got-query-result query-result])
+    (a/<! (a/timeout (* 1000 60)))
+    (recur)))
 
 
-(defn- view-swiper-slide [i row]
+(a/go-loop []
+  (let [msg (a/<! (p/take! ::clicked-swiper-slide))
+        screen-payload (-> msg second (select-keys [:media/id]))
+        screen [:screen/media-details screen-payload]
+        _ (p/put! [:screen/clicked-link screen])]
+    (recur)))
+
+(defn- view-swiper-slide [row]
   [:swiper-slide {}
    [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
-    {:on-click #(on-slide-click i row)}
+    {:on-click #(p/put! [::clicked-swiper-slide row])}
     [image-preload/view {:image/url (:media/backdrop-url row)}]
     [image/view {:image/url (:media/poster-url row)
                  :image/alt (:media/title row)
                  :class "pointer-events-none w-full h-full"}]]])
 
-(defn- view-swiper [i rows]
+(defn- view-swiper [rows]
   [:swiper-container {:class "w-full flex-1 overflow-hidden" :direction :vertical}
    (for [row rows]
      ^{:key row}
-     [view-swiper-slide i row])])
+     [view-swiper-slide row])])
 
 (screen/register!
  :screen/home
- (fn [i]
-   (println "home" i)
-   (let [query-result (db/to-query-result i popular-media-query)
+ (fn [input]
+   (let [state input
+         query-result (db/to-query-result state popular-media-query)
          rows (:query-result/rows query-result)]
      [:div.w-full.flex-1.flex.flex-col.overflow-hidden
       [top-bar/view {:top-bar/title "Home"}]
-      [view-swiper i rows]
+      [view-swiper rows]
       (when (empty? rows)
         [image/view {:class "w-full h-full"}])
-      [top-level-bottom-buttons/view i]])))
+      [top-level-bottom-buttons/view]])))

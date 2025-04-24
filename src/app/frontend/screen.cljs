@@ -3,12 +3,25 @@
             [core.program :as p]
             [clojure.core.async :as a]))
 
-(defn- fallback [] [:screen/profile])
+(defn- fallback [] [:screen/home])
 
-(p/put! [::set-screen (p/eff! [::get-screen])])
+
+
+(a/go
+  (p/put! [::set-screen (p/eff! [::get-screen])])
+  #_(a/<! (a/timeout 2000))
+  #_(recur))
+
+
 
 (a/go-loop []
   (let [msg (a/<! (p/take! :screen/clicked-link))]
+    (p/put! [::set-screen (second msg)])
+    (p/eff! [::push-screen! (second msg)])
+    (recur)))
+
+(a/go-loop []
+  (let [msg (a/<! (p/take! :screen/push))]
     (p/put! [::set-screen (second msg)])
     (p/eff! [::push-screen! (second msg)])
     (recur)))
@@ -27,8 +40,9 @@
 
 (p/reg-eff
  ::push-screen!
- (fn [msg]
-   (let [encoded-route (route/encode (second msg))]
+ (fn [eff]
+   (println "push-screen!" eff)
+   (let [encoded-route (route/encode (second eff))]
      (js/window.history.pushState nil nil (str "/" encoded-route)))))
 
 
@@ -56,10 +70,10 @@
   (swap! view-screen-by-name! assoc name view-screen))
 
 (defn view [input]
-  (let [current-screen (-> input :read! deref ::screen (or (fallback)))
+  (let [current-screen (-> input ::screen (or (fallback)))
         current-screen-name (first current-screen)]
     [:div.w-full.h-full.bg-black
-     [:code (pr-str {:current-screen current-screen})]
+     #_[:code (pr-str {:current-screen current-screen})]
      (for [[screen-name view-screen] @view-screen-by-name!]
        ^{:key screen-name}
        [:div.w-full.h-full.overflow-hidden.flex.flex-col

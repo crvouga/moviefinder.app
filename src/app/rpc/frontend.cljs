@@ -1,9 +1,9 @@
 (ns app.rpc.frontend
   (:require
-   [app.frontend.store :as store]
    [core.http-client :as http-client]
    [clojure.edn :as edn]
    [clojure.core.async :refer [<! go]]
+   [core.program :as p]
    [app.frontend.config :refer [config]]))
 
 (defn- rpc-fetch! [req]
@@ -13,7 +13,7 @@
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str req)}))
 
-(defn rpc-chan! [req]
+(defn- rpc-res-chan! [req]
   (println "rpc-chan! " req)
   (go
     (let [res (<! (rpc-fetch! req))
@@ -25,12 +25,11 @@
         (merge body-edn {:result/type :result/ok
                          :error/message "Errored while requesting from backend"})))))
 
-(defmethod store/eff! :rpc/send! [i]
-  (println "store/eff! :rpc/send! " i)
-  (go
-    (let [eff-payload (store/to-eff-payload i)
-          req (-> eff-payload :rpc/req)
-          map-res (-> eff-payload :rpc/res)
-          res (<! (rpc-chan! req))
-          mapped-res (map-res res)]
-      (store/put! i mapped-res))))
+(p/reg-eff
+ :rpc/send!
+ (fn [msg]
+   (go
+     (println "rpc/send! " msg)
+     (let [res (<! (rpc-res-chan! (second msg)))]
+       (println "rpc/send! res " res)
+       res))))

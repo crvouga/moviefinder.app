@@ -39,7 +39,7 @@
 
 (go-loop []
   (let [msg (<! (p/take! ::inputted-code))]
-    (p/put! [::set-code (-> msg second ::code)])
+    (p/put! [::set-code (-> msg second)])
     (recur)))
 
 
@@ -53,23 +53,23 @@
 
 (screen/register!
  :screen/login-verify-code
- (fn []
+ (fn [input]
    [:div.w-full.flex-1
     [top-bar/view {:top-bar/title "Verify Code"
                    :top-bar/on-back #(p/put! [:screen/clicked-link [:screen/login]])}]
     [:form.flex.flex-col.w-full.gap-6.p-6
      {:on-submit #(do (.preventDefault %) (p/put! [::user-submitted-form]))}
-     [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> (p/read!) ::screen second :user/phone-number)]]
+     [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> input ::screen second :user/phone-number)]]
      [text-field/view
       {:text-field/label "Code"
-       :text-field/value (-> (p/read!) ::code)
+       :text-field/value (-> input ::code)
        :text-field/type :text-field-type/number-pad
        :text-field/required? true
-       :text-field/disabled? (loading? (p/read!))
+       :text-field/disabled? (loading? input)
        :text-field/on-change #(p/put! [::inputted-code %])}]
      [:div.w-full]
      [button/view
       {:button/type :button-type/submit
-       :button/loading? (loading? (p/read!))
+       :button/loading? (loading? input)
        :button/full? true
        :button/label "Verify Code"}]]]))

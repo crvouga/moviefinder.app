@@ -15,7 +15,7 @@
     [top-bar/view {:top-bar/title "Profile"}]
     [:div.w-full.flex-1.flex.flex-col
      (cond
-       (current-user/logged-out? i) [login-cta/view i]
+       (current-user/logged-out? i) [login-cta/view]
        (current-user/logged-in? i) [:div "You are logged in."]
        :else [spinner-screen/view])]
     [top-level-bottom-buttons/view i]]))

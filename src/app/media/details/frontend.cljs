@@ -2,37 +2,46 @@
   (:require
    [app.frontend.screen :as screen]
    [core.ui.top-bar :as top-bar]
-   [app.frontend.store :as store]
    [app.frontend.db :as db]
-   [core.ui.image :as image]))
+   [core.ui.image :as image]
+   [clojure.core.async :refer [<! go-loop]]
+   [core.program :as p]))
 
+(go-loop []
+  (let [_ (<! (p/take! ::clicked-back))]
+    (p/put! [:screen/push [:screen/home]])
+    (recur)))
 
-(defn view-backdrop [i]
+(p/reg-reducer ::set-media-details
+               (fn [state msg]
+                 (assoc state ::media-details (second msg))))
+
+(defn view-backdrop [media]
   [image/view
    {:class "w-full aspect-video object-cover"
-    :image/url (:media/backdrop-url i)
-    :image/alt (:media/title i)}])
+    :image/url (:media/backdrop-url media)
+    :image/alt (:media/title media)}])
 
-(defn view-top-bar [i]
+(defn view-top-bar [media]
   [top-bar/view
-   {:top-bar/on-back #(store/put! i [:screen/clicked-link [:screen/home]])
-    :top-bar/title (:media/title i)}])
+   {:top-bar/on-back #(p/put! [::clicked-back])
+    :top-bar/title (:media/title media)}])
 
-(defn view-title [i]
-  [:div.text-3xl.font-bold (:media/title i)])
+(defn view-title [media]
+  [:div.text-3xl.font-bold (:media/title media)])
 
-(defn view-overview [i]
-  [:div.text-lg.text-neutral-300 (:media/overview i)])
+(defn view-overview [media]
+  [:div.text-lg.text-neutral-300 (:media/overview media)])
 
 (screen/register!
  :screen/media-details
- (fn [i]
-   (let [payload (screen/screen-payload i)
-         media (db/to-entity i (:media/id payload))
-         i (merge i media)]
+ (fn [input]
+   (let [state input
+         payload (screen/screen-payload state)
+         media (db/to-entity state (:media/id payload))]
      [:div.w-full.h-full.flex.flex-col
-      [view-top-bar i]
-      [view-backdrop i]
+      [view-top-bar media]
+      [view-backdrop media]
       [:div.w-full.text-center.flex.flex-col.items-center.justify-center.p-6.gap-3
-       [view-title i]
-       [view-overview i]]])))
+       [view-title media]
+       [view-overview media]]])))

@@ -5,5 +5,5 @@
 
 (defmethod media-db/query-result-chan! :media-db-impl/rpc [q]
   (go
-    (let [result (<! (rpc/rpc-chan! [:rpc/media-db-query q]))]
+    (let [result (<! (rpc/rpc-res-chan! [:rpc/media-db-query q]))]
       result)))
