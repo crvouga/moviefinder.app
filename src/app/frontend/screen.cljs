@@ -73,7 +73,7 @@
   (let [current-screen (-> input ::screen (or (fallback)))
         current-screen-name (first current-screen)]
     [:div.w-full.h-full.bg-black
-     #_[:code (pr-str {:current-screen current-screen})]
+     [:code (-> input ::screen pr-str)]
      (for [[screen-name view-screen] @view-screen-by-name!]
        ^{:key screen-name}
        [:div.w-full.h-full.overflow-hidden.flex.flex-col

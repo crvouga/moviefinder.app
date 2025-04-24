@@ -13,7 +13,7 @@
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str req)}))
 
-(defn- rpc-res-chan! [req]
+(defn rpc-res-chan! [req]
   (println "rpc-chan! " req)
   (go
     (let [res (<! (rpc-fetch! req))

@@ -10,12 +10,12 @@
 
 (screen/register!
  :screen/profile
- (fn [i]
+ (fn [input]
    [:div.w-full.flex-1.flex.flex-col
     [top-bar/view {:top-bar/title "Profile"}]
     [:div.w-full.flex-1.flex.flex-col
      (cond
-       (current-user/logged-out? i) [login-cta/view]
-       (current-user/logged-in? i) [:div "You are logged in."]
+       (current-user/logged-out? input) [login-cta/view]
+       (current-user/logged-in? input) [:div "You are logged in."]
        :else [spinner-screen/view])]
-    [top-level-bottom-buttons/view i]]))
+    [top-level-bottom-buttons/view input]]))

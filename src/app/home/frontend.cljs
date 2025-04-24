@@ -62,4 +62,4 @@
       [view-swiper rows]
       (when (empty? rows)
         [image/view {:class "w-full h-full"}])
-      [top-level-bottom-buttons/view]])))
+      [top-level-bottom-buttons/view input]])))
