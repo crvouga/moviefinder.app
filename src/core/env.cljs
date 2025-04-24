@@ -1,7 +1,8 @@
 (ns core.env
-  (:require ["fs" :as fs]
-            ["path" :as path]
-            [clojure.string :as str]))
+  (:require
+   ["fs" :as fs]
+   ["path" :as path]
+   [clojure.string :as str]))
 
 (defn load-env! []
   (let [env-path (.resolve path ".env")

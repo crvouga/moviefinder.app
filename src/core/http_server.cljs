@@ -1,6 +1,7 @@
 (ns core.http-server
-  (:require ["http" :as http]
-            [clojure.core.async :refer [go chan close! <!]]))
+  (:require
+   ["http" :as http]
+   [clojure.core.async :refer [<! chan close! go]]))
 
 (defn new! [request-handler!]
   (let [http-server! (.createServer http request-handler!)]

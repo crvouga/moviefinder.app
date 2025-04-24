@@ -1,7 +1,7 @@
 (ns core.ui.top-bar
   (:require
-   [core.ui.icon-button :as icon-button]
-   [core.ui.icon :as icon]))
+   [core.ui.icon :as icon]
+   [core.ui.icon-button :as icon-button]))
 
 
 (defn view [i]

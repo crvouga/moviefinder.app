@@ -1,5 +1,6 @@
 (ns core.ui.button
-  (:require [core.ui.icon :as icon]))
+  (:require
+   [core.ui.icon :as icon]))
 
 (def button-type->html-type
   {:button-type/submit "submit"

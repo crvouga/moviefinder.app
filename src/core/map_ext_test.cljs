@@ -1,7 +1,8 @@
 (ns core.map-ext-test
-  (:require [cljs.test :refer [deftest testing is]]
-            [core.map-ext :as map-ext]
-            [clojure.string :as str]))
+  (:require
+   [cljs.test :refer [deftest is testing]]
+   [clojure.string :as str]
+   [core.map-ext :as map-ext]))
 
 (deftest convert-keys-recursively-test
   (testing "handles nil input"

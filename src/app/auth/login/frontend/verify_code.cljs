@@ -49,7 +49,7 @@
 
 
 (defn- loading? [i]
-  (-> i :store/state ::request result/loading?))
+  (-> i  ::request result/loading?))
 
 (screen/register!
  :screen/login-verify-code

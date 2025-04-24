@@ -16,5 +16,5 @@
       :where [:=  (:user/id i)]}))
 
 #_(defn view [i]
-    (let [lists (-> i :store/state ::lists)]
+    (let [lists (-> i  ::lists)]
       [:div]))

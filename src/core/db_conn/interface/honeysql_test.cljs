@@ -1,8 +1,9 @@
 (ns core.db-conn.interface.honeysql-test
-  (:require [core.db-conn.interface :as db-conn]
-            [core.db-conn.impl]
-            [cljs.test :refer-macros [deftest testing is async]]
-            [cljs.core.async :refer [<!] :refer-macros [go]]))
+  (:require
+   [cljs.core.async :refer [<!] :refer-macros [go]]
+   [cljs.test :refer-macros [deftest testing is async]]
+   [core.db-conn.impl]
+   [core.db-conn.interface :as db-conn]))
 
 (deftest insert-select-honeysql-test
   (async done

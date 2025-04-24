@@ -1,7 +1,8 @@
 (ns core.tmdb-api.shared
-  (:require [clojure.string :as str]
-            [core.map-ext :as map-ext]
-            [core.json :as json]))
+  (:require
+   [clojure.string :as str]
+   [core.json :as json]
+   [core.map-ext :as map-ext]))
 
 
 (def ^:private base-url "https://api.themoviedb.org/3")

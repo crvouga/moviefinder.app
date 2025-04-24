@@ -1,9 +1,10 @@
 (ns core.tmdb-api.configuration-test
-  (:require [cljs.test :refer-macros [deftest testing is async]]
-            [clojure.core.async :refer [go <!]]
-            [core.tmdb-api.configuration :as configuration]
-            [cljs.spec.alpha :as s]
-            [app.backend.config :as config]))
+  (:require
+   [app.backend.config :as config]
+   [cljs.spec.alpha :as s]
+   [cljs.test :refer-macros [deftest testing is async]]
+   [clojure.core.async :refer [<! go]]
+   [core.tmdb-api.configuration :as configuration]))
 
 (deftest fetch-configuration-test
   (testing "fetching configuration from TMDB API"

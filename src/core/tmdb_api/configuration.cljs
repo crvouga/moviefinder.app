@@ -1,9 +1,10 @@
 ;; https://developer.themoviedb.org/reference/configuration-details
 (ns core.tmdb-api.configuration
-  (:require [clojure.core.async :refer [go <!]]
-            [core.http-client :as http-client]
-            [core.tmdb-api.shared :as shared]
-            [cljs.spec.alpha :as s]))
+  (:require
+   [cljs.spec.alpha :as s]
+   [clojure.core.async :refer [<! go]]
+   [core.http-client :as http-client]
+   [core.tmdb-api.shared :as shared]))
 
 (s/def :tmdb/base-url string?)
 (s/def :tmdb/secure-base-url string?)

@@ -1,5 +1,6 @@
 (ns core.http-client
-  (:require [cljs.core.async :refer [chan go >! close!]]))
+  (:require
+   [cljs.core.async :refer [>! chan close! go]]))
 
 (defn to-map-keyword [k] (if (string? k) (keyword k) k))
 (defn to-map-entry [[k v]] [(to-map-keyword k) v])

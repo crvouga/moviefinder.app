@@ -1,6 +1,7 @@
 (ns core.sql
-  (:require [honey.sql :as sql]
-            [clojure.string :as str]))
+  (:require
+   [clojure.string :as str]
+   [honey.sql :as sql]))
 
 
 (defn- escape-param-val [param]

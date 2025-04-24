@@ -1,9 +1,10 @@
 (ns core.tmdb-api.discover-movie-test
-  (:require [cljs.test :refer-macros [deftest testing is async]]
-            [clojure.core.async :refer [go <!]]
-            [core.tmdb-api.discover-movie :as discover-movie]
-            [app.backend.config :as config]
-            [cljs.spec.alpha :as s]))
+  (:require
+   [app.backend.config :as config]
+   [cljs.spec.alpha :as s]
+   [cljs.test :refer-macros [deftest testing is async]]
+   [clojure.core.async :refer [<! go]]
+   [core.tmdb-api.discover-movie :as discover-movie]))
 
 
 (deftest fetch-movies-test

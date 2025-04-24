@@ -1,5 +1,6 @@
 (ns core.ui.image
-  (:require [reagent.core :as r]))
+  (:require
+   [reagent.core :as r]))
 
 (defn- skeleton-surface []
   [:div

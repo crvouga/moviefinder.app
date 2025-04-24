@@ -1,10 +1,11 @@
 ;; https://developer.themoviedb.org/reference/movie-details
 (ns core.tmdb-api.movie-details-test
-  (:require [cljs.test :refer-macros [deftest testing is async]]
-            [clojure.core.async :refer [go <!]]
-            [core.tmdb-api.movie-details :as movie-details]
-            [app.backend.config :as config]
-            [cljs.spec.alpha :as s]))
+  (:require
+   [app.backend.config :as config]
+   [cljs.spec.alpha :as s]
+   [cljs.test :refer-macros [deftest testing is async]]
+   [clojure.core.async :refer [<! go]]
+   [core.tmdb-api.movie-details :as movie-details]))
 
 (deftest fetch-movie-details-test
   (testing "fetching movie details from TMDB API"
@@ -13,7 +14,7 @@
      (go
        (let [movie-id 550  ; Fight Club movie ID
              params (merge config/config
-                          {:tmdb/language "en-US"})
+                           {:tmdb/language "en-US"})
              result (<! (movie-details/fetch-chan! movie-id params))]
 
          (is (s/valid? :tmdb/movie result)
