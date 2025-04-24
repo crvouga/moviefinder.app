@@ -20,8 +20,7 @@
         query-result (-> payload
                          (select-keys [:query-result/limit :query-result/offset :query-result/total :query-result/primary-key])
                          (assoc :query-result/row-ids entity-ids))]
-    (-> i
-        (assoc-in [:store/state ::query-result-by-query query] query-result))))
+    (assoc-in state [::query-result-by-query query] query-result)))
 
 (defn- to-entity-by-id [i]
   (->> i
