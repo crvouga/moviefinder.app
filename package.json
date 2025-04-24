@@ -11,7 +11,9 @@
     "stop": "bun x shadow-cljs stop frontend backend",
     "start": "bun out/backend/main.js",
     "preview": "bun install && bun run build && bun run start",
-    "test": "clear && bun x shadow-cljs compile test && bun x shadow-cljs test"
+    "test": "clear && bun x shadow-cljs compile test && bun x shadow-cljs test",
+    "docker:preview": "docker build -t moviefinder-app . && docker run -p 9630:9630 moviefinder-app",
+    "cloc": "bun x cloc src"
   },
   "devDependencies": {
     "shadow-cljs": "2.28.20"

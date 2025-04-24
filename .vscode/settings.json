@@ -3,6 +3,7 @@
     "aget",
     "aset",
     "chans",
+    "cloc",
     "defmethod",
     "defmulti",
     "defn",
