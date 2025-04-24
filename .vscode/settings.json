@@ -17,6 +17,8 @@
     "extname",
     "fdef",
     "fieldset",
+    "filterv",
+    "fnil",
     "gobj",
     "honeysql",
     "keywordize",
@@ -34,6 +36,7 @@
     "pushstate",
     "replacestate",
     "seancorfield",
+    "swiperslidechange",
     "tmdb"
   ]
 }

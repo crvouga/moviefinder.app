@@ -29,6 +29,7 @@
 (a/go-loop []
   (let [msg (a/<! (p/take! ::got-screen))]
     (p/put! [::set-screen (second msg)])
+    (p/put! [:screen/screen-changed (second msg)])
     (recur)))
 
 (doseq [event ["popstate" "pushstate" "replacestate"]]
@@ -73,7 +74,7 @@
   (let [current-screen (-> input ::screen (or (fallback)))
         current-screen-name (first current-screen)]
     [:div.w-full.h-full.bg-black
-     [:code (-> input ::screen pr-str)]
+     #_[:code (-> input ::screen pr-str)]
      (for [[screen-name view-screen] @view-screen-by-name!]
        ^{:key screen-name}
        [:div.w-full.h-full.overflow-hidden.flex.flex-col

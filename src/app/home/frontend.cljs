@@ -1,16 +1,17 @@
 (ns app.home.frontend
   (:require
-   [app.frontend.screen :as screen]
-   [app.frontend.db :as db]
-   [core.ui.image :as image]
-   [core.ui.image-preload :as image-preload]
-   [core.ui.top-bar :as top-bar]
-   [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.frontend.config :refer [config]]
+   [app.frontend.db :as db]
+   [app.frontend.screen :as screen]
+   [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.media.media-db.frontend]
    [app.media.media-db.interface :as media-db]
    [clojure.core.async :as a]
-   [core.program :as p]))
+   [core.dom :as dom]
+   [core.program :as p]
+   [core.ui.image :as image]
+   [core.ui.image-preload :as image-preload]
+   [core.ui.top-bar :as top-bar]))
 
 (def popular-media-query
   {:query/limit 25
@@ -45,8 +46,21 @@
                  :image/alt (:media/title row)
                  :class "pointer-events-none w-full h-full"}]]])
 
+(a/go
+  (a/<! (a/timeout 1000))
+  (let [swiper-container (dom/query! "#swiper-container")
+        swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
+    (a/go-loop []
+      (let [event (a/<! swiper-container-event-chan!)
+            slide-index-new (-> event .-detail (aget 0) .-activeIndex)]
+        (p/put! [::swiper-slide-changed slide-index-new])
+        (recur)))))
+
+
 (defn- view-swiper [rows]
-  [:swiper-container {:class "w-full flex-1 overflow-hidden" :direction :vertical}
+  [:swiper-container {:class "w-full flex-1 overflow-hidden"
+                      :direction :vertical
+                      :id "swiper-container"}
    (for [row rows]
      ^{:key row}
      [view-swiper-slide row])])

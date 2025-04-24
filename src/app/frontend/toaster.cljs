@@ -3,48 +3,61 @@
             [core.program :as p]
             [core.ui.icon-button :as icon-button]
             [core.ui.icon :as icon]))
-
 (go-loop []
   (let [msg (<! (p/take! :toaster/show))
-        toast (second msg)
-        toast-id (-> (p/read!) ::running-id)
-        toast-with-id (assoc toast :toast/id toast-id)
-        duration (or (:toast/duration toast) 0)
 
-        _ (p/put! [::add-toast toast-with-id])
+        running-id (-> (p/read!) ::running-id (or 0))
 
-        _ (p/put! [::increment-running-id])
+        toast (assoc (second msg) :toast/id running-id)
 
-        _ (<! (alts!
-               (p/take! ::clicked-close-toast-button)
-               (timeout duration)))
+        _ (p/put! [::inc-running-id])
 
-        _ (p/put! [::mark-toast-exiting toast-id])
+        _ (p/put! [::added toast])
+
+        _ (alts! [(p/take! ::clicked-close-toast-button)
+                  (timeout (:toast/duration toast))])
+
+        _ (p/put! [::removing (:toast/id toast)])
 
         _ (<! (timeout 500))
 
-        _ (p/put! [::remove-toast toast-id])]
+        _ (p/put! [::removed (:toast/id toast)])]
     (recur)))
 
 (p/reg-reducer
- ::add-toast
- (fn [state msg]
-   (update state ::toasts conj (second msg))))
-
-(p/reg-reducer
- ::increment-running-id
+ ::inc-running-id
  (fn [state _]
-   (update state ::running-id inc)))
+   (-> state
+       (update  ::running-id (fnil inc 0)))))
 
 (p/reg-reducer
- ::mark-toast-exiting
+ ::added
  (fn [state msg]
-   (update state ::exiting-ids conj (second msg))))
+   (-> state
+       (update ::toasts (fn [toasts]
+                          (if (nil? toasts)
+                            [(second msg)]
+                            (conj toasts (second msg))))))))
+(p/reg-reducer
+ ::removing
+ (fn [state msg]
+   (update state ::removing-ids
+           (fn [ids]
+             (if (nil? ids)
+               [(second msg)]
+               (conj ids (second msg)))))))
+
+
+(defn- ensure-toasts [state]
+  (update state ::toasts #(or % [])))
 
 (p/reg-reducer
- ::remove-toast
+ ::removed
  (fn [state msg]
-   (update state ::toasts disj (second msg))))
+   (-> state
+       ensure-toasts
+       (update ::toasts (fn [toasts] (filterv #(not= (:toast/id %) (second msg)) toasts)))
+       (update ::removing-ids (fn [ids] (filterv #(not= % (second msg)) ids))))))
 
 ;; 
 ;; 
@@ -99,7 +112,6 @@
   (let [id (toast-id toast)
         exiting? (is-exiting? id exiting-ids)
         variant (toast-variant toast)]
-    ^{:key id}
     [:div.p-3.shadow-2xl.rounded.text-lg.pointer-events-auto.flex.items-center.justify-start.font-bold.slide-in-from-top
      {:id (toast-element-id id)
       :class (toast-classes exiting? variant)}
@@ -111,8 +123,8 @@
 
 (defn view [input]
   (let [toasts (-> input ::toasts)
-        exiting-ids (-> input ::exiting-ids)]
+        exiting-ids (-> input ::removing-ids)]
     [view-toast-container
      (for [toast toasts]
-       ^{:key (:toast/id toast)}
+       ^{:key (toast-id toast)}
        [view-single-toast toast exiting-ids])]))
