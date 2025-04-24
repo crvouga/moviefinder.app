@@ -2,63 +2,46 @@
   (:require
    [clojure.core.async :as async]))
 
-(defprotocol Program
-  (put! [this msg])
-  (take! [this msg-type])
-  (read! [this])
-  (start! [this]))
-
-(defmulti eff! (fn [_ msg] (first msg)))
-(defmulti reducer (fn [_ msg] (first msg)))
+(def ^:private state! (atom {}))
+(def ^:private msg-chan! (async/chan))
+(def ^:private msg-mult! (async/mult msg-chan!))
+(def ^:private eff-handlers! (atom {}))
+(def ^:private reducers! (atom {}))
 
 
-(deftype ProgramInstance [sagas! state! state-chan! state-mult! msg-chan! msg-mult!]
-  Program
-  (eff! [_ msg-type]
-    (eff! msg-type))
+(defn put! [msg]
+  (println "put!" msg)
+  (let [state-prev @state!
+        reducer-fn (get @reducers! (constantly state-prev))
+        state-new (reducer-fn state-prev msg)
+        _ (reset! state! state-new)]
+    (println "reducer" reducer-fn "state-prev" state-prev "state-new" state-new))
+  (async/put! msg-chan! msg))
 
-  (put! [_ msg]
-    (println "put!" msg)
-    (async/put! msg-chan! msg))
-
-  (take! [_ msg-type]
-    (println "register take!" msg-type)
-    (let [ch (async/chan)]
-      (async/tap msg-mult! ch)
-      (async/go-loop []
-        (when-let [msg (async/<! ch)]
-          (if (or (= msg-type :*)
-                  (= (first msg) msg-type))
-            (do
-              (println "take!" msg)
-              (async/close! ch)
-              msg)
-            (recur))))))
-
-  (read! [_]
-    @state!)
-
-  (extend! [_ & sagas]
-    (println "register!" sagas)
-    (swap! sagas! into sagas))
-
-  (start! [this]
+(defn take! [msg-type]
+  (println "register take!" msg-type)
+  (let [ch (async/chan)]
+    (async/tap msg-mult! ch)
     (async/go-loop []
-      (when-let [msg (async/<! (.take! this :*))]
-        (println "msg" msg)
-        (println "state" (.read! this))
-        (recur)))
+      (when-let [msg (async/<! ch)]
+        (if (or (= msg-type :*)
+                (= (first msg) msg-type))
+          (do
+            (println "take!" msg)
+            (async/close! ch)
+            msg)
+          (recur))))))
 
-    (doseq [saga @sagas!]
-      (println "start!" saga)
-      (saga this))))
+(defn read! []
+  @state!)
 
-(defn create []
-  (let [sagas! (atom #{})
-        state! (atom {})
-        state-chan! (async/chan)
-        state-mult! (async/mult state-chan!)
-        msg-chan! (async/chan)
-        msg-mult! (async/mult msg-chan!)]
+(defn eff! [eff-type]
+  (let [eff-fn (get @eff-handlers! eff-type)]
+    (println "eff!" eff-fn)
+    (eff-fn)))
 
-    (->ProgramInstance sagas! state! state-chan! state-mult! msg-chan! msg-mult!)))
+(defn reg-eff [eff-type eff-fn]
+  (swap! eff-handlers! assoc eff-type eff-fn))
+
+(defn reg-reducer [msg-type reducer-fn]
+  (swap! reducers! assoc msg-type reducer-fn))

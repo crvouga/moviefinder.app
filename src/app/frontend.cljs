@@ -3,7 +3,6 @@
    ["react-dom/client" :as rd]
    [app.auth.frontend]
    [app.frontend.db]
-   [core.program :as program]
    [app.frontend.screen :as screen]
    [app.frontend.sleep]
    [app.frontend.toaster :as toaster]
@@ -12,6 +11,7 @@
    [app.profile.frontend]
    [app.rpc.frontend]
    [clojure.core.async :refer [<! go-loop]]
+   [core.program :as p]
    [reagent.core :as r]))
 
 
@@ -22,8 +22,6 @@
     [toaster/view input]
     [screen/view input]]])
 
-(defonce app (program/create))
-
 (defonce root
   (let [dom-root (.getElementById js/document "root")
         _ (println "dom-root" dom-root)
@@ -31,14 +29,11 @@
     react-root))
 
 (defn render! []
-  (println "render!" (-> app :read! deref))
-  (.render root (r/as-element [view app])))
+  (.render root (r/as-element [view {}])))
 
 (defn -main []
-  (screen/saga app)
-
   (go-loop []
-    (<! (.take app :*))
+    (<! (p/take! :*))
     (render!)
     (recur)))
 

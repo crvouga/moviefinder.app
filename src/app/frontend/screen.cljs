@@ -5,32 +5,39 @@
 
 (defn- fallback [] [:screen/profile])
 
-(defn saga [p]
-  (p/put! p [::set-screen (p/eff! p [::get-screen])])
+(p/put! [::set-screen (p/eff! [::get-screen])])
 
-  (a/go-loop []
-    (let [msg (a/<! (p/take! p :screen/clicked-link))]
-      (p/put! p [::set-screen (second msg)])
-      (p/eff! p [::push-screen! (second msg)])
-      (recur)))
+(a/go-loop []
+  (let [msg (a/<! (p/take! :screen/clicked-link))]
+    (p/put! [::set-screen (second msg)])
+    (p/eff! [::push-screen! (second msg)])
+    (recur)))
 
-  (a/go-loop []
-    (let [msg (a/<! (p/take! p ::got-screen))]
-      (p/put! p [::set-screen (second msg)])
-      (recur)))
+(a/go-loop []
+  (let [msg (a/<! (p/take! ::got-screen))]
+    (p/put! [::set-screen (second msg)])
+    (recur)))
 
-  (doseq [event ["popstate" "pushstate" "replacestate"]]
-    (js/window.addEventListener event #(p/put! p [::got-screen (p/eff! p [::get-screen])]))))
+(doseq [event ["popstate" "pushstate" "replacestate"]]
+  (js/window.addEventListener event #(p/put! [::got-screen (p/eff! [::get-screen])])))
 
-(defmethod p/reducer ::set-screen [state msg]
-  (assoc state ::screen (second msg)))
+(p/reg-reducer
+ ::set-screen
+ (fn [state msg] (assoc state ::screen (second msg))))
 
-(defmethod p/eff! ::push-screen! [_ msg]
-  (let [encoded-route (route/encode (second msg))]
-    (js/window.history.pushState nil nil (str "/" encoded-route))))
+(p/reg-eff
+ ::push-screen!
+ (fn [msg]
+   (let [encoded-route (route/encode (second msg))]
+     (js/window.history.pushState nil nil (str "/" encoded-route)))))
 
-(defmethod p/eff! ::get-screen [_]
-  (or (route/get!) (fallback)))
+
+(p/reg-eff
+ ::get-screen
+ (fn [_]
+   (or (route/get!) (fallback))))
+
+
 
 ;; 
 ;; 
