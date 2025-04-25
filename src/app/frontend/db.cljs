@@ -44,7 +44,6 @@
       (update ::query-result-by-query #(or % {}))))
 
 (defn tap-print [input]
-  (println "reducer-got-query-result" input)
   input)
 
 (defn reducer-got-query-result [state [_ msg-payload]]

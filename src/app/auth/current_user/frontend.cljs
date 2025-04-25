@@ -1,6 +1,7 @@
 (ns app.auth.current-user.frontend
   (:require
    [app.frontend.mod :as mod]
+   [clojure.core.async :as a]
    [core.program :as p]
    [core.result :as result]))
 
@@ -10,8 +11,9 @@
   (p/take-every!
    i :current-user/load
    (fn [_]
-     (let [got-current-user (p/eff! i [:rpc/send! [:rpc/get-current-user]])]
-       (p/put! i [::set-current-user got-current-user])))))
+     (a/go
+       (let [got-current-user (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
+         (p/put! i [::set-current-user got-current-user]))))))
 
 
 (defn loading? [i]
