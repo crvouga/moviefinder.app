@@ -20,3 +20,6 @@
 
 (defn message [toast]
   (:toast/message toast))
+
+(defn duration [toast]
+  (or (:toast/duration toast) 3000))

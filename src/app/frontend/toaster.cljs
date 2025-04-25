@@ -10,10 +10,10 @@
 (defn- init []
   {::toast-queue []
    ::toast nil
-   ::toast-state nil})
+   ::toast-status nil})
 
 (defn exiting? [state]
-  (-> state ::toast-state (= :toast-state/exit)))
+  (-> state ::toast-status (= :toast-status/exit)))
 
 (defn to-next-toast [state]
   (let [toast-queue (-> state ::toast-queue)]
@@ -31,43 +31,43 @@
    (fn [state [_ toast]] (assoc state ::toast toast)))
 
   (p/reg-reducer
-   i ::set-toast-state
-   (fn [state [_ toast-state]] (assoc state ::toast-state toast-state)))
+   i ::set-toast-status
+   (fn [state [_ toast-status]] (assoc state ::toast-status toast-status)))
 
   (p/reg-reducer
-   i ::enqueue-toast
+   i ::add-toast
    (fn [state [_ toast]]
      (-> state (update ::toast-queue conj toast))))
 
   (p/reg-reducer
-   i ::dequeue-toast
+   i ::remove-toast
    (fn [state [_ toast]]
      (-> state (update ::toast-queue remove-toast toast))))
 
   (p/take-every!
    i :toaster/show
    (fn [[_ toast]]
-     (p/put! i [::enqueue-toast toast])))
+     (p/put! i [::add-toast toast])))
 
   (a/go-loop []
     (let [toast (to-next-toast (p/state! i))]
       (when (nil? toast)
-        (a/<! (p/take! i ::enqueue-toast))
+        (a/<! (p/take! i ::add-toast))
         (recur))
 
       (p/put! i [::set-toast toast])
 
-      (p/put! i [::set-toast-state :toast-state/enter])
+      (p/put! i [::set-toast-status :toast-status/enter])
 
-      (a/alt! (a/timeout (:toast/duration toast)) ::timeout
-              (p/take! i ::clicked-dismiss) ::clicked-dismiss
-              (p/take! i ::enqueue-toast) ::enqueue-toast)
+      (a/alt! (a/timeout (toast/duration toast)) nil
+              (p/take! i ::clicked-dismiss) nil
+              (p/take! i ::add-toast) nil)
 
-      (p/put! i [::set-toast-state :toast-state/exit])
+      (p/put! i [::set-toast-status :toast-status/exit])
 
       (a/<! (a/timeout 300))
 
-      (p/put! i [::dequeue-toast toast])
+      (p/put! i [::remove-toast toast])
 
       (recur))))
 
