@@ -22,13 +22,8 @@
   (-> i  ::request result/loading?))
 
 (defn- logic [i]
-  (p/reg-reducer i ::set-code (fn [state msg] (assoc state ::code (second msg))))
-  (p/reg-reducer i ::set-request (fn [state msg] (assoc state ::request (second msg))))
-
-  (go-loop []
-    (let [msg (<! (p/take! i ::inputted-code))]
-      (p/put! i [::set-code (-> msg second)])
-      (recur)))
+  (p/reg-reducer i ::inputted-code (fn [state [_ code]] (assoc state ::code code)))
+  (p/reg-reducer i ::set-request (fn [state [_ request]] (assoc state ::request request)))
 
   (go-loop []
     (<! (p/take! i ::user-submitted-form))
@@ -79,7 +74,7 @@
                  :top-bar/on-back #(p/put! i [:screen/clicked-link [:screen/login]])}])
 
 (defn view-message [i]
-  [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/screen-payload second :user/phone-number)]])
+  [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/screen-payload :user/phone-number)]])
 
 (defn view-form [i & children]
   (vec

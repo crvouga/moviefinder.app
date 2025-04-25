@@ -1,6 +1,7 @@
 (ns app.frontend.toaster
   (:require
    [app.frontend.mod :as mod]
+   [cljs.pprint :as pprint]
    [clojure.core.async :as a]
    [core.program :as p]
    [core.ui.icon :as icon]
@@ -72,7 +73,7 @@
 (defn- class-toast-variant [variant]
   (case variant
     :toast-variant/info " bg-neutral-800"
-    :toast-variant/error " bg-red-600"
+    :toast-variant/error " bg-red-500"
     " bg-neutral-800"))
 
 (defn- class-toast-animation [exiting?]
@@ -114,6 +115,7 @@
   (let [id (toast-id toast)
         exiting? (is-exiting? id exiting-ids)
         variant (toast-variant toast)]
+    (pprint/pprint {"toast" toast})
     [:div.p-3.shadow-2xl.rounded.text-lg.pointer-events-auto.flex.items-center.justify-start.font-bold.slide-in-from-top
      {:id (toast-element-id id)
       :class (toast-classes exiting? variant)}
@@ -126,7 +128,7 @@
   (let [toasts (-> i ::toasts)
         exiting-ids (-> i ::removing-ids)]
     [view-toast-container
-     (for [toast toasts]
+     (for [toast (vals toasts)]
        ^{:key (toast-id toast)}
        [view-single-toast i toast exiting-ids])]))
 

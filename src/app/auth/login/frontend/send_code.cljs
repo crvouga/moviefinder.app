@@ -62,13 +62,19 @@
 
 (defn- view-top-bar [i]
   [top-bar/view {:top-bar/title "Login with SMS"
-                 :top-bar/on-back #(p/put! i [:screen/clicked-link [:screen/login]])}])
+                 :top-bar/on-back #(p/put! i [:screen/clicked-link [:screen/profile]])}])
+
+(defn view-form [i & children]
+  (vec
+   (concat [:form.flex.flex-col.w-full.gap-6.p-6
+            {:on-submit #(do (.preventDefault %) (p/put! i [::user-submitted-form]))}]
+           children)))
+
 
 (defn view [i]
   [screen/view-screen i :screen/login
    [view-top-bar i]
-   [:form.flex.flex-col.w-full.gap-6
-    {:on-submit #(do (.preventDefault %) (p/put! i [::user-submitted-form]))}
+   [view-form i
     [view-field-phone-number i]
     [:div.w-full]
     [view-submit-button i]]])
