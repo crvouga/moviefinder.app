@@ -63,7 +63,7 @@
 (defmethod upsert-chan! :default [q]
   (go
     (assoc q
-           :result/type :result/error
+           :result/type :result/err
            :error/message "Media db implementation not found"
            :error/data q)))
 

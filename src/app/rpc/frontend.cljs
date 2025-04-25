@@ -1,10 +1,11 @@
 (ns app.rpc.frontend
   (:require
-   [core.http-client :as http-client]
-   [clojure.edn :as edn]
+   [app.frontend.config :refer [config]]
+   [app.frontend.mod :as mod]
    [clojure.core.async :refer [<! go]]
-   [core.program :as p]
-   [app.frontend.config :refer [config]]))
+   [clojure.edn :as edn]
+   [core.http-client :as http-client]
+   [core.program :as p]))
 
 (defn- rpc-fetch! [req]
   (http-client/fetch-chan!
@@ -25,11 +26,9 @@
         (merge body-edn {:result/type :result/ok
                          :error/message "Errored while requesting from backend"})))))
 
-(p/reg-eff
- :rpc/send!
- (fn [msg]
-   (go
-     (println "rpc/send! " msg)
-     (let [res (<! (rpc-res-chan! (second msg)))]
-       (println "rpc/send! res " res)
-       res))))
+(defn- logic [i]
+  (p/reg-eff i :rpc/send! (fn [[_ req]] (rpc-res-chan! req))))
+
+(mod/reg
+ {:mod/name :mod/rpc
+  :mod/logic-fn logic})

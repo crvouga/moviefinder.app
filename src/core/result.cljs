@@ -4,8 +4,8 @@
 (defn ok? [result]
   (= (:result/type result) :result/ok))
 
-(defn error? [result]
-  (= (:result/type result) :result/error))
+(defn err? [result]
+  (= (:result/type result) :result/err))
 
 
 (defn loading? [result]
@@ -15,4 +15,4 @@
 
 (def ok {:result/type :result/ok})
 
-(def error {:result/type :result/error})
+(def error {:result/type :result/err})

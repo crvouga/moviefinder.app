@@ -3,49 +3,82 @@
    [clojure.core.async :as async]
    [clojure.pprint :as pprint]))
 
-(def ^:private state! (atom {}))
+(defn new
+  "New is a function that takes no arguments. It returns a program. new"
+  []
+  (let [state! (atom {})
+        msg-chan! (async/chan)
+        msg-mult! (async/mult msg-chan!)
+        eff-fns! (atom {})
+        reducer-fns! (atom {})]
+    {:program/state! state!
+     :program/msg-chan! msg-chan!
+     :program/msg-mult! msg-mult!
+     :program/eff-fns! eff-fns!
+     :program/reducer-fns! reducer-fns!}))
 
 
-(def ^:private msg-chan! (async/chan))
-(def ^:private msg-mult! (async/mult msg-chan!))
+(defn reducer
+  "Reducer is a function that takes a program, a state, and a message. It returns a state. new"
+  [program state msg]
+  (let [{:keys [program/reducer-fns!]} program
+        reducer-fn (get @reducer-fns! (first msg) (constantly state))]
+    (reducer-fn state msg)))
 
-(def ^:private eff-fns! (atom {}))
-(def ^:private reducer-fns! (atom {}))
+(defn reg-reducer
+  "Reg-reducer is a function that takes a program, a message type, and a reducer function. It returns a program. new"
+  [program msg-type reducer-fn]
+  (pprint/pprint {:reg-reducer msg-type})
+  (let [{:keys [program/reducer-fns!]} program]
+    (swap! reducer-fns! assoc msg-type reducer-fn)))
 
 
-(defn put! [msg]
-  (let [state-prev @state!
-        reducer-fn (get @reducer-fns! (first msg) (constantly state-prev))
-        state-new (reducer-fn state-prev msg)
+(defn state! [program]
+  (let [{:keys [program/state!]} program]
+    @state!))
+
+(defn eff!
+  "Eff is a function that takes a program, and a message. It returns a state. new"
+  [program eff]
+  (pprint/pprint {:eff eff})
+  (let [{:keys [program/eff-fns!]} program
+        maybe-eff-fn! (get @eff-fns! (first eff))
+        eff-fn! (or maybe-eff-fn! (constantly nil))]
+    (eff-fn! eff)))
+
+(defn reg-eff
+  "Reg-eff is a function that takes a program, a message type, and an effect function. It returns a program. new"
+  [program eff-type eff-fn]
+  (pprint/pprint {:reg-eff eff-type})
+  (let [{:keys [program/eff-fns!]} program]
+    (swap! eff-fns! assoc eff-type eff-fn)))
+
+
+(defn put!
+  "Put is a function that takes a program, and a message. It returns a program. new"
+  [program msg]
+  (let [{:keys [program/msg-chan!
+                program/state!]} program
+
+        state-new (reducer program @state! msg)
+
         _ (reset! state! state-new)]
-    (pprint/pprint {:put! msg}))
-  (async/put! msg-chan! msg))
+    (pprint/pprint {:put! msg})
+    (async/put! msg-chan! msg)))
 
-(defn take! [msg-type]
-  (let [ch (async/chan)]
+(defn take!
+  "Take is a function that takes a program, and a message type. It returns a message. new"
+  [program msg-type]
+  (let [{:keys [program/msg-mult!]} program
+        ch (async/chan)]
     (async/tap msg-mult! ch)
-    (async/go-loop []
+    (async/go-loop [ch ch]
       (when-let [msg (async/<! ch)]
         (if (or (= msg-type :*)
                 (= (first msg) msg-type))
           (do
             (async/close! ch)
             msg)
-          (recur))))))
+          (recur ch))))))
 
-(defn read! []
-  @state!)
 
-(defn reg-reducer [msg-type reducer-fn]
-  (pprint/pprint {:reg-reducer msg-type})
-  (swap! reducer-fns! assoc msg-type reducer-fn))
-
-(defn eff! [msg]
-  (pprint/pprint {:eff msg})
-  (let [maybe-eff-fn! (get @eff-fns! (first msg))
-        eff-fn! (or maybe-eff-fn! (constantly nil))]
-    (eff-fn! msg)))
-
-(defn reg-eff [eff-type eff-fn]
-  (pprint/pprint {:reg-eff eff-type})
-  (swap! eff-fns! assoc eff-type eff-fn))

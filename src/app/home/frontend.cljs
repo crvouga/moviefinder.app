@@ -2,6 +2,7 @@
   (:require
    [app.frontend.config :refer [config]]
    [app.frontend.db :as db]
+   [app.frontend.mod :as mod]
    [app.frontend.screen :as screen]
    [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.media.media-db.frontend]
@@ -30,96 +31,65 @@
 ;; 
 
 
-#_(defn logic [i]
-    (a/go-loop []
-      (let [query (merge config popular-media-query)
-            query-result (a/<! (media-db/query-result-chan! query))]
-        (p/put! [:db/got-query-result query-result])
-        (a/<! (a/timeout (* 1000 60)))
-        (recur)))
+(defn- logic [i]
+  (a/go-loop []
+    (let [query (merge config popular-media-query)
+          query-result (a/<! (media-db/query-result-chan! query))]
+      (db/put-query-result! i query-result)
+      (a/<! (a/timeout (* 1000 60)))
+      (recur)))
 
 
-    (a/go-loop []
-      (let [msg (a/<! (p/take! i ::clicked-swiper-slide))
-            screen-payload (-> msg second (select-keys [:media/id]))
-            screen [:screen/media-details screen-payload]
-            _ (p/put! i [:screen/clicked-link screen])]
-        (recur)))
+  (a/go-loop []
+    (let [msg (a/<! (p/take! i ::clicked-swiper-slide))
+          screen-payload (-> msg second (select-keys [:media/id]))
+          screen [:screen/media-details screen-payload]
+          _ (p/put! i [:screen/clicked-link screen])]
+      (recur)))
 
-
-    (a/go
-      (a/<! (a/timeout 1000))
-      (let [swiper-container (dom/query! "#swiper-container")
-            swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
-        (a/go-loop []
-          (let [event (a/<! swiper-container-event-chan!)
-                slide-index-new (-> event .-detail (aget 0) .-activeIndex js/parseInt)]
-            (p/put! i [::swiper-slide-changed slide-index-new])
-            (recur))))))
-
+  (a/go
+    (a/<! (a/timeout 1000))
+    (let [swiper-container (dom/query! "#swiper-container")
+          swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
+      (a/go-loop []
+        (let [event (a/<! swiper-container-event-chan!)
+              slide-index-new (-> event .-detail (aget 0) .-activeIndex js/parseInt)]
+          (p/put! i [::swiper-slide-changed slide-index-new])
+          (recur))))))
 
 ;; 
 ;; 
 ;; 
 ;; 
-;; 
 
-(a/go-loop []
-  (let [query (merge config popular-media-query)
-        query-result (a/<! (media-db/query-result-chan! query))]
-    (p/put! [:db/got-query-result query-result])
-    (a/<! (a/timeout (* 1000 60)))
-    (recur)))
-
-(a/go-loop []
-  (let [msg (a/<! (p/take! ::clicked-swiper-slide))
-        screen-payload (-> msg second (select-keys [:media/id]))
-        screen [:screen/media-details screen-payload]
-        _ (p/put! [:screen/clicked-link screen])]
-    (recur)))
-
-(a/go
-  (a/<! (a/timeout 1000))
-  (let [swiper-container (dom/query! "#swiper-container")
-        swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
-    (a/go-loop []
-      (let [event (a/<! swiper-container-event-chan!)
-            slide-index-new (-> event .-detail (aget 0) .-activeIndex js/parseInt)]
-        (p/put! [::swiper-slide-changed slide-index-new])
-        (recur)))))
-
-;; 
-;; 
-;; 
-;; 
-;; 
-
-(defn- view-swiper-slide [row]
+(defn- view-swiper-slide [i row]
   [:swiper-slide {}
    [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
-    {:on-click #(p/put! [::clicked-swiper-slide row])}
+    {:on-click #(p/put! i [::clicked-swiper-slide row])}
     [image-preload/view {:image/url (:media/backdrop-url row)}]
     [image/view {:image/url (:media/poster-url row)
                  :image/alt (:media/title row)
                  :class "pointer-events-none w-full h-full"}]]])
 
 
-(defn- view-swiper [rows]
+(defn- view-swiper [i rows]
   [:swiper-container {:class "w-full flex-1 overflow-hidden"
                       :direction :vertical
                       :id "swiper-container"}
    (for [row rows]
      ^{:key row}
-     [view-swiper-slide row])])
+     [view-swiper-slide i row])])
 
 (defn- view [i]
   (let [query-result (db/to-query-result i popular-media-query)
         rows (:query-result/rows query-result)]
-    [:div.w-full.flex-1.flex.flex-col.overflow-hidden
+    [screen/view-screen i :screen/home
      [top-bar/view {:top-bar/title "Home"}]
-     [view-swiper rows]
+     [view-swiper i rows]
      (when (empty? rows)
        [image/view {:class "w-full h-full"}])
      [top-level-bottom-buttons/view i]]))
 
-(screen/register :screen/home view)
+(mod/reg {:mod/name :mod/home
+          :mod/view-fn view
+          :mod/logic-fn logic})
