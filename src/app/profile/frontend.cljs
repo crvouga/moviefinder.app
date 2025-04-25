@@ -8,7 +8,7 @@
    [app.auth.current-user.frontend :as current-user]))
 
 
-(screen/register!
+(screen/register
  :screen/profile
  (fn [input]
    [:div.w-full.flex-1.flex.flex-col

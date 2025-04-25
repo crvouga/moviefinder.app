@@ -33,7 +33,7 @@
 (defn view-overview [media]
   [:div.text-lg.text-neutral-300 (:media/overview media)])
 
-(screen/register!
+(screen/register
  :screen/media-details
  (fn [input]
    (let [state input

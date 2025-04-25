@@ -66,8 +66,8 @@
 
 (def ^:private view-screen-by-name! (atom {}))
 
-(defn register! [name view-screen]
-  (println "register!" name view-screen)
+(defn register [name view-screen]
+  (println "register" name view-screen)
   (swap! view-screen-by-name! assoc name view-screen))
 
 (defn view [input]

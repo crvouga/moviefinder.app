@@ -57,7 +57,7 @@
 (defn- loading? [i]
   (-> i ::request result/loading?))
 
-(screen/register!
+(screen/register
  :screen/login
  (fn [input]
    [shared/view-layout "Login with SMS"

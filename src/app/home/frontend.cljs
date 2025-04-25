@@ -22,6 +22,47 @@
                  [:> :media/popularity 80]
                  [:= :media/media-type :media-type/movie]]})
 
+
+;; 
+;; 
+;; 
+;; 
+;; 
+
+
+#_(defn logic [i]
+    (a/go-loop []
+      (let [query (merge config popular-media-query)
+            query-result (a/<! (media-db/query-result-chan! query))]
+        (p/put! [:db/got-query-result query-result])
+        (a/<! (a/timeout (* 1000 60)))
+        (recur)))
+
+
+    (a/go-loop []
+      (let [msg (a/<! (p/take! i ::clicked-swiper-slide))
+            screen-payload (-> msg second (select-keys [:media/id]))
+            screen [:screen/media-details screen-payload]
+            _ (p/put! i [:screen/clicked-link screen])]
+        (recur)))
+
+
+    (a/go
+      (a/<! (a/timeout 1000))
+      (let [swiper-container (dom/query! "#swiper-container")
+            swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
+        (a/go-loop []
+          (let [event (a/<! swiper-container-event-chan!)
+                slide-index-new (-> event .-detail (aget 0) .-activeIndex js/parseInt)]
+            (p/put! i [::swiper-slide-changed slide-index-new])
+            (recur))))))
+
+;; 
+;; 
+;; 
+;; 
+;; 
+
 (a/go-loop []
   (let [query (merge config popular-media-query)
         query-result (a/<! (media-db/query-result-chan! query))]
@@ -29,22 +70,12 @@
     (a/<! (a/timeout (* 1000 60)))
     (recur)))
 
-
 (a/go-loop []
   (let [msg (a/<! (p/take! ::clicked-swiper-slide))
         screen-payload (-> msg second (select-keys [:media/id]))
         screen [:screen/media-details screen-payload]
         _ (p/put! [:screen/clicked-link screen])]
     (recur)))
-
-(defn- view-swiper-slide [row]
-  [:swiper-slide {}
-   [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
-    {:on-click #(p/put! [::clicked-swiper-slide row])}
-    [image-preload/view {:image/url (:media/backdrop-url row)}]
-    [image/view {:image/url (:media/poster-url row)
-                 :image/alt (:media/title row)
-                 :class "pointer-events-none w-full h-full"}]]])
 
 (a/go
   (a/<! (a/timeout 1000))
@@ -56,6 +87,21 @@
         (p/put! [::swiper-slide-changed slide-index-new])
         (recur)))))
 
+;; 
+;; 
+;; 
+;; 
+;; 
+
+(defn- view-swiper-slide [row]
+  [:swiper-slide {}
+   [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
+    {:on-click #(p/put! [::clicked-swiper-slide row])}
+    [image-preload/view {:image/url (:media/backdrop-url row)}]
+    [image/view {:image/url (:media/poster-url row)
+                 :image/alt (:media/title row)
+                 :class "pointer-events-none w-full h-full"}]]])
+
 
 (defn- view-swiper [rows]
   [:swiper-container {:class "w-full flex-1 overflow-hidden"
@@ -65,15 +111,14 @@
      ^{:key row}
      [view-swiper-slide row])])
 
-(screen/register!
- :screen/home
- (fn [input]
-   (let [state input
-         query-result (db/to-query-result state popular-media-query)
-         rows (:query-result/rows query-result)]
-     [:div.w-full.flex-1.flex.flex-col.overflow-hidden
-      [top-bar/view {:top-bar/title "Home"}]
-      [view-swiper rows]
-      (when (empty? rows)
-        [image/view {:class "w-full h-full"}])
-      [top-level-bottom-buttons/view input]])))
+(defn- view [i]
+  (let [query-result (db/to-query-result i popular-media-query)
+        rows (:query-result/rows query-result)]
+    [:div.w-full.flex-1.flex.flex-col.overflow-hidden
+     [top-bar/view {:top-bar/title "Home"}]
+     [view-swiper rows]
+     (when (empty? rows)
+       [image/view {:class "w-full h-full"}])
+     [top-level-bottom-buttons/view i]]))
+
+(screen/register :screen/home view)

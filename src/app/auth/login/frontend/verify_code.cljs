@@ -51,7 +51,7 @@
 (defn- loading? [i]
   (-> i  ::request result/loading?))
 
-(screen/register!
+(screen/register
  :screen/login-verify-code
  (fn [input]
    [:div.w-full.flex-1
