@@ -56,11 +56,11 @@
            :query-result/query q
            :query-result/rows [])))
 
-(defmulti put-chan!
+(defmulti upsert-chan!
   "Used for inserting media data into the database"
   :media-db/impl)
 
-(defmethod put-chan! :default [q]
+(defmethod upsert-chan! :default [q]
   (go
     (assoc q
            :result/type :result/error

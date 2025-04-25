@@ -14,7 +14,7 @@
                    dual-source-config {:media-db/impl :media-db-impl/dual-source
                                        :media-db-impl-dual-source/primary primary-config
                                        :media-db-impl-dual-source/secondary secondary-config}
-                   _put-result (<! (media-db/put-chan! (assoc primary-config :media/entity test-media)))
+                   _put-result (<! (media-db/upsert-chan! (assoc primary-config :media/entity test-media)))
                    query (merge dual-source-config
                                 {:query/limit 1
                                  :query/offset 0

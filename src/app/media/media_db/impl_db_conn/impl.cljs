@@ -39,7 +39,7 @@
     (doseq [migration migrations/migrations]
       (<! (db-conn/query-chan! (merge config {:db-conn/query migration}))))))
 
-(defmethod media-db/put-chan! :media-db-impl/db-conn
+(defmethod media-db/upsert-chan! :media-db-impl/db-conn
   [{:keys [media/entity] :as config}]
   (go
     (<! (run-migrations! config))

@@ -10,7 +10,7 @@
            (go
              (doseq [config fixture/configs-read-only]
                (let [test-media (assoc fixture/test-media :media/id "123")
-                     _put-result (<! (media-db/put-chan! (assoc config :media/entity test-media)))
+                     _put-result (<! (media-db/upsert-chan! (assoc config :media/entity test-media)))
                      query (merge config
                                   {:query/limit 1
                                    :query/offset 0

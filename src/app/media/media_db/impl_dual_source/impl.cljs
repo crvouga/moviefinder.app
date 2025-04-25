@@ -14,7 +14,7 @@
           (let [secondary-result (<! (media-db/query-result-chan! secondary))]
             (doseq [entity (:query-result/rows secondary-result)]
               (println "putting entity into primary" (-> entity :media/title))
-              (<! (media-db/put-chan! (assoc primary :media/entity entity))))))
+              (<! (media-db/upsert-chan! (assoc primary :media/entity entity))))))
 
         (close! result-chan)))
     result-chan))
