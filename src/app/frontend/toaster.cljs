@@ -9,36 +9,30 @@
 
 (defn- init []
   {::toast-queue []
-   ::visible-toast-id nil
-   ::visible-toast-state nil})
-
-(defn to-visible-toast [state]
-  (let [visible-toast-id (-> state ::visible-toast-id)
-        toast-queue (-> state ::toast-queue)
-        visible-toast (filter #(= (:toast/id %) visible-toast-id) toast-queue)]
-    (first visible-toast)))
+   ::toast nil
+   ::toast-state nil})
 
 (defn exiting? [state]
-  (-> state ::visible-toast-state (= :toast-state/exit)))
+  (-> state ::toast-state (= :toast-state/exit)))
 
-(defn to-latest-toast [state]
+(defn to-next-toast [state]
   (let [toast-queue (-> state ::toast-queue)]
     (last toast-queue)))
 
-(defn- remove-toast [toasts toast-id]
-  (filterv #(not= (:toast/id %) toast-id) toasts))
+(defn- remove-toast [toasts toast]
+  (filterv #(not= (:toast/id %) (:toast/id toast)) toasts))
 
 (defn- logic [i]
   (p/reg-reducer i ::init (fn [state _] (merge state (init))))
   (a/go (p/put! i [::init]))
 
   (p/reg-reducer
-   i ::set-visible-toast-id
-   (fn [state [_ id]] (assoc state ::visible-toast-id id)))
+   i ::set-toast
+   (fn [state [_ toast]] (assoc state ::toast toast)))
 
   (p/reg-reducer
-   i ::set-visible-toast-state
-   (fn [state [_ toast-state]] (assoc state ::visible-toast-state toast-state)))
+   i ::set-toast-state
+   (fn [state [_ toast-state]] (assoc state ::toast-state toast-state)))
 
   (p/reg-reducer
    i ::enqueue-toast
@@ -47,8 +41,8 @@
 
   (p/reg-reducer
    i ::dequeue-toast
-   (fn [state [_ toast-id]]
-     (-> state (update ::toast-queue remove-toast toast-id))))
+   (fn [state [_ toast]]
+     (-> state (update ::toast-queue remove-toast toast))))
 
   (p/take-every!
    i :toaster/show
@@ -56,40 +50,39 @@
      (p/put! i [::enqueue-toast toast])))
 
   (a/go-loop []
-    (let [toast (to-latest-toast (p/state! i))]
-
+    (let [toast (to-next-toast (p/state! i))]
       (when (nil? toast)
         (a/<! (p/take! i ::enqueue-toast))
         (recur))
 
-      (p/put! i [::set-visible-toast-id (:toast/id toast)])
+      (p/put! i [::set-toast toast])
 
-      (p/put! i [::set-visible-toast-state :toast-state/enter])
+      (p/put! i [::set-toast-state :toast-state/enter])
 
       (a/alt! (a/timeout (:toast/duration toast)) ::timeout
               (p/take! i ::clicked-dismiss) ::clicked-dismiss
               (p/take! i ::enqueue-toast) ::enqueue-toast)
 
-      (p/put! i [::set-visible-toast-state :toast-state/exit])
+      (p/put! i [::set-toast-state :toast-state/exit])
 
       (a/<! (a/timeout 300))
 
-      (p/put! i [::dequeue-toast (:toast/id toast)])
+      (p/put! i [::dequeue-toast toast])
 
       (recur))))
 
 
 
 
-(defn- view-dismiss-button [i toast]
+(defn- view-dismiss-button [i]
   [icon-button/view
-   {:icon-button/on-click #(p/put! i [::clicked-dismiss (toast/id toast)])
+   {:icon-button/on-click #(p/put! i [::clicked-dismiss])
     :icon-button/view-icon icon/x-mark}])
 
 (defn- toast-classes [i toast]
   (str
-   (if (exiting? i) "slide-out-to-top" "slide-in-from-top")
-   " "
+   "slide-in-from-top "
+   (when (exiting? i) "slide-out-to-top ")
    (case (toast/variant toast)
      :toast-variant/info "bg-neutral-800"
      :toast-variant/error "bg-red-500"
@@ -98,7 +91,7 @@
 (defn- view-toast-content [i toast]
   [:div.flex.items-center.justify-start.w-full
    [:p.flex-1 (toast/message toast)]
-   [view-dismiss-button i toast]])
+   [view-dismiss-button i]])
 
 (defn- view-toast [i toast]
   [:div.p-3.shadow-2xl.rounded.text-lg.pointer-events-auto.flex.items-center.justify-start.font-bold
@@ -107,9 +100,9 @@
    [view-toast-content i toast]])
 
 (defn- view [i]
-  [:div.absolute.top-0.left-0.w-full.p-4.pointer-events-none
-   (when-let [toast (to-visible-toast i)]
-     [view-toast i toast])])
+  (when-let [toast (-> i ::toast)]
+    [:div.absolute.top-0.left-0.w-full.p-4.pointer-events-none
+     [view-toast i toast]]))
 
 (mod/reg
  {:mod/name :mod/toaster
