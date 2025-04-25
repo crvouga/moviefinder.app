@@ -7,11 +7,13 @@
   (swap! mods conj mod))
 
 (defn logic [i]
-  (doseq [{:keys [mod/logic-fn] :or {logic-fn identity}} @mods]
-    (logic-fn i)))
+  (doseq [{:keys [mod/logic-fn]} @mods]
+    (when (fn? logic-fn)
+      (logic-fn i))))
 
 (defn view [i]
   [:<>
-   (for [{:keys [mod/view-fn mod/name] :or {view-fn identity}} @mods]
+   (for [{:keys [mod/view-fn mod/name]} @mods
+         :when (fn? view-fn)]
      ^{:key name}
      [view-fn i])])

@@ -54,7 +54,7 @@
 
   (a/go
     (a/<! (a/timeout 1000))
-    (let [swiper-container (dom/query! "#swiper-container")
+    (let [swiper-container (dom/query-selector! "#swiper-container")
           swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
       (a/go-loop []
         (let [event (a/<! swiper-container-event-chan!)
@@ -74,8 +74,12 @@
     [image-preload/view {:image/url (:media/backdrop-url row)}]
     [image/view {:image/url (:media/poster-url row)
                  :image/alt (:media/title row)
-                 :class "pointer-events-none w-full h-full"}]]])
+                 :class "w-full h-full"}]]])
 
+
+(defn- view-swiper-last-slide [_]
+  [:swiper-slide {}
+   [image/view {:class "w-full h-full"}]])
 
 (defn- view-swiper [i rows]
   [:swiper-container {:class "w-full flex-1 overflow-hidden"
@@ -83,7 +87,8 @@
                       :id "swiper-container"}
    (for [row rows]
      ^{:key row}
-     [view-swiper-slide i row])])
+     [view-swiper-slide i row])
+   (view-swiper-last-slide i)])
 
 (defn- view [i]
   (let [query-result (db/to-query-result i popular-media-query)
