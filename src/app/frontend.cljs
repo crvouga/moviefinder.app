@@ -5,6 +5,7 @@
    [app.frontend.db]
    [app.frontend.mod :as mod]
    [app.frontend.screen]
+   [app.frontend.screen :as screen]
    [app.frontend.toaster]
    [app.home.frontend]
    [app.media.frontend]
@@ -21,6 +22,7 @@
 (defn view [i]
   [:div {:class "fixed left-1/2 top-1/2 flex h-[100dvh] w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden bg-black text-white"}
    [:div {:class "relative flex h-full max-h-[915px] w-full max-w-[520px] flex-col items-center justify-center overflow-hidden rounded min-[520px]:border border-neutral-500"}
+    [:code (pr-str (screen/screen-name i))]
     [mod/view i]]])
 
 (defonce root
@@ -30,8 +32,6 @@
 
 (defn render! [input]
   (.render root (r/as-element [view input])))
-
-
 
 (defn -main []
   (mod/logic program)

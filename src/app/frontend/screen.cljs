@@ -64,8 +64,28 @@
 
 (defn screen-payload [i] (-> i ::screen second))
 
-(defn concatv [node children]
+(defn- concatv [node children]
   (vec (concat node children)))
+
+
+
+(defn- view-screen-hidden-css [i screen-name & children]
+  (let [current-screen-name (-> i ::screen (or (fallback)) first)]
+    [:<>
+     (concatv
+      [:div.w-full.h-full.overflow-hidden.flex.flex-col
+       {:data-screen-name screen-name
+        :class (when (not= screen-name current-screen-name) "hidden")}]
+      children)]))
+
+(defn- view-screen-hidden-conditional [i screen-name & children]
+  (let [current-screen-name (-> i ::screen (or (fallback)) first)]
+    (if (= screen-name current-screen-name)
+      (concatv
+       [:div.w-full.h-full.overflow-hidden.flex.flex-col
+        {:data-screen-name screen-name}]
+       children)
+      nil)))
 
 (defn view-screen [i screen-name & children]
   (let [current-screen-name (-> i ::screen (or (fallback)) first)]
@@ -74,7 +94,6 @@
       [:div.w-full.h-full.overflow-hidden.flex.flex-col
        {:data-screen-name screen-name
         :class (when (not= screen-name current-screen-name) "hidden")}]
-      #_[:code (str current-screen-name)]
       children)]))
 
 ;; 

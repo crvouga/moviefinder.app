@@ -31,6 +31,9 @@
 ;; 
 
 
+(defn swiper-event->slide-index [event]
+  (-> event .-detail (aget 0) .-activeIndex js/parseInt))
+
 (defn- logic [i]
   (a/go-loop []
     (let [query (merge config popular-media-query)
@@ -40,7 +43,7 @@
       (recur)))
 
   (a/go-loop []
-    (let [[_ {:keys [slide-index]}] (a/<! (p/take! i ::swiper-slide-changed))]
+    (let [[_ slide-index] (a/<! (p/take! i ::swiper-slide-changed))]
       (println "swiper-slide-changed" slide-index)
       (recur)))
 
@@ -52,15 +55,11 @@
           _ (p/put! i [:screen/clicked-link screen])]
       (recur)))
 
-  (a/go
-    (a/<! (a/timeout 1000))
-    (let [swiper-container (dom/query-selector! "#swiper-container")
-          swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
+  #_(let [slide-index-chan (dom/watch-event-chan! "#swiper-container" "swiperslidechange" (map swiper-event->slide-index))]
       (a/go-loop []
-        (let [event (a/<! swiper-container-event-chan!)
-              slide-index-new (-> event .-detail (aget 0) .-activeIndex js/parseInt)]
-          (p/put! i [::swiper-slide-changed slide-index-new])
-          (recur))))))
+        (let [slide-index (a/<! slide-index-chan)]
+          (p/put! i [::swiper-slide-changed slide-index])
+          (recur)))))
 
 ;; 
 ;; 

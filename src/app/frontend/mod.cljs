@@ -15,5 +15,5 @@
   [:<>
    (for [{:keys [mod/view-fn mod/name]} @mods
          :when (fn? view-fn)]
-     ^{:key name}
+     ^{:key (str name)}
      [view-fn i])])
