@@ -8,7 +8,7 @@
   (testing "Can query media from dual sources with db-conn primary and tmdb secondary"
     (async done
            (go
-             (let [primary-config fixture/config-pglite
+             (let [primary-config fixture/config-tmdb-api
                    secondary-config fixture/config-tmdb-api
                    test-media (assoc fixture/test-media :media/id "123")
                    dual-source-config {:media-db/impl :media-db-impl/dual-source
@@ -30,7 +30,7 @@
   (testing "Results from secondary source are stored in primary after dual source query"
     (async done
            (go
-             (let [primary-config fixture/config-pglite
+             (let [primary-config fixture/config-tmdb-api
                    secondary-config fixture/config-tmdb-api
                    test-id "123" ; Using a different ID that won't exist in primary
                    dual-source-config {:media-db/impl :media-db-impl/dual-source

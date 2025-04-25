@@ -1,27 +1,19 @@
 (ns app.media.media-db.interface.fixture
   (:require [app.media.media-db.backend]
             [app.backend.config :as config]
-            [core.db-conn.impl]
-            [app.media.media-db.impl]
-            [core.db-conn.interface :as db-conn]))
+            [core.backend.db-conn.impl]
+            [app.media.media-db.impl]))
 
-(def db-conn-pglite (db-conn/new! {:db-conn/impl :db-conn-impl/pglite}))
-
-(def config-pglite (merge db-conn-pglite {:media-db/impl :media-db-impl/db-conn}))
 
 (def config-tmdb-api {:media-db/impl :media-db-impl/tmdb-api
                       :tmdb/api-key (config/config :tmdb/api-key)
                       :query/limit 10
                       :query/offset 0})
 
-(def config-fake {:media-db/impl :media-db-impl/fake})
-
 (def configs-read-only
-  [config-pglite
-   config-tmdb-api
-   #_config-fake])
+  [config-tmdb-api])
 
-(def configs [config-pglite])
+(def configs [config-tmdb-api])
 
 (def test-media {:media/id "test-id"
                  :media/title "Test Movie"

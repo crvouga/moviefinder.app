@@ -1,7 +1,5 @@
 (ns app.frontend.config
   (:require
-   ;;  [core.db-conn.interface :as db-conn]
-   ;;  [core.db-conn.impl]
    [cljs.pprint :refer [pprint]]))
 
 (def backend-url-dev "http://localhost:8888")
@@ -13,9 +11,7 @@
 
 (def backend-url (if (or false (dev?)) backend-url-dev backend-url-prod))
 
-
-;; (def db (db-conn/new! {:db-conn/impl :db-conn-impl/pglite}))
-(def db {})
+(def db {:db-conn/impl :db-conn-impl/better-sqlite3})
 
 (def config
   (merge db

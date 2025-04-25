@@ -1,16 +1,16 @@
-(ns core.db-conn.interface.insert-select-test
+(ns core.backend.db-conn.interface.insert-select-test
   (:require
    [cljs.core.async :refer [<!] :refer-macros [go]]
    [cljs.test :refer-macros [deftest testing is async]]
-   [core.db-conn.impl]
-   [core.db-conn.interface :as db-conn]))
+   [core.backend.db-conn.impl]
+   [core.backend.db-conn.interface :as db-conn]))
 
 
 (deftest insert-select-test
   (async done
          (testing "Can insert and select data"
            (go
-             (let [db-conn (db-conn/new! {:db-conn/impl :db-conn-impl/pglite})
+             (let [db-conn (db-conn/new! {:db-conn/impl :db-conn-impl/better-sqlite3})
                    _ (-> db-conn
                          (assoc :db-conn/query "CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, name TEXT)")
                          db-conn/query-chan!

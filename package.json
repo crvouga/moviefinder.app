@@ -6,7 +6,7 @@
     "build": "bun x shadow-cljs release frontend backend",
     "clean": "bun x shadow-cljs clean",
     "open": "open http://localhost:9630",
-    "watch": "bun x shadow-cljs watch frontend backend",
+    "watch": "bun x shadow-cljs watch frontend backend browser-test",
     "dev": "bun run open && bun run watch",
     "stop": "bun x shadow-cljs stop frontend backend",
     "start": "bun out/backend/main.js",
@@ -16,9 +16,10 @@
     "cloc": "bun x cloc src"
   },
   "devDependencies": {
-    "shadow-cljs": "2.28.20"
+    "shadow-cljs": "^3.0.1"
   },
   "dependencies": {
+    "better-sqlite3": "^11.9.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

@@ -3,8 +3,8 @@
    [app.media.media-db.interface :as media-db]
    [cljs.core.async :refer [go <!]]
    [clojure.set]
-   [core.db-conn.impl]
-   [core.db-conn.interface :as db-conn]
+   [core.backend.db-conn.impl]
+   [core.backend.db-conn.interface :as db-conn]
    [app.media.media-db.impl-db-conn.migrations :as migrations]))
 
 

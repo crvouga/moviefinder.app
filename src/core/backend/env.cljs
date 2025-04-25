@@ -1,4 +1,4 @@
-(ns core.env
+(ns core.backend.env
   (:require
    ["fs" :as fs]
    ["path" :as path]

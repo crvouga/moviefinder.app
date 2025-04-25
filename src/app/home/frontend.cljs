@@ -52,7 +52,7 @@
         swiper-container-event-chan! (dom/event-chan swiper-container "swiperslidechange")]
     (a/go-loop []
       (let [event (a/<! swiper-container-event-chan!)
-            slide-index-new (-> event .-detail (aget 0) .-activeIndex)]
+            slide-index-new (-> event .-detail (aget 0) .-activeIndex js/parseInt)]
         (p/put! [::swiper-slide-changed slide-index-new])
         (recur)))))
 

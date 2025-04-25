@@ -17,7 +17,7 @@
     sql
     (reduce replace-param sql params)))
 
-(defn query->raw-sql [query]
+(defn sql-query->raw-sql [query]
   (if (string? query)
     query
     (->> query sql/format (apply params->sql))))

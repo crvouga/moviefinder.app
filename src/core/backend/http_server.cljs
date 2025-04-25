@@ -1,4 +1,4 @@
-(ns core.http-server
+(ns core.backend.http-server
   (:require
    ["http" :as http]
    [clojure.core.async :refer [<! chan close! go]]))

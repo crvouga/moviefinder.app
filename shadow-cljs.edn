@@ -6,7 +6,7 @@
  [[reagent "1.2.0"]
   [com.github.seancorfield/honeysql "2.6.1270"]]
 
- :dev-http {8080 "public"} 
+ :dev-http {8080 "public"}
 
  :builds
  {:frontend

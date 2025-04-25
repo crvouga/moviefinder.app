@@ -1,5 +1,5 @@
 (ns app.backend.config
-  (:require [core.env :as env]
+  (:require [core.backend.env :as env]
             [clojure.string :as str]))
 
 (def api-key (-> "TMDB_API_READ_ACCESS_TOKEN" env/get-else-throw!))
@@ -12,7 +12,7 @@
 (def config {:tmdb/api-key api-key
              :http-server/port port
              :verify-sms/impl :verify-sms-impl/fake
-             :db-conn/impl :db-conn-impl/pglite})
+             :db-conn/impl :db-conn-impl/better-sqlite3})
 
 (defn assoc-config
   "assoc application configuration to map"

@@ -6,7 +6,7 @@
             [app.rpc.backend]
             [app.auth.backend]
             [app.media.backend]
-            [core.http-server :as http-server]))
+            [core.backend.http-server :as http-server]))
 
 (defn request-handler-root! [req res]
   (request-handler! req res))
