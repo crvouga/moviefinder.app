@@ -39,6 +39,11 @@
       (a/<! (a/timeout (* 1000 60)))
       (recur)))
 
+  (a/go-loop []
+    (let [[_ {:keys [slide-index]}] (a/<! (p/take! i ::swiper-slide-changed))]
+      (println "swiper-slide-changed" slide-index)
+      (recur)))
+
 
   (a/go-loop []
     (let [msg (a/<! (p/take! i ::clicked-swiper-slide))
