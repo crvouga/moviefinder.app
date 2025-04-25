@@ -57,6 +57,19 @@
      result-chan)))
 
 
+(defn animation-end-once [css-selector]
+  (let [result-chan (a/chan)
+        node-chan (watch-query-selector-chan! css-selector)]
+    (a/go-loop []
+      (let [node (a/<! node-chan)
+            event-chan (event-chan node "animationend")]
+        (a/go-loop []
+          (let [event (a/<! event-chan)]
+            (a/put! result-chan event)
+            (a/close! result-chan)
+            (recur)))
+        (recur)))
+    result-chan))
 
 
 ;; 
