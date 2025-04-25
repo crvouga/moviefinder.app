@@ -26,8 +26,7 @@
 
     (let [state (p/state! i)
           phone-number (-> state ::phone-number)
-          req [:rpc/send-code {:user/phone-number phone-number}]
-          res (<! (p/eff! i [:rpc/send! req]))]
+          res (<! (p/eff! i [:rpc/send! [:rpc/send-code {:user/phone-number phone-number}]]))]
 
       (p/put! i [::set-request res])
 
