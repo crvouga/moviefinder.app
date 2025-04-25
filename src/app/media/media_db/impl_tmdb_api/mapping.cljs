@@ -5,16 +5,20 @@
    [core.tmdb-api.movie-details]
    [clojure.set :refer [rename-keys]]))
 
-(defn- tmdb-item->media [movie]
-  (rename-keys movie {:tmdb/id :media/id
-                      :tmdb/title :media/title
-                      :tmdb/release-date :media/release-date
-                      :tmdb/overview :media/overview
-                      :tmdb/poster-path :media/poster-path
-                      :tmdb/backdrop-path :media/backdrop-path
-                      :tmdb/vote-average :media/vote-average
-                      :tmdb/vote-count :media/vote-count
-                      :tmdb/popularity :media/popularity}))
+(def key-mapping {:tmdb/id :media/id
+                  :tmdb/title :media/title
+                  :tmdb/release-date :media/release-date
+                  :tmdb/overview :media/overview
+                  :tmdb/poster-path :media/poster-path
+                  :tmdb/backdrop-path :media/backdrop-path
+                  :tmdb/vote-average :media/vote-average
+                  :tmdb/vote-count :media/vote-count
+                  :tmdb/popularity :media/popularity})
+
+(defn- tmdb-item->media [item]
+  (-> item
+      (rename-keys key-mapping)
+      (select-keys (vals key-mapping))))
 
 (defn- assoc-image-urls [config movie]
   (assoc movie

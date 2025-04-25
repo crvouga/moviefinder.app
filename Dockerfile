@@ -9,11 +9,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY package*.json ./
-# Don't copy the lockfile as it's causing version compatibility issues
-# COPY bun.lock ./
+COPY package.json bun.lock ./
 
-RUN ["bun", "install", "--no-cache"]
+RUN ["bun", "install"]
 
 COPY . .
 
