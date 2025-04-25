@@ -1,30 +1,27 @@
 FROM node:18-slim
 
-# Install Bun
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    python3 \
-    build-essential \
-    python3-pip \
-    node-gyp \
-    curl \
-    unzip
+# Install dependencies
+RUN apt-get update && apt-get install -y curl gnupg ca-certificates
 
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:${PATH}"
+# Install Java 21 (Eclipse Temurin)
+RUN curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/adoptium-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/adoptium-archive-keyring.gpg] https://packages.adoptium.net/artifactory/deb bookworm main" \
+    > /etc/apt/sources.list.d/adoptium.list && \
+    apt-get update && \
+    apt-get install -y temurin-21-jdk
+
+ENV JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64
+ENV PATH="$JAVA_HOME/bin:$PATH"
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
-
-RUN ["bun", "install"]
+COPY package*.json ./
+RUN npm install
 
 COPY . .
 
-RUN ["bun", "run", "build"]
+RUN npm run build
 
-ARG PORT
+EXPOSE 9630
 
-EXPOSE $PORT
-
-CMD ["bun", "run", "start"]
+CMD ["npm", "start"]
