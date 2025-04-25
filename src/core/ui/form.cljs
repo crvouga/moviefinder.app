@@ -1,9 +1,10 @@
 (ns core.ui.form)
 
-(defn view [props & children]
-  [:form.flex.flex-col.w-full.gap-6
-   (merge props
-          {:on-submit (-> props :form/on-submit)})
-   (for [c children]
-     ^{:key c} c)])
+(defn- concatv [v1 v2]
+  (vec (concat v1 v2)))
+
+(defn view [{:keys [on-submit] :as props :or {on-submit identity}} & children]
+  (concatv
+   [:form (merge props {:on-submit #(do (.preventDefault %) (on-submit))})]
+   children))
   

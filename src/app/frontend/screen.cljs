@@ -1,57 +1,59 @@
 (ns app.frontend.screen
-  (:require [app.frontend.route :as route]
-            [core.program :as p]
-            [clojure.core.async :as a]
-            [app.frontend.mod :as mod]))
+  (:require
+   [app.frontend.mod :as mod]
+   [app.frontend.route :as route]
+   [clojure.core.async :as a]
+   [core.frontend.browser :as browser]
+   [core.program :as p]))
 
 ;; 
 ;; 
 ;; 
 
 (defn- fallback [] [:screen/home])
+(defn screen-name [i] (-> i ::screen first))
+(defn screen-payload [i] (-> i ::screen second))
 
 (defn- logic [i]
-
   (p/reg-reducer
-   i
-   ::set-screen
-   (fn [state msg] (assoc state ::screen (second msg))))
+   i ::set-screen
+   (fn [state [_ screen]] (assoc state ::screen screen)))
 
   (p/reg-eff
-   i
-   ::push-screen!
-   (fn [eff]
-     (println "push-screen!" eff)
-     (let [encoded-route (route/encode (second eff))]
-       (js/window.history.pushState nil nil (str "/" encoded-route)))))
+   i ::push-screen!
+   (fn [[_ screen]]
+     (-> screen route/encode browser/push-state!)))
 
   (p/reg-eff
-   i
-   ::get-screen
-   (fn [_]
-     (or (route/get!) (fallback))))
+   i ::get-screen
+   (fn [_] (or (route/get!) (fallback))))
+
+  (a/go
+    (p/put! i [::set-screen (p/eff! i [::get-screen])]))
+
+  (p/take-every!
+   i :screen/clicked-link
+   (fn [[_ screen]]
+     (p/put! i [::set-screen screen])
+     (p/eff! i [::push-screen! screen])))
+
+  (p/take-every!
+   i :screen/push
+   (fn [[_ screen]]
+     (p/put! i [::set-screen screen])
+     (p/eff! i [::push-screen! screen])))
+
+  (p/take-every!
+   i ::got-screen
+   (fn [[_ screen]]
+     (p/put! i [::set-screen screen])
+     (p/put! i [:screen/screen-changed screen])))
 
   (a/go-loop []
-    (p/put! i [::set-screen (p/eff! i [::get-screen])])
-    (let [msg (a/<! (p/take! i :screen/clicked-link))]
-      (p/put! i [::set-screen (second msg)])
-      (p/eff! i [::push-screen! (second msg)])
-      (recur)))
-
-  (a/go-loop []
-    (let [msg (a/<! (p/take! i :screen/push))]
-      (p/put! i [::set-screen (second msg)])
-      (p/eff! i [::push-screen! (second msg)])
-      (recur)))
-
-  (a/go-loop []
-    (let [msg (a/<! (p/take! i ::got-screen))]
-      (p/put! i [::set-screen (second msg)])
-      (p/put! i [:screen/screen-changed (second msg)])
-      (recur)))
-
-  (doseq [event ["popstate" "pushstate" "replacestate"]]
-    (js/window.addEventListener event #(p/put! i [::got-screen (p/eff! i [::get-screen])]))))
+    (let [_ (a/<! (browser/history-event-chan))]
+      (println "history event")
+      (p/put! i [::got-screen (p/eff! i [::get-screen])])
+      (recur))))
 
 
 ;; 
@@ -60,32 +62,11 @@
 ;; 
 ;; 
 
-(defn screen-name [i] (-> i ::screen first))
 
-(defn screen-payload [i] (-> i ::screen second))
 
 (defn- concatv [node children]
   (vec (concat node children)))
 
-
-
-(defn- view-screen-hidden-css [i screen-name & children]
-  (let [current-screen-name (-> i ::screen (or (fallback)) first)]
-    [:<>
-     (concatv
-      [:div.w-full.h-full.overflow-hidden.flex.flex-col
-       {:data-screen-name screen-name
-        :class (when (not= screen-name current-screen-name) "hidden")}]
-      children)]))
-
-(defn- view-screen-hidden-conditional [i screen-name & children]
-  (let [current-screen-name (-> i ::screen (or (fallback)) first)]
-    (if (= screen-name current-screen-name)
-      (concatv
-       [:div.w-full.h-full.overflow-hidden.flex.flex-col
-        {:data-screen-name screen-name}]
-       children)
-      nil)))
 
 (defn view-screen [i screen-name & children]
   (let [current-screen-name (-> i ::screen (or (fallback)) first)]

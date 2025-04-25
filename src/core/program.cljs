@@ -1,14 +1,14 @@
 (ns core.program
   (:require
-   [clojure.core.async :as async]
+   [clojure.core.async :as a]
    [clojure.pprint :as pprint]))
 
 (defn new
   "New is a function that takes no arguments. It returns a program. new"
   []
   (let [state! (atom {})
-        msg-chan! (async/chan)
-        msg-mult! (async/mult msg-chan!)
+        msg-chan! (a/chan)
+        msg-mult! (a/mult msg-chan!)
         eff-fns! (atom {})
         reducer-fns! (atom {})]
     {:program/state! state!
@@ -64,21 +64,40 @@
 
         _ (reset! state! state-new)]
     (pprint/pprint {:put! msg})
-    (async/put! msg-chan! msg)))
+    (a/put! msg-chan! msg)))
 
 (defn take!
   "Take is a function that takes a program, and a message type. It returns a message. new"
   [program msg-type]
   (let [{:keys [program/msg-mult!]} program
-        ch (async/chan)]
-    (async/tap msg-mult! ch)
-    (async/go-loop [ch ch]
-      (when-let [msg (async/<! ch)]
+        ch (a/chan)]
+    (a/tap msg-mult! ch)
+    (a/go-loop [ch ch]
+      (when-let [msg (a/<! ch)]
         (if (or (= msg-type :*)
                 (= (first msg) msg-type))
           (do
-            (async/close! ch)
+            (a/close! ch)
             msg)
           (recur ch))))))
 
 
+(defn take-every!
+  "Take-every is a function that takes a program, a message type, and a function. It returns a program. new"
+  [program msg-type f]
+  (a/go-loop []
+    (let [msg (a/<! (take! program msg-type))]
+      (f msg)
+      (recur))))
+
+(defn take-latest!
+  "Take-latest is a function that takes a program, and a message type. It returns a message. new"
+  [program msg-type f]
+  (let [last-task (atom nil)]
+    (a/go-loop []
+      (let [msg (a/<! (take! program msg-type))
+            task (a/go (f msg))]
+        (when @last-task
+          (a/close! @last-task))
+        (reset! last-task task)
+        (recur)))))

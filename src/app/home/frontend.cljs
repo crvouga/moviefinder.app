@@ -32,30 +32,33 @@
 
 
 (defn swiper-event->slide-index [event]
-  (-> event .-detail (aget 0) .-activeIndex js/parseInt))
+  (let [detail (.-detail event)
+        first-item (aget detail 0)
+        active-index (aget first-item "activeIndex")]
+    (js/parseInt active-index)))
+
+(defn swiper-slide-change-chan []
+  (dom/watch-event-chan! "#swiper-container" "swiperslidechange" (map swiper-event->slide-index)))
+
 
 (defn- logic [i]
-  (a/go-loop []
+  (a/go
     (let [query (merge config popular-media-query)
           query-result (a/<! (media-db/query-result-chan! query))]
-      (db/put-query-result! i query-result)
-      (a/<! (a/timeout (* 1000 60)))
-      (recur)))
+      (db/put-query-result! i query-result)))
 
   (a/go-loop []
     (let [[_ slide-index] (a/<! (p/take! i ::swiper-slide-changed))]
       (println "swiper-slide-changed" slide-index)
       (recur)))
 
+  (p/take-every!
+   i ::clicked-swiper-slide
+   (fn [[_ media]]
+     (let [screen [:screen/media-details (select-keys media [:media/id])]]
+       (p/put! i [:screen/clicked-link screen]))))
 
-  (a/go-loop []
-    (let [msg (a/<! (p/take! i ::clicked-swiper-slide))
-          screen-payload (-> msg second (select-keys [:media/id]))
-          screen [:screen/media-details screen-payload]
-          _ (p/put! i [:screen/clicked-link screen])]
-      (recur)))
-
-  #_(let [slide-index-chan (dom/watch-event-chan! "#swiper-container" "swiperslidechange" (map swiper-event->slide-index))]
+  #_(let [slide-index-chan (swiper-slide-change-chan)]
       (a/go-loop []
         (let [slide-index (a/<! slide-index-chan)]
           (p/put! i [::swiper-slide-changed slide-index])

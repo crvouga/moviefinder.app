@@ -1,7 +1,7 @@
 (ns app.media.media-db.impl-db-conn.impl
   (:require
    [app.media.media-db.interface :as media-db]
-   [cljs.core.async :refer [go <!]]
+   [clojure.core.async :refer [go <!]]
    [clojure.set]
    [core.backend.db-conn.impl]
    [core.backend.db-conn.interface :as db-conn]

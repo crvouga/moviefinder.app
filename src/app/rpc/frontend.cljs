@@ -5,11 +5,12 @@
    [clojure.core.async :refer [<! go]]
    [clojure.edn :as edn]
    [core.http-client :as http-client]
-   [core.program :as p]))
+   [core.program :as p]
+   [app.rpc.shared :as shared]))
 
 (defn- rpc-fetch! [req]
   (http-client/fetch-chan!
-   {:http-request/url (str (:wire/backend-url config) "/rpc")
+   {:http-request/url (str (:wire/backend-url config) shared/endpoint "?req=" (-> req first pr-str))
     :http-request/method :http-method/post
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str req)}))

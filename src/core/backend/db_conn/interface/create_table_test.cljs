@@ -1,6 +1,6 @@
 (ns core.backend.db-conn.interface.create-table-test
   (:require
-   [cljs.core.async :refer [<!] :refer-macros [go]]
+   [clojure.core.async :refer [<!] :refer-macros [go]]
    [cljs.test :refer-macros [deftest testing is async]]
    [core.backend.db-conn.impl]
    [core.backend.db-conn.interface :as db-conn]

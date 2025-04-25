@@ -39,80 +39,25 @@
       (.addEventListener dom-node event-name (fn [event] (a/put! event-chan event))))
     event-chan))
 
-(defn watch-event-chan! [css-selector event-name transducer]
-  (let [result-chan (a/chan transducer)
-        node-chan (watch-query-selector-chan! css-selector)]
-    (a/go-loop []
-      (let [node (a/<! node-chan)
-            event-chan (event-chan node event-name)]
-        (a/go-loop []
-          (let [event (a/<! event-chan)]
-            (a/put! result-chan event)
-            (recur)))
-        (recur)))
-    result-chan))
+(defn watch-event-chan!
+  ([css-selector event-name]
+   (watch-event-chan! css-selector event-name identity))
 
-(defn- cleanup-node! [node event-name handler]
-  (when node
-    (.removeEventListener node event-name handler)))
+  ([css-selector event-name transducer]
+   (let [result-chan (a/chan transducer)
+         node-chan (watch-query-selector-chan! css-selector)]
+     (a/go-loop []
+       (let [node (a/<! node-chan)
+             event-chan (event-chan node event-name)]
+         (a/go-loop []
+           (let [event (a/<! event-chan)]
+             (a/put! result-chan event)
+             (recur)))
+         (recur)))
+     result-chan)))
 
-(defn- setup-node! [node event-name out-chan]
-  (let [handler (fn [event]
-                  (when (not (a/closed? out-chan))
-                    (a/put! out-chan event)))]
-    (.addEventListener node event-name handler)
-    (fn [] (cleanup-node! node event-name handler))))
 
-#_(defn watch-dom-events
-    "Watches for DOM nodes matching selector and puts events on channel.
-   Automatically cleans up when nodes are removed or channel is closed.
-   Returns just the channel (cleanup is automatic).
-   
-   Args:
-   - selector: CSS selector string
-   - event-name: DOM event name to listen for
-   - xform: transducer to apply to events
-   - opts: optional map with :target (defaults to document.body)"
-    [selector event-name xform & [{:keys [target]}]]
-    (let [out-chan (a/chan (a/sliding-buffer 1) xform)
-          target-node (or target js/document.body)
-          cleanup-fns (atom {}) ; {node-id -> cleanup-fn}
-          observer (js/MutationObserver.
-                    (fn [mutations]
-                      (when (not (a/closed? out-chan))
-                        (doseq [mutation mutations]
-                          (when (or (.-addedNodes mutation) (.-removedNodes mutation))
-                            (let [existing-nodes (array-seq (js/document.querySelectorAll selector))]
-                              ;; Cleanup removed nodes
-                              (doseq [[node _] @cleanup-fns]
-                                (when (not (some #(= % node) existing-nodes))
-                                  (when-let [cleanup (get @cleanup-fns node)]
-                                    (cleanup)
-                                    (swap! cleanup-fns dissoc node))))
 
-                              ;; Setup new nodes
-                              (doseq [node existing-nodes]
-                                (when-not (contains? @cleanup-fns node)
-                                  (let [cleanup (setup-node! node event-name out-chan)]
-                                    (swap! cleanup-fns assoc node cleanup))))))))))]
-
-      ;; Initial setup
-      (let [nodes (array-seq (js/document.querySelectorAll selector))]
-        (doseq [node nodes]
-          (let [cleanup (setup-node! node event-name out-chan)]
-            (swap! cleanup-fns assoc node cleanup))))
-
-      ;; Start observing
-      (.observe observer target-node #js {:childList true :subtree true})
-
-      ;; Setup channel cleanup
-      (a/go
-        (a/<! out-chan) ; Wait for channel to close
-        (.disconnect observer)
-        (doseq [[_ cleanup] @cleanup-fns]
-          (cleanup)))
-
-      out-chan)) ; Return just the channel
 
 ;; 
 ;; 

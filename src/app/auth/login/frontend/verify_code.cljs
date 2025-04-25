@@ -3,7 +3,7 @@
    [app.frontend.mod :as mod]
    [app.frontend.screen :as screen]
    [app.frontend.toast :as toast]
-   [clojure.core.async :refer [<! go-loop]]
+   [clojure.core.async :as a]
    [core.program :as p]
    [core.result :as result]
    [core.ui.button :as button]
@@ -22,11 +22,13 @@
   (-> i  ::request result/loading?))
 
 (defn- logic [i]
-  (p/reg-reducer i ::inputted-code (fn [state [_ code]] (assoc state ::code code)))
+  (p/reg-reducer i ::set-code (fn [state [_ code]] (assoc state ::code code)))
   (p/reg-reducer i ::set-request (fn [state [_ request]] (assoc state ::request request)))
 
-  (go-loop []
-    (<! (p/take! i ::user-submitted-form))
+  (a/take-every! i ::user-inputted-code (fn [[_ code]] (p/put! i [::set-code code])))
+
+  (a/go-loop []
+    (a/<! (p/take! i ::user-submitted-form))
 
     (p/put! i [::set-request result/loading])
 
@@ -34,12 +36,12 @@
           code (::code state)
           phone-number (to-phone-number state)
           req [:rpc/verify-code {:user/phone-number phone-number :verify-sms/code code}]
-          res (<! (p/eff! i [:rpc/send! req]))]
+          res (a/<! (p/eff! i [:rpc/send! req]))]
 
       (p/put! i [::set-request res])
 
       (when (result/ok? res)
-        (p/put! i [:login/authenticated res])
+        (p/put! i [:current-user/load])
         (p/put! i [:screen/push [:screen/profile]])
         (p/put! i [:toaster/show (toast/info "Logged in")]))
 
@@ -60,7 +62,7 @@
     :text-field/type :text-field-type/number-pad
     :text-field/required? true
     :text-field/disabled? (loading? i)
-    :text-field/on-change #(p/put! i [::inputted-code %])}])
+    :text-field/on-change #(p/put! i [::user-inputted-code %])}])
 
 (defn- view-submit [i]
   [button/view

@@ -1,6 +1,6 @@
 (ns core.promise
   (:require
-   [cljs.core.async :refer [chan put!]]))
+   [clojure.core.async :refer [chan put!]]))
 
 (defn ->chan [promise]
   (let [c (chan)]
