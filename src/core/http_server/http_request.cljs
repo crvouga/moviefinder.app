@@ -3,10 +3,15 @@
    [clojure.core.async :refer [<! chan close! go go-loop put!]]
    [clojure.edn :as edn]))
 
+
+
 (defn url
-  "Returns the URL of the HTTP request."
+  "Returns the URL of the HTTP request without search parameters."
   [^js req]
-  (.-url req))
+  (let [full-url (.-url req)]
+    (if-let [question-mark-idx (.indexOf full-url "?")]
+      (.substring full-url 0 question-mark-idx)
+      full-url)))
 
 (defn body-binary-chan
   "Collects binary chunks from the HTTP request into a single binary sequence."

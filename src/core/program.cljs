@@ -17,6 +17,14 @@
      :program/eff-fns! eff-fns!
      :program/reducer-fns! reducer-fns!}))
 
+(defn program? [input]
+  (and (map? input)
+       (:program/state! input)
+       (:program/msg-chan! input)
+       (:program/msg-mult! input)
+       (:program/eff-fns! input)
+       (:program/reducer-fns! input)))
+
 
 (defn reducer
   "Reducer is a function that takes a program, a state, and a message. It returns a state. new"
@@ -69,6 +77,13 @@
 (defn take!
   "Take is a function that takes a program, and a message type. It returns a message. new"
   [program msg-type]
+
+  (when (not (program? program))
+    (throw (js/Error. (str "program must be a program: " program))))
+
+  (when (not (keyword? msg-type))
+    (throw (js/Error. (str "msg-type must be a keyword: " msg-type))))
+
   (let [{:keys [program/msg-mult!]} program
         ch (a/chan)]
     (a/tap msg-mult! ch)

@@ -25,7 +25,7 @@
   (p/reg-reducer i ::set-code (fn [state [_ code]] (assoc state ::code code)))
   (p/reg-reducer i ::set-request (fn [state [_ request]] (assoc state ::request request)))
 
-  (a/take-every! i ::user-inputted-code (fn [[_ code]] (p/put! i [::set-code code])))
+  (p/take-every! i ::user-inputted-code (fn [[_ code]] (p/put! i [::set-code code])))
 
   (a/go-loop []
     (a/<! (p/take! i ::user-submitted-form))

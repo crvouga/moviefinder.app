@@ -1,7 +1,6 @@
 (ns app.frontend.toaster
   (:require
    [app.frontend.mod :as mod]
-   [cljs.pprint :as pprint]
    [clojure.core.async :as a]
    [core.program :as p]
    [core.ui.icon :as icon]
@@ -40,34 +39,30 @@
          ensure-removing-ids
          (update ::removing-ids conj toast-id))))
 
-  ;; Create a channel for close button clicks
-  (let [close-chan (a/chan)]
-    ;; Listen for close button clicks
-    (a/go-loop []
-      (when-let [msg (a/<! (p/take! i ::clicked-close-toast-button))]
-        (a/put! close-chan msg)
-        (recur)))
 
-    ;; Main toast loop
-    (a/go-loop []
-      (let [[_ toast] (a/<! (p/take! i :toaster/show))
-            state (p/state! i)
-            toast-id (-> state ensure-running-id ::running-toast-id)
-            toast (assoc toast :toast/id toast-id)]
+  (a/go-loop []
+    (let [[_ toast] (a/<! (p/take! i :toaster/show))
+          state (p/state! i)
+          toast-id (-> state ensure-running-id ::running-toast-id)
+          toast (assoc toast :toast/id toast-id)]
 
-        (p/put! i [::inc-running-toast-id])
-        (p/put! i [::added toast])
+      (p/put! i [::inc-running-toast-id])
 
-        ;; Wait for either timeout or close button
-        (let [[v _] (a/alts! [(a/timeout (:toast/duration toast))
-                              close-chan])]
-          (when (not= v :timeout)
-            (p/put! i [::started-removing (:toast/id toast)])
-            #_(a/<! (dom/animation-end-chan! (toast-element-id toast-id)))
-            (a/<! (a/timeout 500))
-            (p/put! i [::finished-removing (:toast/id toast)])))
+      (p/put! i [::added toast])
 
-        (recur)))))
+      (a/alt! (a/timeout (:toast/duration toast)) ::timeout
+              (p/take! i ::user-clicked-close-toast-button) ::closed
+              (p/take! i :toaster/show) :new-toast)
+
+      (p/put! i [::started-removing (:toast/id toast)])
+
+      (a/<! (a/timeout 500))
+
+      (p/put! i [::finished-removing (:toast/id toast)])
+
+      (recur))))
+
+
 
 
 (defn- class-toast-variant [variant]
@@ -81,7 +76,7 @@
 
 (defn- view-close-button [i toast-id]
   [icon-button/view
-   {:icon-button/on-click #(p/put! i [::clicked-close-toast-button toast-id])
+   {:icon-button/on-click #(p/put! i [::user-clicked-close-toast-button toast-id])
     :icon-button/view-icon icon/x-mark}])
 
 (defn- view-toast-message [message]
@@ -115,7 +110,6 @@
   (let [id (toast-id toast)
         exiting? (is-exiting? id exiting-ids)
         variant (toast-variant toast)]
-    (pprint/pprint {"toast" toast})
     [:div.p-3.shadow-2xl.rounded.text-lg.pointer-events-auto.flex.items-center.justify-start.font-bold.slide-in-from-top
      {:id (toast-element-id id)
       :class (toast-classes exiting? variant)}
