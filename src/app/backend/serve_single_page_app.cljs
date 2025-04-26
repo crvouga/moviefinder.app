@@ -1,7 +1,7 @@
 (ns app.backend.serve-single-page-app
   (:require ["fs" :as fs]
             ["path" :as path]
-            [app.backend.request-handler :refer [request-handler!]]))
+            [app.backend.http-respond :refer [http-respond!]]))
 
 (def public-dir (path/resolve "public"))
 
@@ -49,7 +49,7 @@
                  (serve-file-err! res err)
                  (serve-file-ok! res file-path)))))
 
-(defmethod request-handler! :default [req res]
+(defmethod http-respond! :default [req res]
   (let [url-path (-> req .-url)
         safe-path (if (= url-path "/") "index.html" url-path)
         file-path (path/join public-dir safe-path)]

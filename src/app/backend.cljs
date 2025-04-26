@@ -1,6 +1,6 @@
 (ns app.backend
   (:require [clojure.core.async :refer [go <!]]
-            [app.backend.request-handler :refer [request-handler!]]
+            [app.backend.http-respond :refer [http-respond!]]
             [app.backend.config :as config]
             [app.backend.serve-single-page-app]
             [app.rpc.backend]
@@ -9,7 +9,7 @@
             [core.backend.http-server :as http-server]))
 
 (defn request-handler-root! [req res]
-  (request-handler! req res))
+  (http-respond! req res))
 
 (defn start-http-server! []
   (go

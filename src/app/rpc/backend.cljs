@@ -1,6 +1,6 @@
 (ns app.rpc.backend
   (:require [clojure.core.async :refer [go <!]]
-            [app.backend.request-handler :refer [request-handler!]]
+            [app.backend.http-respond :refer [http-respond!]]
             [app.backend.config :as config]
             [core.http-server.http-request :as http-request]
             [core.http-server.http-response :as http-response]
@@ -30,7 +30,7 @@
                :res rpc-res})
       rpc-res)))
 
-(defmethod request-handler! shared/endpoint [req res]
+(defmethod http-respond! shared/endpoint [req res]
   (go
     (let [rpc-req (<! (http-request/body-edn-chan req))
           rpc-res (<! (handle-rpc-request! rpc-req))]
