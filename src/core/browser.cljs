@@ -1,4 +1,4 @@
-(ns core.frontend.browser
+(ns core.browser
   (:require
    [clojure.core.async :as a]))
 

@@ -3,7 +3,7 @@
    [app.frontend.mod :as mod]
    [app.frontend.route :as route]
    [clojure.core.async :as a]
-   [core.frontend.browser :as browser]
+   [core.browser :as browser]
    [core.program :as p]))
 
 ;; 

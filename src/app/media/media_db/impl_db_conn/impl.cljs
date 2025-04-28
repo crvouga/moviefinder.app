@@ -3,8 +3,8 @@
    [app.media.media-db.interface :as media-db]
    [clojure.core.async :refer [go <!]]
    [clojure.set]
-   [core.backend.db-conn.impl]
-   [core.backend.db-conn.interface :as db-conn]
+   [core.db.impl]
+   [core.db.interface :as db-conn]
    [app.media.media-db.impl-db-conn.migrations :as migrations]))
 
 
@@ -37,7 +37,7 @@
 (defn- run-migrations! [config]
   (go
     (doseq [migration migrations/migrations]
-      (<! (db-conn/query-chan! (merge config {:db-conn/query migration}))))))
+      (<! (db-conn/query-chan! (merge config {:db/query migration}))))))
 
 (defmethod media-db/upsert-chan! :media-db-impl/db-conn
   [{:keys [media/entity] :as config}]
@@ -46,9 +46,9 @@
     (let [row (media->row entity)
           _result (<! (db-conn/query-chan!
                        (merge config
-                              {:db-conn/query {:insert-into :media
-                                               :columns (keys row)
-                                               :values [(vals row)]}})))]
+                              {:db/query {:insert-into :media
+                                          :columns (keys row)
+                                          :values [(vals row)]}})))]
       {:media-db/impl :media-db-impl/db-conn
        :result/type :result/ok})))
 
@@ -60,19 +60,19 @@
           offset (or offset 0)
           count-result (<! (db-conn/query-chan!
                             (merge config
-                                   {:db-conn/query {:select [[:%count.* :total]]
-                                                    :from [:media]
-                                                    :where (or where [])}})))
-          total (get-in count-result [:db-conn/rows 0 :total])
+                                   {:db/query {:select [[:%count.* :total]]
+                                               :from [:media]
+                                               :where (or where [])}})))
+          total (get-in count-result [:db/rows 0 :total])
           result (<! (db-conn/query-chan!
                       (merge config
-                             {:db-conn/query {:select (or select [:*])
-                                              :from [:media]
-                                              :where (or where [])
-                                              :order-by (or order [[:media/id :desc]])
-                                              :limit limit
-                                              :offset offset}})))
-          rows (map row->media (:db-conn/rows result))
+                             {:db/query {:select (or select [:*])
+                                         :from [:media]
+                                         :where (or where [])
+                                         :order-by (or order [[:media/id :desc]])
+                                         :limit limit
+                                         :offset offset}})))
+          rows (map row->media (:db/rows result))
           query-result {:query-result/query config
                         :query-result/rows rows
                         :query-result/limit limit

@@ -1,4 +1,4 @@
-(ns core.frontend.console
+(ns core.console
   (:require
    [cljs.reader :as cr]))
 

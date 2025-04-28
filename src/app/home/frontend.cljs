@@ -1,6 +1,6 @@
 (ns app.home.frontend
   (:require
-   [app.frontend.config :refer [config]]
+   [app.frontend.ctx :refer [ctx]]
    [app.frontend.db :as db]
    [app.frontend.mod :as mod]
    [app.frontend.screen :as screen]
@@ -43,7 +43,7 @@
 
 (defn- logic [i]
   (a/go
-    (let [query (merge config popular-media-query)
+    (let [query (merge ctx popular-media-query)
           query-result (a/<! (media-db/query-result-chan! query))]
       (db/put-query-result! i query-result)))
 

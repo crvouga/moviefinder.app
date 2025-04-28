@@ -1,20 +1,20 @@
-(ns core.backend.db-conn.impl-better-sqlite3
+(ns core.db.impl-better-sqlite3
   (:require [clojure.core.async :as async]
-            [core.backend.db-conn.interface :as interface]
+            [core.db.interface :as db]
             ["better-sqlite3" :as sqlite3]
             [core.sql :as sql]))
 
 (defn- new-db-instance [config]
-  (let [db-path (or (:db-conn/path config) ":memory:")
+  (let [db-path (or (:db/path config) ":memory:")
         db (sqlite3 db-path)]
     db))
 
-(defmethod interface/new! :db-conn-impl/better-sqlite3
+(defmethod db/new! :db/impl-better-sqlite3
   [config]
   (let [db (new-db-instance config)]
     (merge config {::sqlite-instance db})))
 
-(defmethod interface/query-chan! :db-conn-impl/better-sqlite3
+(defmethod db/query-chan! :db/impl-better-sqlite3
   [conn {:keys [db-conn/query db-conn/params] :or {params []}}]
   (let [sqlite-instance (::sqlite-instance conn)
         raw-sql (sql/sql-query->raw-sql query)
@@ -37,11 +37,11 @@
                    [])
             columns (when (and is-select-query (pos? (count rows)))
                       (vec (keys (first rows))))]
-        (async/put! chan {:db-conn/rows rows
-                          :db-conn/columns columns})
+        (async/put! chan {:db/rows rows
+                          :db/columns columns})
         (async/close! chan))
       (catch js/Error e
         (println "SQL error:" e " raw-sql:" raw-sql " params:" params)
-        (async/put! chan {:db-conn/error (.-message e)})
+        (async/put! chan {:db/error (.-message e)})
         (async/close! chan)))
     chan))

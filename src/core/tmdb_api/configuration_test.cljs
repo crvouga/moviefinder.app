@@ -1,6 +1,6 @@
 (ns core.tmdb-api.configuration-test
   (:require
-   [app.backend.config :as config]
+   [core.tmdb-api.fixture :as fixture]
    [cljs.spec.alpha :as s]
    [cljs.test :refer-macros [deftest testing is async]]
    [clojure.core.async :refer [<! go]]
@@ -11,7 +11,7 @@
     (async
      done
      (go
-       (let [result (<! (configuration/fetch-chan! config/config))]
+       (let [result (<! (configuration/fetch-chan! fixture/ctx))]
          (is (s/valid? :tmdb.configuration/response result)
              (s/explain-str :tmdb.configuration/response result))
          (done))))))

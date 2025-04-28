@@ -1,7 +1,7 @@
 (ns core.dom
   (:require
    [clojure.core.async :as a]
-   [core.frontend.console :as console]))
+   [core.console :as console]))
 
 (def document-body (.-body js/document))
 

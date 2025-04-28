@@ -1,6 +1,6 @@
-(ns core.backend.db-conn.interface.fixture
+(ns core.db.interface.fixture
   (:require
-   [core.backend.db-conn.impl]))
+   [core.db.impl]))
 
 (def create-table-query {:create-table [:test_table :if-not-exists]
                          :with-columns [[:id :integer :primary-key]

@@ -1,6 +1,6 @@
 (ns app.rpc.frontend
   (:require
-   [app.frontend.config :refer [config]]
+   [app.frontend.ctx :refer [ctx]]
    [app.frontend.mod :as mod]
    [clojure.core.async :refer [<! go]]
    [clojure.edn :as edn]
@@ -10,7 +10,7 @@
 
 (defn- rpc-fetch! [req]
   (http-client/fetch-chan!
-   {:http-request/url (str (:wire/backend-url config) shared/endpoint "?req=" (-> req first pr-str))
+   {:http-request/url (str (:wire/backend-url ctx) shared/endpoint "?req=" (-> req first pr-str))
     :http-request/method :http-method/post
     :http-request/headers {"Content-Type" "text/plain"}
     :http-request/body (pr-str req)}))

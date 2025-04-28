@@ -1,17 +1,15 @@
-(ns app.auth.user-session-db.impl-db
+(ns app.auth.session.session-db.impl-db
   (:require
-   [app.auth.user-session-db.interface :as user-session-db]
+   [app.auth.session.session-db.interface :as session-db]
    [clojure.core.async :as a]
    [clojure.set :refer [rename-keys]]
-   [core.backend.db.interface :as db]))
+   [core.db.interface :as db]))
 
-(defmethod user-session-db/new! :user-session-db/impl-db
-  [config]
-  config)
+
 
 (defn- query-find-by-session-id [session-id]
   [:select [:session-id :user-id :created-at-posix :ended-at-posix]
-   :from [:user-sessions]
+   :from [:sessions]
    :where [:and
            [:= :session-id session-id]
            [:is :ended-at-posix nil]]
@@ -30,7 +28,7 @@
   (.getTime (js/Date.)))
 
 (defn- query-delete [session-id]
-  [:update [:user-sessions]
+  [:update [:sessions]
    :set [:ended-at-posix (now!)]
    :where [:= :session-id session-id]])
 
@@ -46,8 +44,12 @@
        :query-result/rows
        (map row->user-session)))
 
-(defmethod user-session-db/find-by-session-id :user-session-db/impl-db
-  [{:keys [db]} session-id]
+(defmethod session-db/new! :session-db/impl-db
+  [config]
+  config)
+
+(defmethod session-db/find-by-session-id :session-db/impl-db
+  [{:keys [:db/db]} session-id]
   (a/go
     (let [q (query-find-by-session-id session-id)
           query-result (a/<! (db/query-chan! db q))
@@ -55,10 +57,10 @@
       (first user-sessions))))
 
 
-(defmethod user-session-db/put! :user-session-db/impl-db
-  [{:keys [db]} user-session]
-  (db/query-chan! db (query-upsert user-session)))
+(defmethod session-db/put! :session-db/impl-db
+  [{:keys [:db/db]} session]
+  (db/query-chan! db (query-upsert session)))
 
-(defmethod user-session-db/zap! :user-session-db/impl-db
-  [{:keys [db]} session-id]
+(defmethod session-db/zap! :session-db/impl-db
+  [{:keys [:db/db]} session-id]
   (db/query-chan! db (query-delete session-id)))

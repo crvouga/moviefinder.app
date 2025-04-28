@@ -5,9 +5,7 @@
 
 (defmethod kv/new! :kv/impl-atom
   [config]
-  (a/go
-    (merge config
-           {::state! (atom {})})))
+  (merge config {::state! (atom {})}))
 
 (defmethod kv/get! :kv/impl-atom
   [{:keys [::state!]} key]

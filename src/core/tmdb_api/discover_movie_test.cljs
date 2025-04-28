@@ -1,6 +1,6 @@
 (ns core.tmdb-api.discover-movie-test
   (:require
-   [app.backend.config :as config]
+   [core.tmdb-api.fixture :as fixture]
    [cljs.spec.alpha :as s]
    [cljs.test :refer-macros [deftest testing is async]]
    [clojure.core.async :refer [<! go]]
@@ -12,7 +12,7 @@
     (async
      done
      (go
-       (let [params (merge config/config
+       (let [params (merge fixture/ctx
                            {:tmdb/language "en-US"
                             :tmdb/sort-by "popularity.desc"
                             :tmdb/include-adult false

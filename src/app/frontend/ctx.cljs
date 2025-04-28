@@ -1,4 +1,4 @@
-(ns app.frontend.config
+(ns app.frontend.ctx
   (:require
    [cljs.pprint :refer [pprint]]))
 
@@ -11,9 +11,9 @@
 
 (def backend-url (if (or false (dev?)) backend-url-dev backend-url-prod))
 
-(def db {:db-conn/impl :db-conn-impl/better-sqlite3})
+(def db {:db/impl :db/impl-better-sqlite3})
 
-(def config
+(def ctx
   (merge db
          {:wire/backend-url backend-url
           :verify-sms/impl :verify-sms-impl/fake
@@ -23,4 +23,4 @@
           :media-db-impl-dual-source/secondary {:media-db/impl :media-db-impl/rpc}}))
 
 (println "Config:")
-(pprint config)
+(pprint ctx)

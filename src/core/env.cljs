@@ -1,4 +1,4 @@
-(ns core.backend.env
+(ns core.env
   (:require
    ["fs" :as fs]
    ["path" :as path]
@@ -25,3 +25,5 @@
     (when-not valid?
       (throw (js/Error. (str key " environment variable is not set"))))
     value))
+
+

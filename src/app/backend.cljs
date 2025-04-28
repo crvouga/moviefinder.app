@@ -1,12 +1,12 @@
 (ns app.backend
   (:require [clojure.core.async :refer [go <!]]
             [app.backend.http-respond :refer [http-respond!]]
-            [app.backend.config :as config]
+            [app.backend.ctx :as config]
             [app.backend.serve-single-page-app]
             [app.rpc.backend]
             [app.auth.backend]
             [app.media.backend]
-            [core.backend.http-server :as http-server]))
+            [core.http-server :as http-server]))
 
 (defn request-handler-root! [req res]
   (http-respond! req res))
@@ -14,7 +14,7 @@
 (defn start-http-server! []
   (go
     (let [http-server! (http-server/new! request-handler-root!)
-          port (config/config :http-server/port)]
+          port (config/ctx :http-server/port)]
       (<! (http-server/listen! http-server! port))
       (println (str "Server is running... http://localhost:" port)))))
 

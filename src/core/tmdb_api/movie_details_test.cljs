@@ -1,7 +1,7 @@
 ;; https://developer.themoviedb.org/reference/movie-details
 (ns core.tmdb-api.movie-details-test
   (:require
-   [app.backend.config :as config]
+   [core.tmdb-api.fixture :as fixture]
    [cljs.spec.alpha :as s]
    [cljs.test :refer-macros [deftest testing is async]]
    [clojure.core.async :refer [<! go]]
@@ -13,7 +13,7 @@
      done
      (go
        (let [movie-id 550  ; Fight Club movie ID
-             params (merge config/config
+             params (merge fixture/ctx
                            {:tmdb/language "en-US"})
              result (<! (movie-details/fetch-chan! movie-id params))]
 

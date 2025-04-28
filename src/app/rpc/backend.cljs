@@ -1,7 +1,7 @@
 (ns app.rpc.backend
   (:require [clojure.core.async :refer [go <!]]
             [app.backend.http-respond :refer [http-respond!]]
-            [app.backend.config :as config]
+            [app.backend.ctx :as config]
             [core.http-server.http-request :as http-request]
             [core.http-server.http-response :as http-response]
             [clojure.pprint :refer [pprint]]
@@ -21,10 +21,10 @@
   (go
     (let [rpc-req-name (first rpc-req)
           rpc-req-payload (or (second rpc-req) {})
-          rpc-req-input-payload (config/assoc-config rpc-req-payload)
+          rpc-req-input-payload (config/assoc-ctx rpc-req-payload)
           rpc-req-input [rpc-req-name rpc-req-input-payload]
           rpc-res-unsafe (<! (rpc! rpc-req-input))
-          rpc-res (config/dissoc-config rpc-res-unsafe)]
+          rpc-res (config/dissoc-ctx rpc-res-unsafe)]
       (pprint {:rpc rpc-req-name
                :req rpc-req
                :res rpc-res})

@@ -1,12 +1,12 @@
 (ns app.media.media-db.interface.fixture
   (:require [app.media.media-db.backend]
-            [app.backend.config :as config]
-            [core.backend.db-conn.impl]
+            [app.backend.ctx :as config]
+            [core.db.impl]
             [app.media.media-db.impl]))
 
 
 (def config-tmdb-api {:media-db/impl :media-db-impl/tmdb-api
-                      :tmdb/api-key (config/config :tmdb/api-key)
+                      :tmdb/api-key (config/ctx :tmdb/api-key)
                       :query/limit 10
                       :query/offset 0})
 

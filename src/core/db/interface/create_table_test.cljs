@@ -1,10 +1,10 @@
-#_(ns core.backend.db-conn.interface.create-table-test
+#_(ns core.db.interface.create-table-test
     (:require
      [clojure.core.async :refer [<!] :refer-macros [go]]
      [cljs.test :refer-macros [deftest testing is async]]
-     [core.backend.db-conn.impl]
-     [core.backend.db-conn.interface :as db-conn]
-     [core.backend.db-conn.interface.fixture :refer [create-table-query]]))
+     [core.db.impl]
+     [core.db.interface :as db-conn]
+     [core.db.interface.fixture :refer [create-table-query]]))
 
 #_(deftest create-table-test
     (async done
