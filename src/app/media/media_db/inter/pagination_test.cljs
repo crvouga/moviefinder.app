@@ -1,9 +1,9 @@
-(ns app.media.media-db.interface.pagination-test
+(ns app.media.media-db.inter.pagination-test
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [clojure.core.async :refer [go <!]]
-            [app.media.media-db.interface :as interface]
+            [app.media.media-db.inter :as interface]
             [app.media.media-db.backend]
-            [app.media.media-db.interface.fixture :as fixture]))
+            [app.media.media-db.inter.fixture :as fixture]))
 
 (deftest pagination-test
   (testing "query-result-chan! returns correct paginated subsets"

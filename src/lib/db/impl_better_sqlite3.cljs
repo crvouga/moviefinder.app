@@ -1,6 +1,6 @@
 (ns lib.db.impl-better-sqlite3
   (:require [clojure.core.async :as async]
-            [lib.db.interface :as db]
+            [lib.db.inter :as db]
             ["better-sqlite3" :as sqlite3]
             [lib.sql :as sql]))
 
@@ -15,7 +15,7 @@
     (merge config {::sqlite-instance db})))
 
 (defmethod db/query-chan! :db/impl-better-sqlite3
-  [conn {:keys [db-conn/query db-conn/params] :or {params []}}]
+  [conn {:keys [db/query db/params] :or {params []}}]
   (let [sqlite-instance (::sqlite-instance conn)
         raw-sql (sql/sql-query->raw-sql query)
         chan (async/chan 1)]

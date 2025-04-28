@@ -6,7 +6,7 @@
    [app.frontend.screen :as screen]
    [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.media.media-db.frontend]
-   [app.media.media-db.interface :as media-db]
+   [app.media.media-db.inter :as media-db]
    [clojure.core.async :as a]
    [lib.dom :as dom]
    [lib.program :as p]

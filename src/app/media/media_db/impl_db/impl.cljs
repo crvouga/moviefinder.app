@@ -1,11 +1,11 @@
-(ns app.media.media-db.impl-db-conn.impl
+(ns app.media.media-db.impl-db.impl
   (:require
-   [app.media.media-db.interface :as media-db]
+   [app.media.media-db.inter :as media-db]
    [clojure.core.async :refer [go <!]]
    [clojure.set]
    [lib.db.impl]
-   [lib.db.interface :as db-conn]
-   [app.media.media-db.impl-db-conn.migrations :as migrations]))
+   [lib.db.inter :as db]
+   [app.media.media-db.impl-db.migrations :as migrations]))
 
 
 (defn- media->row [media]
@@ -37,34 +37,34 @@
 (defn- run-migrations! [config]
   (go
     (doseq [migration migrations/migrations]
-      (<! (db-conn/query-chan! (merge config {:db/query migration}))))))
+      (<! (db/query-chan! (merge config {:db/query migration}))))))
 
-(defmethod media-db/upsert-chan! :media-db-impl/db-conn
+(defmethod media-db/upsert-chan! :media-db-impl/db
   [{:keys [media/entity] :as config}]
   (go
     (<! (run-migrations! config))
     (let [row (media->row entity)
-          _result (<! (db-conn/query-chan!
+          _result (<! (db/query-chan!
                        (merge config
                               {:db/query {:insert-into :media
                                           :columns (keys row)
                                           :values [(vals row)]}})))]
-      {:media-db/impl :media-db-impl/db-conn
+      {:media-db/impl :media-db-impl/db
        :result/type :result/ok})))
 
-(defmethod media-db/query-result-chan! :media-db-impl/db-conn
+(defmethod media-db/query-result-chan! :media-db-impl/db
   [{:keys [query/where query/limit query/offset query/select query/order] :as config}]
   (go
     (<! (run-migrations! config))
     (let [limit (or limit 25)
           offset (or offset 0)
-          count-result (<! (db-conn/query-chan!
+          count-result (<! (db/query-chan!
                             (merge config
                                    {:db/query {:select [[:%count.* :total]]
                                                :from [:media]
                                                :where (or where [])}})))
           total (get-in count-result [:db/rows 0 :total])
-          result (<! (db-conn/query-chan!
+          result (<! (db/query-chan!
                       (merge config
                              {:db/query {:select (or select [:*])
                                          :from [:media]

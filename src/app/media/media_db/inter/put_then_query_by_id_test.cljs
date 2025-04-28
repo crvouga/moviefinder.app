@@ -1,8 +1,8 @@
-#_(ns app.media.media-db.interface.put-then-query-by-id-test
+#_(ns app.media.media-db.inter.put-then-query-by-id-test
     (:require [cljs.test :refer-macros [deftest testing is async]]
               [clojure.core.async :refer [go <!]]
-              [app.media.media-db.interface :as media-db]
-              [app.media.media-db.interface.fixture :as fixture]))
+              [app.media.media-db.inter :as media-db]
+              [app.media.media-db.inter.fixture :as fixture]))
 
 
 #_(deftest put-and-query-test

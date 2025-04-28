@@ -28,7 +28,16 @@
                          :error/message "Errored while requesting from backend"})))))
 
 (defn- logic [i]
-  (p/reg-eff i :rpc/send! (fn [[_ req]] (rpc-res-chan! req))))
+  (p/reg-eff
+   i :rpc/send!
+   (fn [[_ req]]
+     (go
+       (try
+         (let [res (<! (rpc-res-chan! req))]
+           (assoc res :result/type :result/ok))
+         (catch js/Error e
+           {:result/type :result/error
+            :error/message (str "RPC request failed: " (.-message e))}))))))
 
 (mod/reg
  {:mod/name :mod/rpc

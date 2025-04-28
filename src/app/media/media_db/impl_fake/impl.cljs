@@ -1,6 +1,6 @@
 (ns app.media.media-db.impl-fake.impl
   (:require
-   [app.media.media-db.interface :as media-db]
+   [app.media.media-db.inter :as media-db]
    [app.media.media-db.impl-fake.fake-data :refer [medias]]
    [clojure.core.async :refer [timeout go <!]]))
 

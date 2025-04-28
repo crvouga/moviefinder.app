@@ -1,10 +1,10 @@
-(ns app.media.media-db.interface.spec-test
+(ns app.media.media-db.inter.spec-test
   (:require [cljs.test :refer-macros [deftest testing is async]]
             [cljs.spec.alpha :as s]
             [clojure.core.async :refer [go <!]]
-            [app.media.media-db.interface :as media-db]
+            [app.media.media-db.inter :as media-db]
             [app.media.media-db.backend]
-            [app.media.media-db.interface.fixture :as fixture]))
+            [app.media.media-db.inter.fixture :as fixture]))
 
 
 (defn test-query [config]

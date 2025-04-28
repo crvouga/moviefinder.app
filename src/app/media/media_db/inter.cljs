@@ -1,4 +1,4 @@
-(ns app.media.media-db.interface
+(ns app.media.media-db.inter
   (:require [cljs.spec.alpha :as s]
             [clojure.core.async :refer [go]]
             [app.media.entity]))

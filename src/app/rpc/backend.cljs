@@ -1,7 +1,7 @@
 (ns app.rpc.backend
   (:require [clojure.core.async :refer [go <!]]
             [app.backend.http-respond :refer [http-respond!]]
-            [app.backend.ctx :as config]
+            [app.backend.ctx :as ctx]
             [lib.http-server.http-request :as http-request]
             [lib.http-server.http-response :as http-response]
             [clojure.pprint :refer [pprint]]
@@ -9,22 +9,15 @@
 
 (defmulti rpc! first)
 
-(defmethod rpc! :default [req]
-  (go
-    (pprint {:msg "rpc! :default" :req req})
-    {:result/type :result/err
-     :error/message "Unknown rpc method"
-     :rpc/req req}))
-
 
 (defn handle-rpc-request! [rpc-req]
   (go
     (let [rpc-req-name (first rpc-req)
           rpc-req-payload (or (second rpc-req) {})
-          rpc-req-input-payload (config/assoc-ctx rpc-req-payload)
+          rpc-req-input-payload (ctx/assoc-ctx rpc-req-payload)
           rpc-req-input [rpc-req-name rpc-req-input-payload]
           rpc-res-unsafe (<! (rpc! rpc-req-input))
-          rpc-res (config/dissoc-ctx rpc-res-unsafe)]
+          rpc-res (ctx/dissoc-ctx rpc-res-unsafe)]
       (pprint {:rpc rpc-req-name
                :req rpc-req
                :res rpc-res})

@@ -1,4 +1,4 @@
-(ns app.media.media-db.interface.fixture
+(ns app.media.media-db.inter.fixture
   (:require [app.media.media-db.backend]
             [app.backend.ctx :as config]
             [lib.db.impl]

@@ -1,4 +1,4 @@
-(ns app.media.media-db.impl-db-conn.migrations)
+(ns app.media.media-db.impl-db.migrations)
 
 (def migrations
   [{:create-table [:media :if-not-exists]

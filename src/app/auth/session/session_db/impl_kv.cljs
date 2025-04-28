@@ -1,7 +1,7 @@
 (ns app.auth.session.session-db.impl-kv
   (:require
-   [app.auth.session.session-db.interface :as session-db]
-   [lib.kv.interface :as kv]))
+   [app.auth.session.session-db.inter :as session-db]
+   [lib.kv.inter :as kv]))
 
 
 (defn new-by-session-id-kv [config]
@@ -14,7 +14,7 @@
   (merge config
          {::by-session-id-kv (new-by-session-id-kv config)}))
 
-(defmethod session-db/find-by-session-id :session-db/impl-kv
+(defmethod session-db/find-by-session-id! :session-db/impl-kv
   [{:keys [::by-session-id-kv]} session-id]
   (kv/get! by-session-id-kv session-id))
 

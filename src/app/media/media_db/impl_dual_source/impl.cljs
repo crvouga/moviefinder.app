@@ -1,5 +1,5 @@
 (ns app.media.media-db.impl-dual-source.impl
-  (:require [app.media.media-db.interface :as media-db]
+  (:require [app.media.media-db.inter :as media-db]
             [clojure.core.async :refer [go <! >! chan close!]]))
 
 (defmethod media-db/query-result-chan! :media-db-impl/dual-source [q]

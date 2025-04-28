@@ -1,4 +1,4 @@
-(ns lib.db.interface.fixture
+(ns lib.db.inter.fixture
   (:require
    [lib.db.impl]))
 

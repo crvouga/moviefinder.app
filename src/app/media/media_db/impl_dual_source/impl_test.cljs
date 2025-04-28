@@ -1,11 +1,11 @@
 #_(ns app.media.media-db.impl-dual-source.impl-test
     (:require [cljs.test :refer-macros [deftest testing is async]]
               [clojure.core.async :refer [go <! timeout]]
-              [app.media.media-db.interface :as media-db]
-              [app.media.media-db.interface.fixture :as fixture]))
+              [app.media.media-db.inter :as media-db]
+              [app.media.media-db.inter.fixture :as fixture]))
 
 #_(deftest dual-source-test
-    (testing "Can query media from dual sources with db-conn primary and tmdb secondary"
+    (testing "Can query media from dual sources with db primary and tmdb secondary"
       (async done
              (go
                (let [primary-config fixture/config-tmdb-api

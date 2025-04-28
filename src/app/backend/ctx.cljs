@@ -1,11 +1,11 @@
 (ns app.backend.ctx
   (:require [lib.env :as env]
-            [lib.kv.interface :as kv]
+            [lib.kv.inter :as kv]
             [lib.kv.impl]
-            [lib.db.interface :as db]
+            [lib.db.inter :as db]
             [lib.db.impl]
             [lib.str :as str]
-            [app.auth.session.session-db.interface :as session-db]
+            [app.auth.session.session-db.inter :as session-db]
             [app.auth.session.session-db.impl]))
 
 (def api-key {:tmdb/api-key (-> "TMDB_API_READ_ACCESS_TOKEN" env/get-else-throw!)})

@@ -1,9 +1,9 @@
 (ns app.auth.session.session-db.impl-db
   (:require
-   [app.auth.session.session-db.interface :as session-db]
+   [app.auth.session.session-db.inter :as session-db]
    [clojure.core.async :as a]
    [clojure.set :refer [rename-keys]]
-   [lib.db.interface :as db]))
+   [lib.db.inter :as db]))
 
 
 
@@ -17,10 +17,11 @@
 
 (defn- query-upsert [user-session]
   [:insert [:session-id :user-id :created-at-posix :ended-at-posix]
-   :values [(:user-session/session-id user-session)
-            (:user-session/user-id user-session)
-            (:user-session/created-at user-session)
-            (:user-session/ended-at user-session)]
+   :values (-> user-session
+               (juxt :user-session/session-id
+                     :user-session/user-id
+                     :user-session/created-at
+                     :user-session/ended-at))
    :on-conflict [:session-id]
    :do-update-set [:user-id :created-at-posix :ended-at-posix]])
 
@@ -48,7 +49,7 @@
   [config]
   config)
 
-(defmethod session-db/find-by-session-id :session-db/impl-db
+(defmethod session-db/find-by-session-id! :session-db/impl-db
   [{:keys [:db/db]} session-id]
   (a/go
     (let [q (query-find-by-session-id session-id)

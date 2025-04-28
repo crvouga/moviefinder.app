@@ -1,13 +1,14 @@
 (ns app.auth.current-user.backend
   (:require
+   [app.auth.session.session-db.inter :as session-db]
+   [app.user.user-db.inter :as user-db]
    [app.rpc.backend :as rpc]
    [clojure.core.async :as a]))
 
-(def fake-user {:user/id "123"
-                :user/phone-number "1234567890"
-                :user/name "John Doe"})
-
-(defmethod rpc/rpc! :rpc/get-current-user [_req]
+(defmethod rpc/rpc! :rpc/get-current-user [[_ req]]
   (a/go
-    (a/<! (a/timeout 1000))
-    (merge fake-user {:result/type :result/ok})))
+    (let [session-id (:session/id req)
+          session (a/<! (session-db/find-by-session-id! req session-id))
+          user-id (:user/id session)
+          user (a/<! (user-db/find-by-id! req user-id))]
+      user)))

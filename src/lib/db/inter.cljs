@@ -1,4 +1,4 @@
-(ns lib.db.interface)
+(ns lib.db.inter)
 
 (defmulti new!
   "Create a new db connection"

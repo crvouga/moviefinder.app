@@ -1,6 +1,6 @@
 (ns lib.kv.impl-namespaced
   (:require
-   [lib.kv.interface :as kv]
+   [lib.kv.inter :as kv]
    [clojure.core.async :as a]))
 
 (defmethod kv/new! :kv/impl-namespaced
