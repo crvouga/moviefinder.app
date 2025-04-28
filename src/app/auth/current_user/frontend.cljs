@@ -5,13 +5,17 @@
    [core.program :as p]
    [core.result :as result]))
 
+(defn set-current-user [state [_ current-user]]
+  (assoc state ::current-user current-user))
+
 (defn- logic [i]
-  (p/reg-reducer i ::set-current-user (fn [state msg] (assoc state ::current-user (second msg))))
+  (p/reg-reducer i ::set-current-user set-current-user)
 
   (p/take-every!
    i :current-user/load
    (fn [_]
      (a/go
+       (p/put! i [::set-current-user result/loading])
        (let [got-current-user (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
          (p/put! i [::set-current-user got-current-user]))))))
 

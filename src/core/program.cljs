@@ -39,7 +39,6 @@
                  :program/msg-mult! msg-mult!
                  :program/eff-fns! eff-fns!
                  :program/reducer-fns! reducer-fns!}]
-    (assert (program? program) "Program must satisfy program spec")
     program))
 
 
@@ -124,8 +123,8 @@
 (defn take!
   "Take is a function that takes a program, and a message type. It returns a message. new"
   [program msg-type]
-  (assert (program? program) "Program must satisfy program spec")
-  (assert (keyword? msg-type) "msg-type must be a keyword")
+  #_(assert (program? program) "Program must satisfy program spec")
+  #_(assert (keyword? msg-type) "msg-type must be a keyword")
 
   (let [{:keys [program/msg-mult!]} program
         ch (a/chan)]

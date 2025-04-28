@@ -6,7 +6,7 @@
     "backend": "node out/backend/main.js",
     "build": "npx shadow-cljs release frontend backend",
     "clean": "npx shadow-cljs clean",
-    "open": "open http://localhost:9631",
+    "open": "open http://localhost:9630",
     "watch": "npx shadow-cljs watch frontend backend",
     "dev": "npm run open && npm run watch",
     "stop": "npx shadow-cljs stop frontend backend",
