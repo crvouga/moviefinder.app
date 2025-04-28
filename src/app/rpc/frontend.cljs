@@ -4,8 +4,8 @@
    [app.frontend.mod :as mod]
    [clojure.core.async :refer [<! go]]
    [clojure.edn :as edn]
-   [core.http-client :as http-client]
-   [core.program :as p]
+   [lib.http-client :as http-client]
+   [lib.program :as p]
    [app.rpc.shared :as shared]))
 
 (defn- rpc-fetch! [req]

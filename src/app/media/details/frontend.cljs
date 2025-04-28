@@ -4,9 +4,9 @@
    [app.frontend.mod :as mod]
    [app.frontend.screen :as screen]
    [clojure.core.async :refer [<! go-loop]]
-   [core.program :as p]
-   [core.ui.image :as image]
-   [core.ui.top-bar :as top-bar]))
+   [lib.program :as p]
+   [lib.ui.image :as image]
+   [lib.ui.top-bar :as top-bar]))
 
 ;; 
 ;; 

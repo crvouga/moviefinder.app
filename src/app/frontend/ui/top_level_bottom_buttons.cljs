@@ -1,8 +1,8 @@
 (ns app.frontend.ui.top-level-bottom-buttons
-  (:require [core.ui.icon :as icon]
-            [core.ui.bottom-buttons :as bottom-buttons]
+  (:require [lib.ui.icon :as icon]
+            [lib.ui.bottom-buttons :as bottom-buttons]
             [app.frontend.screen :as screen]
-            [core.program :as p]))
+            [lib.program :as p]))
 
 
 (defn view [i]

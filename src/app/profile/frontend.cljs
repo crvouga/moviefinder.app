@@ -5,8 +5,8 @@
    [app.frontend.screen :as screen]
    [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.profile.login-cta :as login-cta]
-   [core.ui.spinner-screen :as spinner-screen]
-   [core.ui.top-bar :as top-bar]))
+   [lib.ui.spinner-screen :as spinner-screen]
+   [lib.ui.top-bar :as top-bar]))
 
 
 (defn- logic [_i])

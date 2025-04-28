@@ -4,11 +4,11 @@
    [app.frontend.screen :as screen]
    [app.frontend.toast :as toast]
    [clojure.core.async :as a]
-   [core.program :as p]
-   [core.result :as result]
-   [core.ui.button :as button]
-   [core.ui.text-field :as text-field]
-   [core.ui.top-bar :as top-bar]))
+   [lib.program :as p]
+   [lib.result :as result]
+   [lib.ui.button :as button]
+   [lib.ui.text-field :as text-field]
+   [lib.ui.top-bar :as top-bar]))
 
 (defn- logic [i]
   (p/reg-reducer i ::set-phone-number (fn [state [_ phone-number]] (assoc state ::phone-number phone-number)))

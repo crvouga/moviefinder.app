@@ -9,8 +9,8 @@
    [app.media.frontend]
    [app.profile.frontend]
    [app.rpc.frontend]
-   [core.js-obj :as js-obj]
-   [core.program :as p]
+   [lib.js-obj :as js-obj]
+   [lib.program :as p]
    [reagent.core :as r]))
 
 

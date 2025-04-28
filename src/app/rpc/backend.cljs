@@ -2,8 +2,8 @@
   (:require [clojure.core.async :refer [go <!]]
             [app.backend.http-respond :refer [http-respond!]]
             [app.backend.ctx :as config]
-            [core.http-server.http-request :as http-request]
-            [core.http-server.http-response :as http-response]
+            [lib.http-server.http-request :as http-request]
+            [lib.http-server.http-response :as http-response]
             [clojure.pprint :refer [pprint]]
             [app.rpc.shared :as shared]))
 

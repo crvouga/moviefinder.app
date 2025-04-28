@@ -8,11 +8,11 @@
    [app.media.media-db.frontend]
    [app.media.media-db.interface :as media-db]
    [clojure.core.async :as a]
-   [core.dom :as dom]
-   [core.program :as p]
-   [core.ui.image :as image]
-   [core.ui.image-preload :as image-preload]
-   [core.ui.top-bar :as top-bar]))
+   [lib.dom :as dom]
+   [lib.program :as p]
+   [lib.ui.image :as image]
+   [lib.ui.image-preload :as image-preload]
+   [lib.ui.top-bar :as top-bar]))
 
 (def popular-media-query
   {:query/limit 25

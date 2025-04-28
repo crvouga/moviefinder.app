@@ -3,7 +3,7 @@
    [app.auth.session.session-db.interface :as session-db]
    [clojure.core.async :as a]
    [clojure.set :refer [rename-keys]]
-   [core.db.interface :as db]))
+   [lib.db.interface :as db]))
 
 
 

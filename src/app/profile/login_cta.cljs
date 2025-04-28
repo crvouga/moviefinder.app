@@ -1,8 +1,8 @@
 (ns app.profile.login-cta
   (:require
-   [core.ui.icon :as icon]
-   [core.ui.button :as button]
-   [core.program :as p]))
+   [lib.ui.icon :as icon]
+   [lib.ui.button :as button]
+   [lib.program :as p]))
 
 
 (defn view [i]

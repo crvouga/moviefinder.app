@@ -1,8 +1,8 @@
 (ns app.media.media-db.impl-tmdb-api.query-plan-item.discover-movie
   (:require [clojure.core.async :refer [go <!]]
-            [core.tmdb-api.configuration]
-            [core.tmdb-api.discover-movie]
-            [core.tmdb-api.movie-details]
+            [lib.tmdb-api.configuration]
+            [lib.tmdb-api.discover-movie]
+            [lib.tmdb-api.movie-details]
             [app.media.media-db.impl-tmdb-api.mapping :as mapping]
             [app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]))
 
@@ -18,8 +18,8 @@
                            :tmdb/include-adult false
                            :tmdb/include-video false
                            :tmdb/page page})
-          configuration-response (<! (core.tmdb-api.configuration/fetch-chan! params))
-          discover-movie-response (<! (core.tmdb-api.discover-movie/fetch-chan! params))
+          configuration-response (<! (lib.tmdb-api.configuration/fetch-chan! params))
+          discover-movie-response (<! (lib.tmdb-api.discover-movie/fetch-chan! params))
           response (merge params discover-movie-response configuration-response)
           query-result (mapping/tmdb-result->query-result response)]
       query-result)))

@@ -1,10 +1,10 @@
 (ns app.backend.ctx
-  (:require [core.env :as env]
-            [core.kv.interface :as kv]
-            [core.kv.impl]
-            [core.db.interface :as db]
-            [core.db.impl]
-            [core.str :as str]
+  (:require [lib.env :as env]
+            [lib.kv.interface :as kv]
+            [lib.kv.impl]
+            [lib.db.interface :as db]
+            [lib.db.impl]
+            [lib.str :as str]
             [app.auth.session.session-db.interface :as session-db]
             [app.auth.session.session-db.impl]))
 

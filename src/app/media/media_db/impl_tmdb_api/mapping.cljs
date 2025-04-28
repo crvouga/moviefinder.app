@@ -1,8 +1,8 @@
 (ns app.media.media-db.impl-tmdb-api.mapping
   (:require
-   [core.tmdb-api.configuration]
-   [core.tmdb-api.discover-movie]
-   [core.tmdb-api.movie-details]
+   [lib.tmdb-api.configuration]
+   [lib.tmdb-api.discover-movie]
+   [lib.tmdb-api.movie-details]
    [clojure.set :refer [rename-keys]]))
 
 (def key-mapping {:tmdb/id :media/id
@@ -22,8 +22,8 @@
 
 (defn- assoc-image-urls [config movie]
   (assoc movie
-         :media/poster-url (core.tmdb-api.configuration/to-poster-url config (:media/poster-path movie))
-         :media/backdrop-url (core.tmdb-api.configuration/to-backdrop-url config (:media/backdrop-path movie))))
+         :media/poster-url (lib.tmdb-api.configuration/to-poster-url config (:media/poster-path movie))
+         :media/backdrop-url (lib.tmdb-api.configuration/to-backdrop-url config (:media/backdrop-path movie))))
 
 (defn tmdb-result->query-result [input]
   (let [total (:tmdb/total-results input)

@@ -1,7 +1,7 @@
 (ns app.frontend.db
   (:require
    [app.frontend.mod :as mod]
-   [core.program :as p]))
+   [lib.program :as p]))
 
 (defn- map-vals [f m]
   (into {} (map (fn [[k v]] [k (f v)]) m)))

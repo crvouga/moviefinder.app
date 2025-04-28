@@ -2,8 +2,8 @@
   (:require
    [app.frontend.mod :as mod]
    [clojure.core.async :as a]
-   [core.program :as p]
-   [core.result :as result]))
+   [lib.program :as p]
+   [lib.result :as result]))
 
 (defn set-current-user [state [_ current-user]]
   (assoc state ::current-user current-user))

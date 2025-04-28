@@ -3,9 +3,9 @@
    [app.frontend.mod :as mod]
    [app.frontend.toast :as toast]
    [clojure.core.async :as a]
-   [core.program :as p]
-   [core.ui.icon :as icon]
-   [core.ui.icon-button :as icon-button]))
+   [lib.program :as p]
+   [lib.ui.icon :as icon]
+   [lib.ui.icon-button :as icon-button]))
 
 (defn- init []
   {::toast-queue []

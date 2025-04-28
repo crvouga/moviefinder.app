@@ -1,8 +1,8 @@
 (ns app.media.media-db.impl-tmdb-api.impl
   (:require [clojure.core.async :refer [go <! go-loop]]
-            [core.tmdb-api.configuration]
-            [core.tmdb-api.discover-movie]
-            [core.tmdb-api.movie-details]
+            [lib.tmdb-api.configuration]
+            [lib.tmdb-api.discover-movie]
+            [lib.tmdb-api.movie-details]
             [app.media.media-db.interface :as media-db]
             [app.media.media-db.impl-tmdb-api.query-plan-item.index]
             [app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]))
