@@ -9,6 +9,12 @@
 
 (defmulti rpc! first)
 
+(def rpc-fns! (atom {}))
+
+(defn reg-rpc [rpc-name rpc-fn]
+  (swap! rpc-fns! assoc rpc-name rpc-fn))
+
+
 
 (defn handle-rpc-request! [rpc-req]
   (go
