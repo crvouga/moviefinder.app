@@ -26,7 +26,7 @@
 (defn logged-in? [i]
   (let [current-user (-> i ::current-user)
         ok? (-> current-user result/ok?)
-        user-id? (-> current-user :user/id nil? not)]
+        user-id? (-> current-user :user/user-id nil? not)]
     (and ok? user-id?)))
 
 (defn logged-out? [i]
