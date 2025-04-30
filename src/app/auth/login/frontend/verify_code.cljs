@@ -4,22 +4,21 @@
    [app.frontend.screen :as screen]
    [app.frontend.toast :as toast]
    [clojure.core.async :as a]
+   [lib.err :as err]
    [lib.program :as p]
    [lib.result :as result]
    [lib.ui.button :as button]
    [lib.ui.text-field :as text-field]
    [lib.ui.top-bar :as top-bar]))
 
-;; 
-;; 
-;; 
-;; 
-
 (defn to-phone-number [i]
   (-> i screen/screen-payload second :user/phone-number))
 
 (defn- loading? [i]
   (-> i  ::request result/loading?))
+
+(defmethod err/message :verify-sms-err/wrong-code []
+  "Wrong code")
 
 (defn- logic [i]
   (p/reg-reducer i ::set-code (fn [state [_ code]] (assoc state ::code code)))
@@ -41,13 +40,12 @@
       (p/put! i [::set-request res])
 
       (when (result/ok? res)
-        (p/put! i [:current-user/load])
         (p/put! i [:screen/push [:screen/profile]])
         (p/put! i [:toaster/show (toast/info "Logged in")]))
 
       (when (result/err? res)
         (println "error" res)
-        (p/put! i [:toaster/show (toast/error "Failed to login")]))
+        (p/put! i [:toaster/show (toast/error (err/message res))]))
       (recur))))
 
 ;; 

@@ -19,5 +19,5 @@
       (assoc i :result/type :result/ok)
       (assoc i
              :result/type :result/err
-             :verify-sms/error :verify-sms-error/wrong-code))))
+             :err/err :verify-sms-err/wrong-code))))             
 

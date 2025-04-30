@@ -34,7 +34,7 @@
        (try
          (<! (rpc-res-chan! req))
          (catch js/Error e
-           {:result/type :result/error
+           {:result/type :result/err
             :error/message (str "RPC request failed: " (.-message e))}))))))
 
 (mod/reg
