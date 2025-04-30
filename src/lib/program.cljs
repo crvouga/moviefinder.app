@@ -94,20 +94,22 @@
     (a/put! msg-chan! msg)
     program))
 
+(defn- new-msg-chan [{:keys [program/msg-mult!]}]
+  (let [ch (a/chan)]
+    (a/tap msg-mult! ch)
+    ch))
+
 (defn take!
   "Take is a function that takes a program, and a message type. It returns a message. new"
   [program msg-type]
   (pprint/pprint {:take! msg-type})
-  (let [{:keys [program/msg-mult!]} program
-        ch (a/chan)]
-    (a/tap msg-mult! ch)
+  (let [ch (new-msg-chan program)]
     (a/go-loop []
       (let [msg (a/<! ch)
             match? (or (= msg-type :*)
                        (= (first msg) msg-type))]
         (when-not match?
           (recur))
-
         (a/close! ch)
         msg))))
 
