@@ -11,7 +11,8 @@
    [app.rpc.frontend]
    [lib.js-obj :as js-obj]
    [lib.program :as p]
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [clojure.pprint :as pprint]))
 
 
 (defonce ^:private program (p/new))
@@ -28,7 +29,11 @@
     react-root))
 
 (defn render! [input]
-  (.render root (r/as-element [view input])))
+  (try
+    (.render root (r/as-element [view input]))
+    (catch :default e
+      (pprint/pprint {:render!/exception {:msg input
+                                          :error e}}))))
 
 (defn set-window-state! [state]
   (set! (.-appState js/window) (js-obj/init state)))
@@ -38,7 +43,7 @@
 
   (p/take-every!
    program :*
-   (fn [_]
+   (fn []
      (let [state (p/state! program)
            input (merge state program)]
        (set-window-state! state)

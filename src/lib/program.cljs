@@ -22,10 +22,6 @@
         :complex-msg (s/cat :type keyword? :payload map?)))
 
 
-(defn program? [input]
-  (s/valid? ::program input))
-
-
 (defn new
   "New is a function that takes no arguments. It returns a program. new"
   []
@@ -61,19 +57,9 @@
   (let [{:keys [program/reducer-fns!]} program]
     (swap! reducer-fns! assoc msg-type reducer-fn)))
 
-
-(s/fdef state!
-  :args (s/cat :program ::program)
-  :ret ::state!)
-
 (defn state! [program]
   (let [{:keys [program/state!]} program]
     @state!))
-
-
-(s/fdef eff!
-  :args (s/cat :program ::program :eff ::msg)
-  :ret map?)
 
 (defn eff!
   "Eff is a function that takes a program, and a message. It returns a state. new"
@@ -84,10 +70,6 @@
         eff-fn! (or maybe-eff-fn! (constantly nil))]
     (eff-fn! eff)))
 
-(s/fdef reg-eff
-  :args (s/cat :program ::program :eff-type keyword? :eff-fn fn?)
-  :ret ::program)
-
 (defn reg-eff
   "Reg-eff is a function that takes a program, a message type, and an effect function. It returns a program. new"
   [program eff-type eff-fn]
@@ -96,10 +78,6 @@
     (swap! eff-fns! assoc eff-type eff-fn)
     program))
 
-
-(s/fdef put!
-  :args (s/cat :program ::program :msg ::msg)
-  :ret ::program)
 
 (defn put!
   "Put is a function that takes a program, and a message. It returns a program. new"
@@ -116,16 +94,10 @@
     (a/put! msg-chan! msg)
     program))
 
-(s/fdef take!
-  :args (s/cat :program ::program :msg-type keyword?)
-  :ret ::msg)
-
 (defn take!
   "Take is a function that takes a program, and a message type. It returns a message. new"
   [program msg-type]
-  #_(assert (program? program) "Program must satisfy program spec")
-  #_(assert (keyword? msg-type) "msg-type must be a keyword")
-
+  (pprint/pprint {:take! msg-type})
   (let [{:keys [program/msg-mult!]} program
         ch (a/chan)]
     (a/tap msg-mult! ch)
@@ -138,9 +110,6 @@
             msg)
           (recur ch))))))
 
-(s/fdef take-every!
-  :args (s/cat :program ::program :msg-type keyword? :f fn?)
-  :ret ::program)
 
 (defn take-every!
   "Take-every is a function that takes a program, a message type, and a function. It returns a program. new"
@@ -150,16 +119,3 @@
     (let [msg (a/<! (take! program msg-type))]
       (f msg)
       (recur))))
-
-
-(defn take-latest!
-  "Take-latest is a function that takes a program, and a message type. It returns a message. new"
-  [program msg-type f]
-  (let [last-task (atom nil)]
-    (a/go-loop []
-      (let [msg (a/<! (take! program msg-type))
-            task (a/go (f msg))]
-        (when @last-task
-          (a/close! @last-task))
-        (reset! last-task task)
-        (recur)))))
