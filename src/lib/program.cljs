@@ -116,8 +116,7 @@
   "Take-every is a function that takes a program, a message type, and a function. It returns a program. new"
   [program msg-type f]
   (pprint/pprint {:take-every! msg-type})
-  (a/go
-    (loop []
-      (let [msg (a/<! (take! program msg-type))]
-        (a/<! (f msg))
-        (recur)))))
+  (a/go-loop []
+    (let [msg (a/<! (take! program msg-type))]
+      (f msg)
+      (recur))))
