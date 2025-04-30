@@ -11,8 +11,9 @@
 ;; 
 
 (defn- fallback [] [:screen/home])
-(defn screen-name [i] (-> i ::screen first))
-(defn screen-payload [i] (-> i ::screen second))
+(defn to-screen [i] (-> i ::screen))
+(defn to-screen-name [i] (-> i to-screen first))
+(defn to-screen-payload [i] (-> i to-screen second))
 
 (defn- logic [i]
   (p/reg-reducer

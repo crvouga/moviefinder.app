@@ -47,7 +47,7 @@
 
 
 (defn view [i]
-  (let [payload (screen/screen-payload i)
+  (let [payload (screen/to-screen-payload i)
         media (db/to-entity i (:media/id payload))]
     [screen/view-screen i :screen/media-details
      [view-top-bar i media]

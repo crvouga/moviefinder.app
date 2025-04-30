@@ -12,7 +12,7 @@
    [lib.ui.top-bar :as top-bar]))
 
 (defn to-phone-number [i]
-  (-> i screen/screen-payload second :user/phone-number))
+  (-> i screen/to-screen-payload :user/phone-number))
 
 (defn- loading? [i]
   (-> i  ::request result/loading?))
@@ -74,7 +74,7 @@
                  :top-bar/on-back #(p/put! i [:screen/clicked-link [:screen/login]])}])
 
 (defn view-message [i]
-  [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/screen-payload :user/phone-number)]])
+  [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/to-screen-payload :user/phone-number)]])
 
 (defn view-form [i & children]
   (vec

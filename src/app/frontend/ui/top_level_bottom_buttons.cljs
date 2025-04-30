@@ -10,12 +10,12 @@
    [bottom-buttons/view
     {:bottom-buttons/buttons
      [{:bottom-button/label "Home"
-       :bottom-button/selected? (-> i screen/screen-name (= :screen/home))
+       :bottom-button/selected? (-> i screen/to-screen-name (= :screen/home))
        :bottom-button/on-click #(do
                                   (p/put! i [:screen/clicked-link [:screen/home]]))
        :bottom-button/view-icon icon/home}
       {:bottom-button/label "Profile"
-       :bottom-button/selected? (-> i screen/screen-name (= :screen/profile))
+       :bottom-button/selected? (-> i screen/to-screen-name (= :screen/profile))
        :bottom-button/on-click #(do
                                   (p/put! i [:screen/clicked-link [:screen/profile]]))
        :bottom-button/view-icon icon/user-circle}]}]])
