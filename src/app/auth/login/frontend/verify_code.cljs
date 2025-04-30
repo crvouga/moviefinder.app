@@ -41,7 +41,7 @@
 
       (when (result/ok? res)
         (p/put! i [:screen/push [:screen/profile]])
-        (p/put! i [:toaster/show (toast/info "Logged in")]))
+        #_(p/put! i [:toaster/show (toast/info "Logged in")]))
 
       (when (result/err? res)
         (println "error" res)
