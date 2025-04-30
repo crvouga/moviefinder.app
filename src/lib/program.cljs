@@ -88,7 +88,7 @@
         state-new (reducer program @state! msg)
 
         _ (reset! state! state-new)]
-    (pprint/pprint {:put! (if (> (count (str msg)) 1000)
+    (pprint/pprint {:put! (if (> (count (str msg)) 10000)
                             (str (first msg) " ... (truncated)")
                             msg)})
     (a/put! msg-chan! msg)
