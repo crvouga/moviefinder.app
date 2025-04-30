@@ -102,18 +102,14 @@
         ch (a/chan)]
     (a/tap msg-mult! ch)
     (a/go
-      (try
-        (loop []
-          (when-let [msg (a/<! ch)]
-            (if (or (= msg-type :*)
-                    (= (first msg) msg-type))
-              (do
-                (a/close! ch)
-                msg)
-              (recur))))
-        (catch js/Error e
-          (a/close! ch)
-          (throw e))))))
+      (loop []
+        (when-let [msg (a/<! ch)]
+          (if (or (= msg-type :*)
+                  (= (first msg) msg-type))
+            (do
+              (a/close! ch)
+              msg)
+            (recur)))))))
 
 
 (defn take-every!
@@ -123,11 +119,5 @@
   (a/go
     (loop []
       (let [msg (a/<! (take! program msg-type))]
-        (try
-          (a/<! (f msg))
-          (catch js/Error e
-            (pprint/pprint {:take-every! msg-type
-                            :msg msg
-                            :error e
-                            :error/stack (.-stack e)})))
+        (a/<! (f msg))
         (recur)))))
