@@ -101,21 +101,33 @@
   (let [{:keys [program/msg-mult!]} program
         ch (a/chan)]
     (a/tap msg-mult! ch)
-    (a/go-loop [ch ch]
-      (when-let [msg (a/<! ch)]
-        (if (or (= msg-type :*)
-                (= (first msg) msg-type))
-          (do
-            (a/close! ch)
-            msg)
-          (recur ch))))))
+    (a/go
+      (try
+        (loop []
+          (when-let [msg (a/<! ch)]
+            (if (or (= msg-type :*)
+                    (= (first msg) msg-type))
+              (do
+                (a/close! ch)
+                msg)
+              (recur))))
+        (catch js/Error e
+          (a/close! ch)
+          (throw e))))))
 
 
 (defn take-every!
   "Take-every is a function that takes a program, a message type, and a function. It returns a program. new"
   [program msg-type f]
   (pprint/pprint {:take-every! msg-type})
-  (a/go-loop []
-    (let [msg (a/<! (take! program msg-type))]
-      (f msg)
-      (recur))))
+  (a/go
+    (loop []
+      (let [msg (a/<! (take! program msg-type))]
+        (try
+          (a/<! (f msg))
+          (catch js/Error e
+            (pprint/pprint {:take-every! msg-type
+                            :msg msg
+                            :error e
+                            :error/stack (.-stack e)})))
+        (recur)))))
