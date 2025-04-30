@@ -11,9 +11,10 @@
   (-> req
       (update :media-db/impl update-impl)))
 
-(defmethod rpc/rpc! :rpc/media-db-query [req]
-  (go
-    (let [q (-> req second ensure-not-rpc-impl)
-          res (<! (media-db/query-result-chan! q))]
-      res)))
-        
+(rpc/reg
+ :rpc/media-db-query
+ (fn [req]
+   (go
+     (let [q (-> req ensure-not-rpc-impl)
+           res (<! (media-db/query-result-chan! q))]
+       res))))

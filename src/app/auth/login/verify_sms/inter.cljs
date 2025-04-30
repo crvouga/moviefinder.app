@@ -1,4 +1,4 @@
-(ns app.auth.login.verify-sms.interface)
+(ns app.auth.login.verify-sms.inter)
 
 (defmulti send-code!
   "Send a verification code to :user/phone-number"

@@ -5,10 +5,11 @@
    [app.rpc.backend :as rpc]
    [clojure.core.async :as a]))
 
-(defmethod rpc/rpc! :rpc/get-current-user [[_ req]]
-  (a/go
-    (let [session-id (:session/id req)
-          session (a/<! (session-db/find-by-session-id! req session-id))
-          user-id (:user/id session)
-          user (a/<! (user-db/find-by-id! req user-id))]
-      user)))
+(rpc/reg
+ :rpc/get-current-user
+ (fn [{:keys [session/session-id] :as req}]
+   (a/go
+     (a/<! (a/timeout 1000))
+     (let [{:keys [user/user-id]} (a/<! (session-db/find-by-session-id! req session-id))]
+       (a/<! (user-db/find-by-user-id! req user-id))))))
+

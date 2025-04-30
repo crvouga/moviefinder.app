@@ -16,7 +16,6 @@
     :http-request/body (pr-str req)}))
 
 (defn rpc-res-chan! [req]
-  (println "rpc-chan! " req)
   (go
     (let [res (<! (rpc-fetch! req))
           body (-> res :http-response/body)
@@ -33,8 +32,7 @@
    (fn [[_ req]]
      (go
        (try
-         (let [res (<! (rpc-res-chan! req))]
-           (assoc res :result/type :result/ok))
+         (<! (rpc-res-chan! req))
          (catch js/Error e
            {:result/type :result/error
             :error/message (str "RPC request failed: " (.-message e))}))))))

@@ -2,21 +2,26 @@
   (:require
    [app.rpc.backend :as rpc]
    [app.auth.login.verify-sms.impl]
-   [app.auth.login.verify-sms.interface :as verify-sms]
-   [clojure.core.async :refer [go <!]]))
+   [app.auth.login.verify-sms.inter :as verify-sms]
+   [clojure.core.async :as a]
+   [lib.result :as result]))
 
 (def fake-user {:user/id "123"
                 :user/phone-number "1234567890"
                 :user/name "John Doe"})
 
-(defmethod rpc/rpc! :rpc/send-code [req]
-  (go
-    (let [res (<! (verify-sms/send-code! (second req)))]
-      res)))
+(rpc/reg
+ :rpc/send-code
+ (fn [req]
+   (a/go
+     (let [res (a/<! (verify-sms/send-code! req))]
+       res))))
 
-(defmethod rpc/rpc! :rpc/verify-code [req]
-  (go
-    (let [res (<! (verify-sms/verify-code! (second req)))
-          ok? (-> res :result/type (= :result/ok))
-          res (if ok? (merge res fake-user) res)]
-      res)))
+(rpc/reg
+ :rpc/verify-code
+ (fn [req]
+   (a/go
+     (let [res (a/<! (verify-sms/verify-code! req))]
+       (if (result/ok? res)
+         (merge res fake-user)
+         res)))))

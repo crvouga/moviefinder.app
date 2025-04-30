@@ -29,19 +29,22 @@
    (fn [_] (or (route/get!) (fallback))))
 
   (a/go
-    (p/put! i [::set-screen (p/eff! i [::get-screen])]))
+    (p/put! i [::set-screen (p/eff! i [::get-screen])])
+    (p/put! i [:screen/screen-changed (p/eff! i [::get-screen])]))
 
   (p/take-every!
    i :screen/clicked-link
    (fn [[_ screen]]
      (p/put! i [::set-screen screen])
-     (p/eff! i [::push-screen! screen])))
+     (p/eff! i [::push-screen! screen])
+     (p/put! i [:screen/screen-changed screen])))
 
   (p/take-every!
    i :screen/push
    (fn [[_ screen]]
      (p/put! i [::set-screen screen])
-     (p/eff! i [::push-screen! screen])))
+     (p/eff! i [::push-screen! screen])
+     (p/put! i [:screen/screen-changed screen])))
 
   (p/take-every!
    i ::got-screen

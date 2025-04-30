@@ -6,10 +6,16 @@
    [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.profile.login-cta :as login-cta]
    [lib.ui.spinner-screen :as spinner-screen]
-   [lib.ui.top-bar :as top-bar]))
+   [lib.ui.top-bar :as top-bar]
+   [lib.program :as p]))
 
 
-(defn- logic [_i])
+(defn- logic [i]
+  (p/take-every!
+   i :screen/screen-changed
+   (fn [[_ [screen-name _]]]
+     (when (= screen-name :screen/profile)
+       (p/put! i [:current-user/load])))))
 
 (defn view [i]
   [screen/view-screen i :screen/profile

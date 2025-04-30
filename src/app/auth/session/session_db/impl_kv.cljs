@@ -4,15 +4,14 @@
    [lib.kv.inter :as kv]))
 
 
-(defn new-by-session-id-kv [config]
-  (kv/new! (merge config
-                  {:kv/impl :kv/impl-namespaced
-                   :kv/namespace ::by-session-id})))
+(defn new-by-session-id-kv [kv]
+  (-> (assoc kv :kv/namespace ::by-session-id)
+      kv/new!))
 
 (defmethod session-db/new! :session-db/impl-kv
   [config]
-  (merge config
-         {::by-session-id-kv (new-by-session-id-kv config)}))
+  (-> config
+      (assoc ::by-session-id-kv (new-by-session-id-kv config))))
 
 (defmethod session-db/find-by-session-id! :session-db/impl-kv
   [{:keys [::by-session-id-kv]} session-id]
