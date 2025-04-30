@@ -102,13 +102,14 @@
         ch (a/chan)]
     (a/tap msg-mult! ch)
     (a/go-loop []
-      (when-let [msg (a/<! ch)]
-        (if (or (= msg-type :*)
-                (= (first msg) msg-type))
-          (do
-            (a/close! ch)
-            msg)
-          (recur))))))
+      (let [msg (a/<! ch)
+            match? (or (= msg-type :*)
+                       (= (first msg) msg-type))]
+        (when-not match?
+          (recur))
+
+        (a/close! ch)
+        msg))))
 
 
 (defn take-every!
