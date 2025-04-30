@@ -101,15 +101,14 @@
   (let [{:keys [program/msg-mult!]} program
         ch (a/chan)]
     (a/tap msg-mult! ch)
-    (a/go
-      (loop []
-        (when-let [msg (a/<! ch)]
-          (if (or (= msg-type :*)
-                  (= (first msg) msg-type))
-            (do
-              (a/close! ch)
-              msg)
-            (recur)))))))
+    (a/go-loop []
+      (when-let [msg (a/<! ch)]
+        (if (or (= msg-type :*)
+                (= (first msg) msg-type))
+          (do
+            (a/close! ch)
+            msg)
+          (recur))))))
 
 
 (defn take-every!
