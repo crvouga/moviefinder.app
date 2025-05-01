@@ -4,11 +4,13 @@
    [clojure.pprint :as pprint]))
 
 
+
+
 (defn new
   "New is a function that takes no arguments. It returns a program. new"
   []
   (let [state! (atom {})
-        msg-chan! (a/chan)
+        msg-chan! (a/chan 10)
         msg-mult! (a/mult msg-chan!)
         eff-fns! (atom {})
         reducer-fns! (atom {})
@@ -17,6 +19,7 @@
                  :program/msg-mult! msg-mult!
                  :program/eff-fns! eff-fns!
                  :program/reducer-fns! reducer-fns!}]
+
     program))
 
 (defn- reducer

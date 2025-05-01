@@ -21,11 +21,9 @@
   "Wrong code")
 
 (defn- logic [i]
-  (a/go-loop []
-
+  (a/go
     (a/<! (a/timeout 1000))
-    (p/put! i [::tick])
-    (recur))
+    (p/put! i [::tick]))
 
 
   (p/reg-reducer i ::set-code (fn [state [_ code]] (assoc state ::code code)))

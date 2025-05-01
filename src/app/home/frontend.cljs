@@ -44,9 +44,6 @@
 
 
 (defn- logic [i]
-  (a/go
-    (p/put! i [::load]))
-
   (p/take-every!
    i ::load
    (fn [_]
