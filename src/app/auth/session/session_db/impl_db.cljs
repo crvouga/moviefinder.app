@@ -42,7 +42,7 @@
 
 (defn- query-result->user-sessions [query-result]
   (->> query-result
-       :query-result/rows
+       :queried/rows
        (map row->user-session)))
 
 (defmethod session-db/new! :session-db/impl-db

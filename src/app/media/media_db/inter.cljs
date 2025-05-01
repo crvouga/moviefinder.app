@@ -13,27 +13,27 @@
 (s/def :query/select (s/coll-of keyword?))
 (s/def :query/order vector?)
 
-(s/def :query-result/query (s/keys :opt [:query/select :query/where :query/order :query/limit :query/offset]))
-(s/def :query-result/limit number?)
-(s/def :query-result/offset number?)
-(s/def :query-result/total number?)
-(s/def :query-result/primary-key keyword?)
-(s/def :query-result/rows (s/coll-of :media/entity))
+(s/def :queried/query (s/keys :opt [:query/select :query/where :query/order :query/limit :query/offset]))
+(s/def :queried/limit number?)
+(s/def :queried/offset number?)
+(s/def :queried/total number?)
+(s/def :queried/primary-key keyword?)
+(s/def :queried/rows (s/coll-of :media/entity))
 
 (s/def :query-result/query-result
-  (s/keys :req [:query-result/query
-                :query-result/limit
-                :query-result/offset
-                :query-result/total
-                :query-result/primary-key
-                :query-result/rows]))
+  (s/keys :req [:queried/query
+                :queried/limit
+                :queried/offset
+                :queried/total
+                :queried/primary-key
+                :queried/rows]))
 
 (def empty-query-result
-  {:query-result/limit 25
-   :query-result/offset 0
-   :query-result/total 0
-   :query-result/primary-key :media/id
-   :query-result/rows []})
+  {:queried/limit 25
+   :queried/offset 0
+   :queried/total 0
+   :queried/primary-key :media/id
+   :queried/rows []})
 
 
 
@@ -53,8 +53,8 @@
     (assoc empty-query-result
            :error/message "Media db implementation not found"
            :error/data q
-           :query-result/query q
-           :query-result/rows [])))
+           :queried/query q
+           :queried/rows [])))
 
 (defmulti upsert-chan!
   "Used for inserting media data into the database"

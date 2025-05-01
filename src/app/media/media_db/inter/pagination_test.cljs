@@ -16,24 +16,24 @@
                      full-result (<! (interface/query-result-chan! full-query))
                      result1 (<! (interface/query-result-chan! query1))
                      result2 (<! (interface/query-result-chan! query2))
-                     full-rows (:query-result/rows full-result)]
+                     full-rows (:queried/rows full-result)]
 
                  ; Test paginated results are subsequences of full result
-                 (is (= (:query-result/rows result1)
+                 (is (= (:queried/rows result1)
                         (take 5 full-rows))
                      "First page should match first 5 items of full result")
 
-                 (is (= (:query-result/rows result2)
+                 (is (= (:queried/rows result2)
                         (take 5 (drop 5 full-rows)))
                      "Second page should match items 6-10 of full result")
 
                  ; Test returned limit/offset match input
-                 (is (= (:query-result/limit result1) 5)
+                 (is (= (:queried/limit result1) 5)
                      "Returned limit should match input")
-                 (is (= (:query-result/offset result1) 0)
+                 (is (= (:queried/offset result1) 0)
                      "Returned offset should match input")
-                 (is (= (:query-result/limit result2) 5)
+                 (is (= (:queried/limit result2) 5)
                      "Returned limit should match input")
-                 (is (= (:query-result/offset result2) 5)
+                 (is (= (:queried/offset result2) 5)
                      "Returned offset should match input")))
              (done)))))

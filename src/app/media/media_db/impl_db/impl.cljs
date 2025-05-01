@@ -73,10 +73,10 @@
                                          :limit limit
                                          :offset offset}})))
           rows (map row->media (:db/rows result))
-          query-result {:query-result/query config
-                        :query-result/rows rows
-                        :query-result/limit limit
-                        :query-result/offset offset
-                        :query-result/total total
-                        :query-result/primary-key :media/id}]
+          query-result {:queried/query config
+                        :queried/rows rows
+                        :queried/limit limit
+                        :queried/offset offset
+                        :queried/total total
+                        :queried/primary-key :media/id}]
       query-result)))

@@ -34,11 +34,11 @@
                    (map #(assoc-image-urls input %))
                    (drop offset)
                    (take limit))]
-    {:query-result/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
-     :query-result/limit limit
-     :query-result/offset offset
-     :query-result/total total
-     :query-result/primary-key :media/id
-     :query-result/rows items}))
+    {:queried/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
+     :queried/limit limit
+     :queried/offset offset
+     :queried/total total
+     :queried/primary-key :media/id
+     :queried/rows items}))
 
 
