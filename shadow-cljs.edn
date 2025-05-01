@@ -15,7 +15,9 @@
   :backend
   {:target :node-script
    :main app.backend/-main
-   :output-to "out/backend/main.js"}
+   :output-to "out/backend/main.js"
+   :devtools {:autoload true
+              :repl true}}
   :test
   {:target :node-test
    :output-to "out/test/test.js"

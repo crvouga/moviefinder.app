@@ -41,16 +41,31 @@
   (dom/watch-event-chan! "#swiper-container" "swiperslidechange" (map swiper-event->slide-index)))
 
 
+
+
 (defn- logic [i]
   (a/go
-    (let [query (merge ctx popular-media-query)
-          query-result (a/<! (media-db/query-result-chan! query))]
-      (db/put-query-result! i query-result)))
+    (p/put! i [::load]))
 
-  (a/go-loop []
-    (let [[_ slide-index] (a/<! (p/take! i ::swiper-slide-changed))]
-      (println "swiper-slide-changed" slide-index)
-      (recur)))
+  (p/take-every!
+   i ::load
+   (fn [_]
+     (a/go
+       (let [q (merge ctx popular-media-query)
+             query-result (a/<! (media-db/query-result-chan! q))]
+         (p/put! i [:db/got-query-result query-result])))))
+
+  (p/take-every!
+   i ::swiper-slide-changed
+   (fn [[_ slide-index]]
+     (println "swiper-slide-changed" slide-index)))
+
+  (p/take-every!
+   i :screen/screen-changed
+   (fn [[_ [screen-name _]]]
+     (when (= screen-name :screen/home)
+       (p/put! i [::load]))))
+
 
   (p/take-every!
    i ::clicked-swiper-slide

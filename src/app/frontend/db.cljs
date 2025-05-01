@@ -54,7 +54,7 @@
       tap-print))
 
 (defn- logic [i]
-  (p/reg-reducer i ::got-query-result reducer-got-query-result))
+  (p/reg-reducer i :db/got-query-result reducer-got-query-result))
 
 (defn to-query-result [state query]
   (let [query-result (-> state ::query-result-by-query (get (query-to-key query)))
@@ -62,8 +62,6 @@
     (-> query-result
         (assoc :query-result/rows entities))))
 
-(defn put-query-result! [i query-result]
-  (p/put! i [::got-query-result query-result]))
 
 (defn to-entity [state entity-id]
   (-> state ::entity-by-id (get entity-id)))
