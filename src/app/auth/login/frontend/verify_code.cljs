@@ -22,12 +22,14 @@
 
 (defn- logic [i]
   #_(a/go
-      (p/put! i [::load]))
+      (p/put! i [::hello]))
 
   (p/reg-reducer i ::set-code (fn [state [_ code]] (assoc state ::code code)))
   (p/reg-reducer i ::set-request (fn [state [_ request]] (assoc state ::request request)))
 
-  (p/take-every! i ::user-inputted-code (fn [[_ code]] (p/put! i [::set-code code])))
+  (p/take-every!
+   i ::user-inputted-code
+   (fn [[_ code]] (p/put! i [::set-code code])))
 
   (a/go-loop []
     (a/<! (p/take! i ::user-submitted-form))
@@ -47,7 +49,6 @@
         (p/put! i [:screen/push [:screen/profile]]))
 
       (when (result/err? res)
-        (println "error" res)
         (p/put! i [:toaster/show (toast/error (err/message res))]))
       (recur))))
 

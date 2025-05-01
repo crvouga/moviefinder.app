@@ -120,3 +120,12 @@
     (let [msg (a/<! (take! program msg-type))]
       (f msg)
       (recur))))
+
+(defn take-leading!
+  "Take-leading is a function that takes a program, a message type, and a function. It returns a program. new"
+  [program msg-type f]
+  #_(pprint/pprint {:take-leading! msg-type})
+  (a/go-loop []
+    (let [msg (a/<! (take! program msg-type))]
+      (a/<! (f msg))
+      (recur))))
