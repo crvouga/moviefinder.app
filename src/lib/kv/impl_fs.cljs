@@ -7,7 +7,7 @@
    [cljs.reader :as reader]
    [lib.pretty :as pretty]))
 
-(def ^:private default-file-path "kv-store.edn")
+(def ^:private default-file-path "kv.edn")
 
 (defn- read-store! [fs file-path]
   (a/go

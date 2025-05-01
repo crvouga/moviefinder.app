@@ -24,5 +24,5 @@
   (fn [req res]
     (let [session-id (get-cookie req)]
       (when-not session-id
-        (set-cookie res (random-uuid)))
+        (set-cookie res (str (random-uuid))))
       (respond req res))))

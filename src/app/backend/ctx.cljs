@@ -3,6 +3,7 @@
             [lib.kv.inter :as kv]
             [lib.kv.impl]
             [lib.db.inter :as db]
+            [lib.fs.impl]
             [lib.db.impl]
             [lib.str :as str]
             [app.auth.session.session-db.inter :as session-db]
@@ -16,7 +17,7 @@
 
 (def db (db/new! {:db/impl :db/impl-better-sqlite3}))
 
-(def kv (kv/new! {:kv/impl :kv/impl-atom}))
+(def kv (kv/new! {:kv/impl :kv/impl-fs}))
 
 (def session-db (session-db/new! (merge kv {:session-db/impl :session-db/impl-kv})))
 

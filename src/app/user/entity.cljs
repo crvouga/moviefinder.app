@@ -17,7 +17,7 @@
 
 (defn create [{:keys [user/phone-number]}]
   {:user/phone-number phone-number
-   :user/user-id (random-uuid)
+   :user/user-id (str (random-uuid))
    :user/name (str "User " (random-uuid))
    :user/created-at (time/now!)})
 

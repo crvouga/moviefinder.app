@@ -1,3 +1,0 @@
-{[:test-namespace "same-key"] {:data "value-2"},
- [:namespace-1 "same-key"] {:data "value-1"},
- [:namespace-2 "same-key"] {:data "value-2"}}
