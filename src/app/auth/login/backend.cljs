@@ -31,7 +31,7 @@
            res (if (result/ok? verified) (merge verified user) verified)]
 
        (when (result/ok? res)
-         (a/<! (user-db/put! i user))
+         #_(a/<! (user-db/put! i user))
          (a/<! (session-db/put! i session-new)))
 
        res))))

@@ -19,8 +19,6 @@
   (let [sqlite-instance (::sqlite-instance conn)
         raw-sql (sql/sql-query->raw-sql query)
         chan (async/chan 1)]
-    (println "query" query)
-    (println "raw-sql" raw-sql)
     (try
       (let [params (or (:db/params query) [])
             stmt (.prepare ^js sqlite-instance raw-sql)

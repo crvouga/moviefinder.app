@@ -21,7 +21,7 @@
     (assoc value :result/type :result/ok)))
 
 (defmethod kv/zap! :kv/impl-atom
-  [{:keys [::state!] :as inst}]
+  [{:keys [::state!] :as inst} key]
   (a/go
     (swap! state! dissoc (namespaced/to-key inst key))
     (assoc {} :result/type :result/ok)))
