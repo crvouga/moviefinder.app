@@ -5,9 +5,10 @@
 
 
 (defn- escape-param-val [param]
-  (if (string? param)
-    (str "'" (str/replace param "'" "''") "'")
-    (str param)))
+  (cond
+    (string? param) (str "'" (str/replace param "'" "''") "'")
+    (nil? param) "null"
+    :else (str param)))
 
 (defn- replace-param [sql param]
   (str/replace-first sql "?" (escape-param-val param)))

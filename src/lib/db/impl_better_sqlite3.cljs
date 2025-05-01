@@ -15,12 +15,15 @@
     (merge config {::sqlite-instance db})))
 
 (defmethod db/query-chan! :db/impl-better-sqlite3
-  [conn {:keys [db/query db/params] :or {params []}}]
+  [conn query]
   (let [sqlite-instance (::sqlite-instance conn)
         raw-sql (sql/sql-query->raw-sql query)
         chan (async/chan 1)]
+    (println "query" query)
+    (println "raw-sql" raw-sql)
     (try
-      (let [stmt (.prepare ^js sqlite-instance raw-sql)
+      (let [params (or (:db/params query) [])
+            stmt (.prepare ^js sqlite-instance raw-sql)
             is-select-query (re-find #"(?i)^SELECT" raw-sql)
             result (try
                      (if (empty? params)
@@ -41,7 +44,7 @@
                           :db/columns columns})
         (async/close! chan))
       (catch js/Error e
-        (println "SQL error:" e " raw-sql:" raw-sql " params:" params)
+        (println "SQL error:" e " raw-sql:" raw-sql " params:" (:db/params query))
         (async/put! chan {:db/error (.-message e)})
         (async/close! chan)))
     chan))

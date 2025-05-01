@@ -4,24 +4,20 @@
    [cljs.test :refer-macros [deftest testing is async]]
    [lib.db.impl]
    [lib.db.inter :as db]
-   [lib.db.inter.fixture :refer [create-table-query select-query insert-query]]))
+   [lib.db.inter.fixture :refer [q-create-table q-select q-insert]]))
 
 
 (deftest insert-select-honeysql-test
-  (async done
-         (testing "Can insert and select data using HoneySQL"
-           (go
-             (let [conn (db/new! {:db/impl :db/impl-better-sqlite3})
-                   _ (<! (db/query-chan! conn create-table-query))
-                   before (<! (db/query-chan! conn select-query))
-                   _ (<! (db/query-chan! conn insert-query))
-                   after (<! (db/query-chan! conn select-query))]
-
-               (is (-> before :db/rows empty?) "Should have no rows before insert")
-
-               (is (-> after :db/rows count (= 1)) "Should return one row after insert")
-
-               (is (= {:id 1 :name "test name"} (first (:db/rows after))) "Row should match inserted data"))
-
-             (done)))))
-
+  (async
+   done
+   (go
+     (testing "Can insert and select data using HoneySQL"
+       (let [db (db/new! {:db/impl :db/impl-better-sqlite3})
+             _ (<! (db/query-chan! db q-create-table))
+             before (<! (db/query-chan! db q-select))
+             _ (<! (db/query-chan! db q-insert))
+             after (<! (db/query-chan! db q-select))]
+         (is (-> before :db/rows empty?) "Should have no rows before insert")
+         (is (-> after :db/rows count (= 1)) "Should return one row after insert")
+         (is (= {:id 1 :name "test name"} (first (:db/rows after))) "Row should match inserted data"))))
+   (done)))
