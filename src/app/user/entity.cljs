@@ -23,3 +23,7 @@
 
 (defn create-from-phone-number [phone-number]
   (create {:user/phone-number phone-number}))
+
+(defn eq? [a b]
+  (= (select-keys a [:user/phone-number :user/user-id])
+     (select-keys b [:user/phone-number :user/user-id])))

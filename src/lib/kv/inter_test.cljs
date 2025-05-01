@@ -70,3 +70,39 @@
                "Values in different namespaces should be different"))
 
          (done))))))
+
+
+(deftest kv-string-values
+  (testing "KV operations with string values"
+    (async
+     done
+     (go
+       (let [kv-store (kv/new! {:kv/impl :kv/impl-atom})
+             test-key "string-key"
+             test-value "This is a string value"]
+
+         ;; Set a string value
+         (let [set-result (<! (kv/set! kv-store test-key test-value))]
+           (is (= :result/ok (:result/type set-result))
+               "Setting a string value should return a success result"))
+
+         ;; Get the string value
+         (let [get-result (<! (kv/get! kv-store test-key))]
+           (is (= :result/ok (:result/type get-result))
+               "Getting a string value should return a success result")
+           (is (= test-value (:result/data get-result))
+               "Retrieved string value should match what was set"))
+
+         ;; Zap the string value
+         (let [zap-result (<! (kv/zap! kv-store test-key))]
+           (is (= :result/ok (:result/type zap-result))
+               "Zapping a string value should return a success result"))
+
+         ;; Verify string value is gone after zap
+         (let [get-after-zap (<! (kv/get! kv-store test-key))]
+           (is (= :result/ok (:result/type get-after-zap))
+               "Getting after zap should still return a success result")
+           (is (nil? (:data get-after-zap))
+               "String value should be nil after being zapped"))
+
+         (done))))))

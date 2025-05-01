@@ -8,20 +8,26 @@
   [config]
   (merge config {::state! (atom {})}))
 
+(defn- assoc-ok [value]
+  (if (map? value)
+    (assoc value :result/type :result/ok)
+    {:result/type :result/ok
+     :result/data value}))
+
 (defmethod kv/get! :kv/impl-atom
   [{:keys [::state!] :as inst} key]
   (a/go
     (-> (get @state! (namespaced/to-key inst key))
-        (assoc :result/type :result/ok))))
+        assoc-ok)))
 
 (defmethod kv/set! :kv/impl-atom
   [{:keys [::state!] :as inst} key value]
   (a/go
     (swap! state! assoc (namespaced/to-key inst key) value)
-    (assoc value :result/type :result/ok)))
+    (assoc-ok value)))
 
 (defmethod kv/zap! :kv/impl-atom
   [{:keys [::state!] :as inst} key]
   (a/go
     (swap! state! dissoc (namespaced/to-key inst key))
-    (assoc {} :result/type :result/ok)))
+    (assoc-ok {})))
