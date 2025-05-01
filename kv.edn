@@ -1,0 +1,2 @@
+{[:namespace-1 "same-key"] {:data "value-1"},
+ [:namespace-2 "same-key"] {:data "value-2"}}
