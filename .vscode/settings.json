@@ -9,6 +9,7 @@
     "clojurescript",
     "concatv",
     "datascript",
+    "defmacro",
     "defmethod",
     "defmulti",
     "defn",

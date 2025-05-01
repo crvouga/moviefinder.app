@@ -1,25 +1,7 @@
 (ns lib.program
   (:require
    [clojure.core.async :as a]
-   [clojure.pprint :as pprint]
-   [clojure.spec.alpha :as s]))
-
-(s/def ::state! (s/and #(instance? js/Atom %) #(map? @%)))
-(s/def ::msg-chan! #(instance? js/ManyToManyChannel %))
-(s/def ::msg-mult! #(instance? js/Mult %))
-(s/def ::eff-fns! (s/and #(instance? js/Atom %) #(map? @%)))
-(s/def ::reducer-fns! (s/and #(instance? js/Atom %) #(map? @%)))
-
-(s/def ::program
-  (s/keys :req-un [::state!
-                   ::msg-chan!
-                   ::msg-mult!
-                   ::eff-fns!
-                   ::reducer-fns!]))
-
-(s/def ::msg
-  (s/or :simple-msg (s/cat :type keyword?)
-        :complex-msg (s/cat :type keyword? :payload map?)))
+   [clojure.pprint :as pprint]))
 
 
 (defn new
@@ -37,8 +19,6 @@
                  :program/reducer-fns! reducer-fns!}]
     program))
 
-
-
 (defn- reducer
   "Reducer is a function that takes a program, a state, and a message. It returns a state. new"
   [program state msg]
@@ -46,14 +26,10 @@
         reducer-fn (get @reducer-fns! (first msg) (constantly state))]
     (reducer-fn state msg)))
 
-(s/fdef reducer
-  :args (s/cat :program ::program :state map? :msg ::msg)
-  :ret map?)
-
 (defn reg-reducer
   "Reg-reducer is a function that takes a program, a message type, and a reducer function. It returns a program. new"
   [program msg-type reducer-fn]
-  (pprint/pprint {:reg-reducer msg-type})
+  #_(pprint/pprint {:reg-reducer msg-type})
   (let [{:keys [program/reducer-fns!]} program]
     (swap! reducer-fns! assoc msg-type reducer-fn)))
 
@@ -82,10 +58,13 @@
 (defn- msg->str [msg]
   (if (> (count (str msg)) 10000) (str (first msg) " ... (truncated)") msg))
 
+(defn- update-state! [{:keys [program/state!] :as program} msg]
+  (swap! state! #(reducer program % msg)))
+
 (defn put!
   "Put is a function that takes a program, and a message. It returns a program. new"
-  [{:keys [program/msg-chan! program/state!] :as program} msg]
-  (swap! state! (fn [state] (reducer program state msg)))
+  [{:keys [program/msg-chan!] :as program} msg]
+  (update-state! program msg)
   (pprint/pprint {:put! (msg->str msg)})
   (a/put! msg-chan! msg)
   program)
@@ -95,7 +74,7 @@
     (a/tap msg-mult! ch)
     ch))
 
-(defn match? [msg msg-type]
+(defn msg-match? [msg msg-type]
   (or (= msg-type :*)
       (= (first msg) msg-type)))
 
@@ -106,7 +85,7 @@
   (let [ch (new-msg-chan program)]
     (a/go-loop []
       (let [msg (a/<! ch)]
-        (when-not (match? msg msg-type)
+        (when-not (msg-match? msg msg-type)
           (recur))
         (a/close! ch)
         msg))))
@@ -121,11 +100,3 @@
       (f msg)
       (recur))))
 
-(defn take-leading!
-  "Take-leading is a function that takes a program, a message type, and a function. It returns a program. new"
-  [program msg-type f]
-  #_(pprint/pprint {:take-leading! msg-type})
-  (a/go-loop []
-    (let [msg (a/<! (take! program msg-type))]
-      (a/<! (f msg))
-      (recur))))
