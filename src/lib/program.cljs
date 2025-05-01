@@ -22,19 +22,25 @@
 
     program))
 
+(defn- reduce-reducers [reducers state msg]
+  (reduce
+   (fn [state reducer-fn] (reducer-fn state msg))
+   state
+   reducers))
+
 (defn- reducer
   "Reducer is a function that takes a program, a state, and a message. It returns a state. new"
-  [program state msg]
+  [program state [msg-type :as msg]]
   (let [{:keys [program/reducer-fns!]} program
-        reducer-fn (get @reducer-fns! (first msg) (constantly state))]
-    (reducer-fn state msg)))
+        reducer-fns (get @reducer-fns! msg-type [])]
+    (reduce-reducers reducer-fns state msg)))
 
 (defn reg-reducer
   "Reg-reducer is a function that takes a program, a message type, and a reducer function. It returns a program. new"
   [program msg-type reducer-fn]
   #_(pprint/pprint {:reg-reducer msg-type})
   (let [{:keys [program/reducer-fns!]} program]
-    (swap! reducer-fns! assoc msg-type reducer-fn)))
+    (swap! reducer-fns! update msg-type (fnil conj []) reducer-fn)))
 
 (defn state! [program]
   (let [{:keys [program/state!]} program]

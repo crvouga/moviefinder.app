@@ -39,12 +39,12 @@
   (set! (.-appState js/window) (js-obj/init state)))
 
 (defn -main []
-  (mod/logic program)
-
   (p/take-every!
    program :*
    (fn []
      (let [state (p/state! program)
            input (merge state program)]
        (set-window-state! state)
-       (render! input)))))
+       (render! input))))
+
+  (mod/logic program))
