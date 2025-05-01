@@ -21,6 +21,9 @@
   "Wrong code")
 
 (defn- logic [i]
+  #_(a/go
+      (p/put! i [::load]))
+
   (p/reg-reducer i ::set-code (fn [state [_ code]] (assoc state ::code code)))
   (p/reg-reducer i ::set-request (fn [state [_ request]] (assoc state ::request request)))
 

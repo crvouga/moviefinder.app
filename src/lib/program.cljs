@@ -79,20 +79,16 @@
     program))
 
 
+(defn- msg->str [msg]
+  (if (> (count (str msg)) 10000) (str (first msg) " ... (truncated)") msg))
+
 (defn put!
   "Put is a function that takes a program, and a message. It returns a program. new"
-  [program msg]
-  (let [{:keys [program/msg-chan!
-                program/state!]} program
-
-        state-new (reducer program @state! msg)
-
-        _ (reset! state! state-new)]
-    (pprint/pprint {:put! (if (> (count (str msg)) 10000)
-                            (str (first msg) " ... (truncated)")
-                            msg)})
-    (a/put! msg-chan! msg)
-    program))
+  [{:keys [program/msg-chan! program/state!] :as program} msg]
+  (swap! state! (fn [state] (reducer program state msg)))
+  (pprint/pprint {:put! (msg->str msg)})
+  (a/put! msg-chan! msg)
+  program)
 
 (defn- new-msg-chan [{:keys [program/msg-mult!]}]
   (let [ch (a/chan)]
