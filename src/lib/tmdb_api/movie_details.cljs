@@ -12,6 +12,6 @@
   (go
     (-> params
         (shared/build-request (str "/movie/" movie-id))
-        http-client/fetch-chan!
+        http-client/fetch!
         <!
         shared/map-response)))

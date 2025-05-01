@@ -52,7 +52,7 @@
     (if-let [cached (@configuration-cache input)]
       cached
       (let [request (shared/build-request input "/configuration")
-            response (<! (http-client/fetch-chan! request))
+            response (<! (http-client/fetch! request))
             mapped-response (shared/map-response response)]
         (swap! configuration-cache assoc input mapped-response)
         mapped-response))))

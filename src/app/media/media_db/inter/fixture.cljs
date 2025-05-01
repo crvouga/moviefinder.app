@@ -5,7 +5,7 @@
             [app.media.media-db.impl]))
 
 
-(def config-tmdb-api {:media-db/impl :media-db-impl/tmdb-api
+(def config-tmdb-api {:media-db/impl :media-db/impl-tmdb-api
                       :tmdb/api-key (config/ctx :tmdb/api-key)
                       :query/limit 10
                       :query/offset 0})

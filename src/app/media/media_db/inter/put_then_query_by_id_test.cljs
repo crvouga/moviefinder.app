@@ -15,7 +15,7 @@
                                     {:query/limit 10
                                      :query/offset 0
                                      :query/where [:= :media/id "test-id"]})
-                       query-result (<! (media-db/query-result-chan! query))]
+                       query-result (<! (media-db/query-result-chan! config query))]
 
                    (is (= :result/ok (:result/type put-result))
                        "Put operation should succeed")

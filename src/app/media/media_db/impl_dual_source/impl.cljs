@@ -2,16 +2,16 @@
   (:require [app.media.media-db.inter :as media-db]
             [clojure.core.async :refer [go <! >! chan close!]]))
 
-(defmethod media-db/query-result-chan! :media-db-impl/dual-source [q]
+(defmethod media-db/query-result-chan! :media-db-/impl-dual-source [inst q]
   (let [result-chan (chan)]
     (go
-      (let [primary (-> q :media-db-impl-dual-source/primary)
-            secondary (-> q :media-db-impl-dual-source/secondary)
-            primary-result (<! (media-db/query-result-chan! primary))]
+      (let [primary (-> inst :media-db/primary-source)
+            secondary (-> inst :media-db/secondary-source)
+            primary-result (<! (media-db/query-result-chan! primary q))]
         (>! result-chan primary-result)
         #_(println "primary-result" primary-result)
         (go
-          (let [secondary-result (<! (media-db/query-result-chan! secondary))]
+          (let [secondary-result (<! (media-db/query-result-chan! secondary q))]
             (doseq [entity (:query-result/rows secondary-result)]
               #_(println "putting entity into primary" (-> entity :media/title))
               (<! (media-db/upsert-chan! (assoc primary :media/entity entity))))))

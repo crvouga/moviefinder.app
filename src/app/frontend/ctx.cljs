@@ -17,10 +17,10 @@
   (merge db
          {:wire/backend-url backend-url
           :verify-sms/impl :verify-sms-impl/fake
-          :media-db/impl :media-db-impl/rpc
+          :media-db/impl :media-db/impl-rpc
           ;; :media-db/impl :media-db-impl/dual-source
-          :media-db-impl-dual-source/primary (merge db {:media-db/impl :media-db-impl/db})
-          :media-db-impl-dual-source/secondary {:media-db/impl :media-db-impl/rpc}}))
+          :media-db/primary-source (merge db {:media-db/impl :media-db/impl-db})
+          :media-db/secondary-source {:media-db/impl :media-db/impl-rpc}}))
 
 (println "Config:")
 (pprint ctx)

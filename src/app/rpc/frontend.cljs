@@ -2,40 +2,48 @@
   (:require
    [app.frontend.ctx :refer [ctx]]
    [app.frontend.mod :as mod]
-   [clojure.core.async :refer [<! go]]
+   [app.rpc.shared :as shared]
+   [clojure.core.async :as a]
    [clojure.edn :as edn]
+   [lib.err :as err]
    [lib.http-client :as http-client]
    [lib.program :as p]
-   [app.rpc.shared :as shared]))
+   [lib.serialize :as serialize]))
+
+(defn to-url [req]
+  (str (:wire/backend-url ctx) shared/endpoint "?req=" (pr-str (first req))))
 
 (defn- rpc-fetch! [req]
-  (http-client/fetch-chan!
-   {:http-request/url (str (:wire/backend-url ctx) shared/endpoint "?req=" (-> req first pr-str))
-    :http-request/method :http-method/post
-    :http-request/headers {"Content-Type" "text/plain"}
-    :http-request/body (pr-str req)}))
+  (serialize/assert-serializable req)
+  (http-client/fetch!
+   {:http/url (to-url req)
+    :http/method :http/post
+    :http/headers {"Content-Type" "text/plain"}
+    :http/body (pr-str req)}))
 
 (defn rpc-res-chan! [req]
-  (go
-    (let [res (<! (rpc-fetch! req))
-          body (-> res :http-response/body)
-          body-edn (-> body edn/read-string)
-          ok? (-> res :http-response/ok?)]
+  (a/go
+    (let [{:keys [http/ok? http/body]} (a/<! (rpc-fetch! req))
+          edn (edn/read-string body)]
       (if ok?
-        body-edn
-        (merge body-edn {:result/type :result/ok
-                         :error/message "Errored while requesting from backend"})))))
+        edn
+        (merge edn {:result/type :result/err
+                    :err/err :err/rpc-error})))))
+
+(defmethod err/message :err/rpc-error []
+  "Errored while requesting from backend")
 
 (defn- logic [i]
   (p/reg-eff
    i :rpc/send!
    (fn [[_ req]]
-     (go
+     (a/go
        (try
-         (<! (rpc-res-chan! req))
+         (a/<! (rpc-res-chan! req))
          (catch js/Error e
            {:result/type :result/err
-            :error/message (str "RPC request failed: " (.-message e))}))))))
+            :err/err :err/rpc-error
+            :err/data e}))))))
 
 (mod/reg
  {:mod/name :mod/rpc

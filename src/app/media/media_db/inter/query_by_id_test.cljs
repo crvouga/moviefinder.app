@@ -15,7 +15,7 @@
                                   {:query/limit 1
                                    :query/offset 0
                                    :query/where [:= :media/id "123"]})
-                     result (<! (media-db/query-result-chan! query))
+                     result (<! (media-db/query-result-chan! config query))
                      first-result (first (:query-result/rows result))]
 
                  (is (= "123" (-> first-result :media/id str))

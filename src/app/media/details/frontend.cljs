@@ -3,7 +3,8 @@
    [app.frontend.db :as db]
    [app.frontend.mod :as mod]
    [app.frontend.screen :as screen]
-   [clojure.core.async :refer [<! go-loop]]
+   [app.media.media-db.inter :as media-db]
+   [clojure.core.async :as a]
    [lib.program :as p]
    [lib.ui.image :as image]
    [lib.ui.top-bar :as top-bar]))
@@ -13,13 +14,33 @@
 ;; 
 ;; 
 
-(defn- logic [i]
-  (p/reg-reducer i ::set-media-details (fn [state msg] (assoc state ::media-details (second msg))))
+(defn to-media-query [media-id]
+  {:query/limit 25
+   :query/offset 0
+   :query/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
+   :query/order [:media/popularity :desc]
+   :query/where [:query/and
+                 [:= :media/id media-id]]})
 
-  (go-loop []
-    (let [_ (<! (p/take! i ::clicked-back))]
-      (p/put! i [:screen/push [:screen/home]])
-      (recur))))
+
+
+(defn- logic [i]
+  (p/take-every! i ::clicked-back (fn [_] (p/put! i [:screen/push [:screen/home]])))
+
+  (p/take-every!
+   i ::load
+   (fn [[_ media-id]]
+     (a/go
+       (let [query-result (a/<! (media-db/query-result-chan! i (to-media-query media-id)))]
+         (p/put! i [:db/got-query-result query-result])))))
+
+  (p/take-every!
+   i :screen/screen-changed
+   (fn [[_ [screen-name screen-payload]]]
+     (when (= screen-name :screen/media-details)
+       (p/put! i [::load (:media/id screen-payload)])))))
+
+
 
 ;; 
 ;; 

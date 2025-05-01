@@ -12,6 +12,6 @@
   (go
     (-> params
         (shared/build-request "/discover/movie")
-        http-client/fetch-chan!
+        http-client/fetch!
         <!
         (shared/map-response  shared-spec/tmdb-results-empty))))

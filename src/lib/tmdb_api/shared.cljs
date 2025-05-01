@@ -33,31 +33,31 @@
 (defn build-request [params endpoint]
   (let [api-key (->api-key params)
         query-params (build-query-params params)]
-    {:http-request/method :http-method/get
-     :http-request/url (str base-url endpoint)
+    {:http/method :http/get
+     :http/url (str base-url endpoint)
      :http-request/query-params query-params
-     :http-request/headers {"Authorization" (str "Bearer " api-key)}}))
+     :http/headers {"Authorization" (str "Bearer " api-key)}}))
 
 (defn- map-response-ok [response empty-response]
-  (let [body (:http-response/body response)
+  (let [body (:http/body response)
         parsed (or (json/json->clj body) body)]
     (if parsed
       (map-ext/map-keys-recursively parsed external-key->namespace-key)
       (when empty-response
         (assoc empty-response
                :tmdb/error "Error parsing response"
-               :http-response/body body)))))
+               :http/body body)))))
 
 (defn- map-response-error [response empty-response]
   (when empty-response
     (assoc empty-response
            :tmdb/error (str "HTTP request failed: " (:http-response/status response))
-           :http-response/body (:http-response/body response))))
+           :http/body (:http/body response))))
 
 (defn map-response
   ([response]
    (map-response response {}))
   ([response empty-response]
-   (if (:http-response/ok? response)
+   (if (:http/ok? response)
      (map-response-ok response empty-response)
      (map-response-error response empty-response))))

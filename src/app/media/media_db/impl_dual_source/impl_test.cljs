@@ -19,7 +19,7 @@
                                   {:query/limit 1
                                    :query/offset 0
                                    :query/where [:= :media/id "123"]})
-                     result (<! (media-db/query-result-chan! query))
+                     result (<! (media-db/query-result-chan! dual-source-config query))
                      first-result (first (:query-result/rows result))]
 
                  (is (= "123" (-> first-result :media/id str))
@@ -41,7 +41,7 @@
                                             {:query/limit 1
                                              :query/offset 0
                                              :query/where [:= :media/id test-id]})
-                     secondary-result (<! (media-db/query-result-chan! secondary-query))
+                     secondary-result (<! (media-db/query-result-chan! dual-source-config secondary-query))
                      secondary-item (first (:query-result/rows secondary-result))
                      _ (is (some? secondary-item)
                            "Test ID should exist in secondary source")
@@ -51,7 +51,7 @@
                                        {:query/limit 1
                                         :query/offset 0
                                         :query/where [:= :media/id test-id]})
-                     _dual-result (<! (media-db/query-result-chan! dual-query))
+                     _dual-result (<! (media-db/query-result-chan! dual-source-config dual-query))
 
                    ; Add a timeout to allow time for secondary results to be stored
                      _ (<! (timeout 1000))
@@ -61,7 +61,7 @@
                                           {:query/limit 1
                                            :query/offset 0
                                            :query/where [:= :media/id test-id]})
-                     primary-result (<! (media-db/query-result-chan! primary-query))
+                     primary-result (<! (media-db/query-result-chan! dual-source-config primary-query))
                      stored-result (first (:query-result/rows primary-result))]
 
                  (is (some? stored-result)

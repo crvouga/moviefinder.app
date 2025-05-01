@@ -1,9 +1,8 @@
 (ns app.media.media-db.impl-rpc.frontend
-  (:require [clojure.core.async :refer [go <!]]
+  (:require [clojure.core.async :as a]
             [app.rpc.frontend :as rpc]
             [app.media.media-db.inter :as media-db]))
 
-(defmethod media-db/query-result-chan! :media-db-impl/rpc [q]
-  (go
-    (let [res (<! (rpc/rpc-res-chan! [:rpc/media-db-query q]))]
-      res)))
+(defmethod media-db/query-result-chan! :media-db/impl-rpc [_inst q]
+  (a/go (let [res (a/<! (rpc/rpc-res-chan! [:rpc/media-db-query (assoc q :media-db/impl :media-db/impl-tmdb-api)]))]
+          res)))

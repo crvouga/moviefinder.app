@@ -5,7 +5,7 @@
             [app.rpc.backend :as rpc]))
 
 (defn update-impl [impl]
-  (if (= impl :media-db-impl/rpc) :media-db-impl/tmdb-api impl))
+  (if (= impl :media-db/impl-rpc) :media-db/impl-tmdb-api impl))
 
 (defn ensure-not-rpc-impl [req]
   (-> req
@@ -15,6 +15,5 @@
  :rpc/media-db-query
  (fn [req]
    (go
-     (let [q (-> req ensure-not-rpc-impl)
-           res (<! (media-db/query-result-chan! q))]
+     (let [res (<! (media-db/query-result-chan! (-> req ensure-not-rpc-impl) req))]
        res))))

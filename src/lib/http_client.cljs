@@ -27,30 +27,29 @@
       (.then (fn [data]
                (go
                  (>! response-chan
-                     {:http-response/ok? (.-ok response)
+                     {:http/ok? (.-ok response)
                       :http-response/status (.-status response)
                       :http-response/headers (js-headers->clj (.-headers response))
-                      :http-response/body (if (string? data) data (js->clj data :keywordize-keys true))})
+                      :http/body (if (string? data) data (js->clj data :keywordize-keys true))})
                  (close! response-chan))))))
 
 (defn on-error-response [error response-chan]
   (go
-    (>! response-chan {:http-response/ok? false
+    (>! response-chan {:http/ok? false
                        :http-response/error (str error)})
     (close! response-chan)))
 
-(defn fetch-chan!
+(defn fetch!
   "Sends an HTTP request using the Fetch API.
    Accepts an `http-request` map with:
-   - :http-request/method (:http-method/get, :http-method/post, :http-method/put, :http-method/delete, etc.)
-   - :http-request/url (the endpoint)
-   - :http-request/headers (optional, a map of headers)
-   - :http-request/body (optional, the request body as a string or FormData for POST/PUT requests)
+   - :http/method (:http/get, :http/post, :http/put, :http/delete, etc.)
+   - :http/url (the endpoint)
+   - :http/headers (optional, a map of headers)
+   - :http/body (optional, the request body as a string or FormData for POST/PUT requests)
    Returns a channel containing the HTTP response map."
   [http-request]
-  #_(println "http-request" http-request)
   (let [response-chan (chan)
-        {:http-request/keys [method url headers body]} http-request
+        {:keys [http/method http/url http/headers http/body]} http-request
         init (cond-> {:method (-> method name .toUpperCase)}
                headers (assoc :headers (clj->js headers))
                body (assoc :body body))]

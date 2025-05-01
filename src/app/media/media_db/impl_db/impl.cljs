@@ -39,7 +39,7 @@
     (doseq [migration migrations/migrations]
       (<! (db/query-chan! (merge config {:db/query migration}))))))
 
-(defmethod media-db/upsert-chan! :media-db-impl/db
+(defmethod media-db/upsert-chan! :media-db/impl-db
   [{:keys [media/entity] :as config}]
   (go
     (<! (run-migrations! config))
@@ -49,10 +49,10 @@
                               {:db/query {:insert-into :media
                                           :columns (keys row)
                                           :values [(vals row)]}})))]
-      {:media-db/impl :media-db-impl/db
+      {:media-db/impl :media-db/impl-db
        :result/type :result/ok})))
 
-(defmethod media-db/query-result-chan! :media-db-impl/db
+(defmethod media-db/query-result-chan! :media-db/impl-db
   [{:keys [query/where query/limit query/offset query/select query/order] :as config}]
   (go
     (<! (run-migrations! config))

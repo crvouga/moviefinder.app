@@ -2,6 +2,7 @@
   (:require
    ["react-dom/client" :as rd]
    [app.auth.frontend]
+   [app.frontend.ctx :refer [ctx]]
    [app.frontend.db]
    [app.frontend.mod :as mod]
    [app.frontend.toaster]
@@ -30,6 +31,6 @@
   (set! (.-appState js/window) (js-obj/init i)))
 
 (defn -main []
-  (mod/logic p)
+  (mod/logic (merge ctx p))
   (p/take-every! p :* (fn [] (-> p p/state! set-window-state!)))
   (p/take-every! p :* (fn [] (-> p p/state! (merge p) render!))))
