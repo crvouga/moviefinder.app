@@ -7,7 +7,6 @@
   []
   (let [chan (a/chan)]
     (doseq [event-name ["popstate" "pushstate" "replacestate"]]
-      (println "adding event listener" event-name)
       (js/window.addEventListener event-name #(a/put! chan %)))
     chan))
 

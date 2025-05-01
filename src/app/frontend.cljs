@@ -11,11 +11,7 @@
    [app.rpc.frontend]
    [lib.js-obj :as js-obj]
    [lib.program :as p]
-   [reagent.core :as r]
-   [clojure.pprint :as pprint]))
-
-
-(defonce ^:private program (p/new))
+   [reagent.core :as r]))
 
 (defn view [i]
   [:div {:class "fixed left-1/2 top-1/2 flex h-[100dvh] w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden bg-black text-white"}
@@ -23,28 +19,17 @@
     #_[:code (pr-str (screen/screen-name i))]
     [mod/view i]]])
 
-(defonce root
-  (let [dom-root (.getElementById js/document "root")
-        react-root (rd/createRoot dom-root)]
-    react-root))
+(defonce p (p/new))
 
-(defn render! [input]
-  (try
-    (.render root (r/as-element [view input]))
-    (catch :default e
-      (pprint/pprint {:render!/exception {:msg input
-                                          :error e}}))))
+(defonce react-root (rd/createRoot (.getElementById js/document "root")))
 
-(defn set-window-state! [state]
-  (set! (.-appState js/window) (js-obj/init state)))
+(defn render! [i]
+  (.render react-root (r/as-element [view i])))
+
+(defn set-window-state! [i]
+  (set! (.-appState js/window) (js-obj/init i)))
 
 (defn -main []
-  (p/take-every!
-   program :*
-   (fn []
-     (let [state (p/state! program)
-           input (merge state program)]
-       (set-window-state! state)
-       (render! input))))
-
-  (mod/logic program))
+  (mod/logic p)
+  (p/take-every! p :* (fn [] (-> p p/state! set-window-state!)))
+  (p/take-every! p :* (fn [] (-> p p/state! (merge p) render!))))
