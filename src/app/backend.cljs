@@ -1,15 +1,17 @@
 (ns app.backend
-  (:require [clojure.core.async :refer [go <!]]
-            [app.backend.http-respond :refer [http-respond!]]
-            [app.backend.ctx :as config]
-            [app.backend.serve-single-page-app]
-            [app.rpc.backend]
-            [app.auth.backend]
-            [app.media.backend]
-            [lib.http-server :as http-server]))
+  (:require
+   [app.auth.backend]
+   [app.backend.ctx :as config]
+   [app.backend.http-respond :refer [http-respond!]]
+   [app.backend.serve-single-page-app]
+   [app.media.backend]
+   [app.rpc.backend]
+   [clojure.core.async :refer [<! go]]
+   [lib.http-server :as http-server]
+   [lib.session-id-cookie :as session-id-cookie]))
 
 (defn request-handler-root! [req res]
-  (http-respond! req res))
+  ((session-id-cookie/with-cookie http-respond!) req res))
 
 (defn start-http-server! []
   (go

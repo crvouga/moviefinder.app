@@ -34,7 +34,6 @@
          (let [get-after-zap (<! (kv/get! kv-store test-key))]
            (is (= :result/ok (:result/type get-after-zap))
                "Getting after zap should still return a success result")
-           (println "get-after-zap" get-after-zap)
            (is (nil? (:data get-after-zap))
                "Value should be nil after being zapped"))
 

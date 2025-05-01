@@ -19,6 +19,7 @@
   (http-client/fetch!
    {:http/url (to-url req)
     :http/method :http/post
+    :http/credentials :include
     :http/headers {"Content-Type" "text/plain"}
     :http/body (pretty/str-edn req)}))
 

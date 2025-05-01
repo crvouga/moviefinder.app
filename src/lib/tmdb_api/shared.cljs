@@ -51,7 +51,7 @@
 (defn- map-response-error [response empty-response]
   (when empty-response
     (assoc empty-response
-           :tmdb/error (str "HTTP request failed: " (:http-response/status response))
+           :tmdb/error (str "HTTP request failed: " (:http/status response))
            :http/body (:http/body response))))
 
 (defn map-response

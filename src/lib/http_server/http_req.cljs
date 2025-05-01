@@ -1,7 +1,8 @@
 (ns lib.http-server.http-req
   (:require
    [clojure.core.async :refer [<! chan close! go go-loop put!]]
-   [clojure.edn :as edn]))
+   [clojure.edn :as edn]
+   [clojure.string :as s]))
 
 
 
@@ -44,3 +45,18 @@
       (catch :default e
         (js/console.error "Failed to parse EDN:" e)
         nil))))
+(defn headers->map [^js req]
+  (let [headers (.-headers req)
+        entries (js->clj headers)]
+    (reduce (fn [acc [k v]] (assoc acc k v)) {} entries)))
+
+(defn get-header [^js req key]
+  (get (headers->map req) key))
+
+(defn get-cookie [^js req key]
+  (let [cookie-header (get-header req "cookie")]
+    (when cookie-header
+      (let [cookies (s/split cookie-header #"; ")
+            cookie-pairs (map #(s/split % #"=") cookies)
+            cookie-map (reduce (fn [acc [k v]] (assoc acc k v)) {} cookie-pairs)]
+        (get cookie-map key)))))

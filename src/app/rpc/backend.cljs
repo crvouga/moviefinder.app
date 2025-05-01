@@ -6,7 +6,7 @@
    [clojure.core.async :as a]
    [clojure.pprint :refer [pprint]]
    [lib.http-server.http-req :as http-req]
-   [lib.http-server.http-res :as http-response]
+   [lib.http-server.http-res :as http-res]
    [lib.pretty :as pretty]))
 
 
@@ -33,6 +33,6 @@
   (a/go
     (let [rpc-req (a/<! (http-req/body-edn-chan req))
           rpc-res (a/<! (handle-rpc-request! rpc-req))]
-      (http-response/allow-cors! res)
-      (http-response/set-header! res "Content-Type" "text/plain")
-      (http-response/end! res (pretty/str-edn rpc-res)))))
+      (http-res/allow-cors! res)
+      (http-res/set-header! res "Content-Type" "text/plain")
+      (http-res/end! res (pretty/str-edn rpc-res)))))
