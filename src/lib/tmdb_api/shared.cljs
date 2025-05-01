@@ -35,7 +35,7 @@
         query-params (build-query-params params)]
     {:http/method :http/get
      :http/url (str base-url endpoint)
-     :http-request/query-params query-params
+     :http-req/query-params query-params
      :http/headers {"Authorization" (str "Bearer " api-key)}}))
 
 (defn- map-response-ok [response empty-response]

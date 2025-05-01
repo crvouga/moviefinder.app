@@ -41,15 +41,15 @@
 
 (defn fetch!
   "Sends an HTTP request using the Fetch API.
-   Accepts an `http-request` map with:
+   Accepts an `http-req` map with:
    - :http/method (:http/get, :http/post, :http/put, :http/delete, etc.)
    - :http/url (the endpoint)
    - :http/headers (optional, a map of headers)
    - :http/body (optional, the request body as a string or FormData for POST/PUT requests)
    Returns a channel containing the HTTP response map."
-  [http-request]
+  [http-req]
   (let [response-chan (chan)
-        {:keys [http/method http/url http/headers http/body]} http-request
+        {:keys [http/method http/url http/headers http/body]} http-req
         init (cond-> {:method (-> method name .toUpperCase)}
                headers (assoc :headers (clj->js headers))
                body (assoc :body body))]

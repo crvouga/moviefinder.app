@@ -1,4 +1,4 @@
-(ns lib.http-server.http-response)
+(ns lib.http-server.http-res)
 
 (defn set-header! [^js res key value]
   (.setHeader res key value))

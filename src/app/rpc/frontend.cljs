@@ -8,7 +8,8 @@
    [lib.err :as err]
    [lib.http-client :as http-client]
    [lib.program :as p]
-   [lib.serialize :as serialize]))
+   [lib.serialize :as serialize]
+   [lib.pretty :as pretty]))
 
 (defn to-url [req]
   (str (:wire/backend-url ctx) shared/endpoint "?req=" (pr-str (first req))))
@@ -19,7 +20,7 @@
    {:http/url (to-url req)
     :http/method :http/post
     :http/headers {"Content-Type" "text/plain"}
-    :http/body (pr-str req)}))
+    :http/body (pretty/str-edn req)}))
 
 (defn rpc-res-chan! [req]
   (a/go

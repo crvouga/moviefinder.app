@@ -1,4 +1,4 @@
-(ns lib.http-server.http-request
+(ns lib.http-server.http-req
   (:require
    [clojure.core.async :refer [<! chan close! go go-loop put!]]
    [clojure.edn :as edn]))

@@ -1,11 +1,13 @@
 (ns app.rpc.backend
-  (:require [clojure.core.async :as a]
-            [app.backend.http-respond :refer [http-respond!]]
-            [app.backend.ctx :as ctx]
-            [lib.http-server.http-request :as http-request]
-            [lib.http-server.http-response :as http-response]
-            [clojure.pprint :refer [pprint]]
-            [app.rpc.shared :as shared]))
+  (:require
+   [app.backend.ctx :as ctx]
+   [app.backend.http-respond :refer [http-respond!]]
+   [app.rpc.shared :as shared]
+   [clojure.core.async :as a]
+   [clojure.pprint :refer [pprint]]
+   [lib.http-server.http-req :as http-req]
+   [lib.http-server.http-res :as http-response]
+   [lib.pretty :as pretty]))
 
 
 (def rpc-fns! (atom {}))
@@ -29,8 +31,8 @@
 
 (defmethod http-respond! shared/endpoint [req res]
   (a/go
-    (let [rpc-req (a/<! (http-request/body-edn-chan req))
+    (let [rpc-req (a/<! (http-req/body-edn-chan req))
           rpc-res (a/<! (handle-rpc-request! rpc-req))]
       (http-response/allow-cors! res)
       (http-response/set-header! res "Content-Type" "text/plain")
-      (http-response/end! res (pr-str rpc-res)))))
+      (http-response/end! res (pretty/str-edn rpc-res)))))
