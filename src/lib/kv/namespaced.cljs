@@ -2,6 +2,4 @@
 
 
 (defn to-key [{:keys [:kv/namespace]} key]
-  (if (keyword? namespace)
-    (keyword (str namespace ":" key))
-    key))
+  (vec (flatten [namespace key])))
