@@ -11,7 +11,7 @@
    (a/go
      (a/<! (a/timeout 1000))
      (println "session-id" session-id)
-     (let [{:keys [user/user-id]} (a/<! (session-db/find-by-session-id! req session-id))]
+     (let [{:keys [session/user-id]} (a/<! (session-db/find-by-session-id! req session-id))]
        (println "user-id" user-id)
        (a/<! (user-db/find-by-user-id! req user-id))))))
 

@@ -76,3 +76,35 @@
                "Second session should be retrievable"))
 
          (done))))))
+
+
+(deftest find-by-session-id-test
+  (testing "Finding sessions by session ID"
+    (async
+     done
+     (go
+       (let [db (new-db)
+             test-user-id (str (random-uuid))
+             test-session-id (str (random-uuid))
+             test-session {:session/session-id test-session-id
+                           :session/user-id test-user-id
+                           :session/created-at (js/Date.)}]
+
+         ;; Test finding a non-existent session
+         (let [find-result (<! (session-db/find-by-session-id! db "non-existent-id"))]
+           (is (= :result/ok (:result/type find-result))
+               "Finding a non-existent session should return a success result with nil data")
+           (is (nil? (:session/user-id find-result))
+               "Non-existent session should have nil user ID"))
+
+         ;; Add a session and then find it
+         (<! (session-db/put! db test-session))
+         (let [find-result (<! (session-db/find-by-session-id! db test-session-id))]
+           (is (= :result/ok (:result/type find-result))
+               "Finding an existing session should return a success result")
+           (is (= test-session-id (:session/session-id find-result))
+               "Retrieved session should have the correct session ID")
+           (is (= test-user-id (:session/user-id find-result))
+               "Retrieved session should have the correct user ID"))
+
+         (done))))))
