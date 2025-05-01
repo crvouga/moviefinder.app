@@ -7,9 +7,12 @@
   (:require-macros
    [cljs.core.async.macros :refer [go]]))
 
-(defn new-kv []
-  (kv/new! {:kv/impl :kv/impl-fs
-            :kv/namespace :test-namespace}))
+(defn new-kv
+  ([]
+   (new-kv :test-namespace))
+  ([namespace]
+   (kv/new! {:kv/impl :kv/impl-fs
+             :kv/namespace namespace})))
 
 (deftest kv-operations
   (testing "Basic KV operations"
@@ -47,8 +50,8 @@
     (async
      done
      (go
-       (let [kv-store-1 (new-kv)
-             kv-store-2 (new-kv)
+       (let [kv-store-1 (new-kv :namespace-1)
+             kv-store-2 (new-kv :namespace-2)
              test-key "same-key"
              test-value-1 {:data "value-1"}
              test-value-2 {:data "value-2"}]
