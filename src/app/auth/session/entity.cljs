@@ -11,7 +11,7 @@
 (s/def ::session
   (s/keys :req [::user-id ::session-id ::created-at ::ended-at]))
 
-(defn create [{:keys [session/user-id]}]
+(defn create [{:keys [session/user-id session/session-id]}]
   {:session/user-id user-id
-   :session/session-id (random-uuid)
+   :session/session-id session-id
    :session/created-at (time/now!)})

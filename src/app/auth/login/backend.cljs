@@ -31,7 +31,9 @@
            res (if (result/ok? verified) (merge verified user) verified)]
 
        (when (result/ok? res)
-         #_(a/<! (user-db/put! i user))
+         (println "put user" user)
+         (a/<! (user-db/put! i user))
+         (println "put session" session-new)
          (a/<! (session-db/put! i session-new)))
 
        res))))

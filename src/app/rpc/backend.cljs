@@ -19,11 +19,11 @@
   (let [rpc-fn (get @rpc-fns! rpc-name identity)]
     (rpc-fn rpc-body)))
 
-(defn handle-rpc-request! [rpc-req]
+(defn handle-rpc-request! [rpc-req session-id]
   (a/go
-    (let [rpc-body (-> rpc-req second (or {}) (ctx/assoc-ctx))
+    (let [rpc-body (-> rpc-req second (or {}) (ctx/assoc-ctx) (assoc :session/session-id session-id))
           rpc-res (a/<! (rpc! (first rpc-req) rpc-body))
-          rpc-res (ctx/dissoc-ctx rpc-res)]
+          rpc-res (-> rpc-res ctx/dissoc-ctx (dissoc :session/session-id))]
       (pprint {:rpc (first rpc-req)
                :req rpc-req
                :res rpc-res})
@@ -32,7 +32,8 @@
 (defmethod http-respond! shared/endpoint [req res]
   (a/go
     (let [rpc-req (a/<! (http-req/body-edn-chan req))
-          rpc-res (a/<! (handle-rpc-request! rpc-req))]
+          session-id (http-req/get-cookie req "session-id")
+          rpc-res (a/<! (handle-rpc-request! rpc-req session-id))]
       (http-res/allow-cors! res)
       (http-res/set-header! res "Content-Type" "text/plain")
       (http-res/end! res (pretty/str-edn rpc-res)))))
