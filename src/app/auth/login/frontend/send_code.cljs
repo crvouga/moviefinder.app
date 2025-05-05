@@ -36,13 +36,13 @@
    {:text-field/label "Phone Number"
     :text-field/value (-> i :verify-sms/phone-number)
     :text-field/required? true
-    :text-field/type :text-field/num-pad
+    :text-field/type :text-field/type-num-pad
     :text-field/disabled? (loading? i)
     :text-field/on-change #(p/put! i [::set :verify-sms/phone-number %])}])
 
 (defn view-submit-button [i]
   [button/view
-   {:button/type :button/submit
+   {:button/type :button/type-submit
     :button/full? true
     :button/loading? (loading? i)
     :button/label "Send Code"}])

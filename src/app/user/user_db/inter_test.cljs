@@ -25,7 +25,7 @@
              test-user-id "test-user-id"
              test-user {:user/user-id test-user-id
                         :user/phone-number "+1234567890"
-                        :user/name "Test User"}]
+                        :user/username "Test User"}]
 
          ;; Test putting a user
          (let [put-result (<! (user-db/put! db test-user))]
@@ -55,7 +55,7 @@
          (let [find-after-zap (<! (user-db/find-by-user-id! db test-user-id))]
            (is (= :result/ok (:result/type find-after-zap))
                "Finding after zap should still return a success result")
-           (is (nil? (:user/name find-after-zap))
+           (is (nil? (:user/username find-after-zap))
                "User should be nil after being zapped"))
 
          (done))))))
@@ -68,10 +68,10 @@
        (let [db (new-db)
              user-1 {:user/user-id "user-1"
                      :user/phone-number "+1111111111"
-                     :user/name "User One"}
+                     :user/username "User One"}
              user-2 {:user/user-id "user-2"
                      :user/phone-number "+2222222222"
-                     :user/name "User Two"}]
+                     :user/username "User Two"}]
 
 
          (<! (user-db/put! db user-1))

@@ -19,10 +19,12 @@
 
 
 (defn create [{:keys [user/phone-number]}]
-  {:user/phone-number phone-number
-   :user/user-id (str (random-uuid))
-   :user/name (str "movie finder " (rand-int 1000000))
-   :user/created-at (time/now!)})
+  (let [username (str "movie finder " (rand-int 1000000))]
+    {:user/phone-number phone-number
+     :user/user-id (str (random-uuid))
+     :user/username username
+     :user/avatar-seed username
+     :user/created-at (time/now!)}))
 
 (defn create-from-phone-number [phone-number]
   (create {:user/phone-number phone-number}))

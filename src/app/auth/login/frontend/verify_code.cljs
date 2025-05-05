@@ -52,14 +52,14 @@
   [text-field/view
    {:text-field/label "Code"
     :text-field/value (-> i :verify-sms/code)
-    :text-field/type :text-field/num-pad
+    :text-field/type :text-field/type-num-pad
     :text-field/required? true
     :text-field/disabled? (loading? i)
     :text-field/on-change #(p/put! i [::set :verify-sms/code %])}])
 
 (defn- view-submit [i]
   [button/view
-   {:button/type :button/submit
+   {:button/type :button/type-submit
     :button/loading? (loading? i)
     :button/full? true
     :button/label "Verify Code"}])

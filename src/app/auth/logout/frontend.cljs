@@ -28,7 +28,7 @@
 
 
 (defn view [i]
-  [confirmation/view
+  [confirmation/view-drawer
    {:confirmation/open? (-> i ::opened (= ::confirmation))
     :confirmation/title "Logout"
     :confirmation/description "Are you sure you want to logout?"

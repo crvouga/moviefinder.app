@@ -16,7 +16,8 @@
    (fn []
      (a/go
        (let [got (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
-         (p/put! i [::set ::current-user got])))))
+         (p/put! i [::set ::current-user got])
+         (p/put! i [:current-user/loaded])))))
 
   (p/take-every!
    i :current-user/hard-load

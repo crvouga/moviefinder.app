@@ -4,9 +4,9 @@
    [lib.ui.icon :as icon]))
 
 (def button-type->html-type
-  {:button/submit "submit"
-   :button/reset "reset"
-   :button/button "button"})
+  {:button/type-submit "submit"
+   :button/type-reset "reset"
+   :button/type-button "button"})
 
 (defmulti classes-color :button/color)
 (defmethod classes-color :default []

@@ -111,7 +111,7 @@
   and notifies all matching listeners."
   [{:keys [program/listener-fns!] :as program} msg]
   (update-state! program msg)
-  #_(pprint/pprint {:put! (msg->str msg)})
+  (pprint/pprint {:put! (msg->str msg)})
 
   ;; Notify listeners
   (let [current-listeners @listener-fns!

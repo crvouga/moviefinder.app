@@ -47,7 +47,7 @@
     [avatar/view {:avatar/size 100
                   :avatar/src (-> i current-user/to-current-user :user/avatar-url)
                   :avatar/alt "avatar for current user"}]
-    [:p.text-2xl.font-bold (-> i current-user/to-current-user :user/name)]]
+    [:p.text-2xl.font-bold (-> i current-user/to-current-user :user/username)]]
    [:div.w-full.flex.items-center.gap-6
     [view-edit-button i]
     [view-logout-button i]]])
