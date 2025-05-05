@@ -5,7 +5,8 @@
    [lib.program :as p]
    [lib.result :as result]
    [lib.ui.button :as button]
-   [lib.ui.confirmation :as confirmation]))
+   [lib.ui.confirmation :as confirmation]
+   [app.frontend.toast :as toast]))
 
 
 
@@ -25,7 +26,7 @@
         (p/put! i [:current-user/load])
         (when (result/ok? res)
           (p/put! i [::set ::opened nil])
-          (p/put! i [:toast/show {:toast/message "Logged out"}]))
+          (p/put! i [:toaster/show (toast/info "Logged out")]))
         (recur)))))
 
 
