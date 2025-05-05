@@ -15,6 +15,13 @@
 (defn to-screen-name [i] (-> i to-screen first))
 (defn to-screen-payload [i] (-> i to-screen second))
 
+(defn take-every-change! [i screen-name f]
+  (p/take-every!
+   i :screen/screen-changed
+   (fn [[_ [screen-name-new _]]]
+     (when (= screen-name screen-name-new)
+       (f screen-name-new)))))
+
 (defn- logic [i]
   (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
 

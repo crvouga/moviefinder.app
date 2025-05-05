@@ -20,7 +20,7 @@
       (p/put! i [::set ::opened ::confirmation])
       (let [res (a/<! (p/eff! i [:rpc/send! [:rpc/logout]]))]
         (p/put! i [::set ::request res])
-        (p/put! i [:current-user/load])
+        (p/put! i [:current-user/hard-load])
         (when (result/ok? res)
           (p/put! i [::set ::opened nil])
           (p/put! i [:toaster/show (toast/info "Logged out")]))

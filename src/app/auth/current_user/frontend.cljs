@@ -8,12 +8,21 @@
 (defn- logic [i]
   (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
 
-  (a/go-loop []
-    (let [_ (a/<! (p/take! i :current-user/load))]
-      (p/put! i [::set ::current-user result/loading])
-      (let [got (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
-        (p/put! i [::set ::current-user got])
-        (recur)))))
+  (a/go
+    (p/put! i [:current-user/hard-load]))
+
+  (p/take-every!
+   i :current-user/load
+   (fn []
+     (a/go
+       (let [got (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
+         (p/put! i [::set ::current-user got])))))
+
+  (p/take-every!
+   i :current-user/hard-load
+   (fn []
+     (p/put! i [::set ::current-user result/loading])
+     (p/put! i [:current-user/load]))))
 
 
 (defn loading? [i]
