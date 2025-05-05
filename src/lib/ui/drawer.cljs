@@ -33,8 +33,9 @@
    (concatv
     [:div
      {:class (cn
-              "bg-neutral-950 h-fit w-full border border-neutral-800 transition-transform duration-200"
+              "bg-black h-fit w-full border border-neutral-800 transition-transform duration-200"
               (if (= position :drawer/top)
-                (cn "rounded-b-2xl" (if open? "translate-y-0" "-translate-y-full"))
+                (cn "rounded-b-2xl"
+                    (if open? "translate-y-0" "-translate-y-full"))
                 (cn "rounded-t-2xl" (if open? "translate-y-0" "translate-y-full"))))}]
     children)])

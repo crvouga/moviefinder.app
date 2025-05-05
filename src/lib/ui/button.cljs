@@ -11,7 +11,7 @@
 (defmulti classes-color :button/color)
 (defmethod classes-color :default []
   "bg-blue-500 text-white")
-(defmethod classes-color :button/color-neutral [] "bg-neutral-700 text-white")
+(defmethod classes-color :button/color-neutral [] "bg-neutral-800 text-white")
 
 (defn- classes [i]
   (cn

@@ -4,14 +4,14 @@
   "f0e22cf2-3b35-4f93-8746-1bd80be58cfd"]
  {:user/phone-number "123",
   :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :user/name "User 69675439-abba-4ae6-b1f3-852a849d2a2f",
+  :user/name "movie finder 122131",
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :result/data nil},
  [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "123"]
  {:user/phone-number "123",
   :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :user/name "User 69675439-abba-4ae6-b1f3-852a849d2a2f",
+  :user/name "movie finder 122131",
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :result/data nil},
@@ -19,14 +19,12 @@
   "b5ae0c41-52d8-4327-b157-d09ce6e1fc27"]
  {:user/phone-number "1233",
   :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
-  :user/name "User 46cfac48-c955-41e9-8536-7cccbe451e28",
   :user/created-at 1746414602096,
   :result/type :result/ok,
   :result/data nil},
  [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "1233"]
  {:user/phone-number "1233",
   :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
-  :user/name "User 46cfac48-c955-41e9-8536-7cccbe451e28",
   :user/created-at 1746414602096,
   :result/type :result/ok,
   :result/data nil},
@@ -34,4 +32,4 @@
   "c7baa457-e0cb-4758-aa18-13d91bff0fbf"]
  {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
   :session/session-id "c7baa457-e0cb-4758-aa18-13d91bff0fbf",
-  :session/created-at 1746415618226}}
+  :session/created-at 1746418319585}}

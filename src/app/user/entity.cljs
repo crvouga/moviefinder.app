@@ -1,6 +1,7 @@
 (ns app.user.entity
-  (:require [cljs.spec.alpha :as s]
-            [lib.time :as time]))
+  (:require
+   [cljs.spec.alpha :as s]
+   [lib.time :as time]))
 
 (s/def :user/user-id string?)
 (s/def :user/phone-number string?)
@@ -15,10 +16,12 @@
                 :user/updated-at]))
 
 
+
+
 (defn create [{:keys [user/phone-number]}]
   {:user/phone-number phone-number
    :user/user-id (str (random-uuid))
-   :user/name (str "User " (random-uuid))
+   :user/name (str "movie finder " (rand-int 1000000))
    :user/created-at (time/now!)})
 
 (defn create-from-phone-number [phone-number]

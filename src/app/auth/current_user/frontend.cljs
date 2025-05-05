@@ -35,6 +35,9 @@
     (logged-out? i) :current-user/logged-out
     :else :current-user/loading))
 
+(defn to-current-user [i]
+  (-> i ::current-user))
+
 (mod/reg
  {:mod/name :mod/current-user
   :mod/logic-fn logic})

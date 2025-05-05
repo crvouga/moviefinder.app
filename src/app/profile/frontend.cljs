@@ -6,9 +6,11 @@
    [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.profile.login-cta :as login-cta]
    [lib.program :as p]
+   [lib.result :as result]
+   [lib.ui.avatar :as avatar]
+   [lib.ui.button :as button]
    [lib.ui.spinner-screen :as spinner-screen]
-   [lib.ui.top-bar :as top-bar]
-   [app.auth.logout.frontend :as logout]))
+   [lib.ui.top-bar :as top-bar]))
 
 
 (defn- logic [i]
@@ -20,6 +22,22 @@
 
 
 
+(defn view-logout-button [i]
+  [button/view
+   {:button/full? true
+    :button/on-click #(p/put! i [:logout/logout])
+    :button/loading? (-> i ::request result/loading?)
+    :button/color :button/color-neutral
+    :button/label "Logout"}])
+
+(defn view-edit-button [i]
+  [button/view
+   {:button/full? true
+    :button/on-click #(p/put! i [::clicked-edit-profile-button])
+    :button/loading? (-> i ::request result/loading?)
+    :button/color :button/color-neutral
+    :button/label "Edit Profile"}])
+
 (defmulti view-body current-user/to-status)
 
 (defmethod view-body :current-user/loading []
@@ -29,8 +47,15 @@
   [login-cta/view i])
 
 (defmethod view-body :current-user/logged-in [i]
-  [:div.w-full.h-full
-   [logout/view-button i]])
+  [:div.w-full.h-full.p-6.flex.flex-col.items-center.gap-6
+   [:div.w-full.flex.flex-col.gap-4.items-center
+    [avatar/view {:avatar/size 100
+                  :avatar/src (-> i current-user/to-current-user :user/avatar-url)
+                  :avatar/alt "avatar for current user"}]
+    [:p.text-2xl.font-bold (-> i current-user/to-current-user :user/name)]]
+   [:div.w-full.flex.items-center.gap-6
+    [view-edit-button i]
+    [view-logout-button i]]])
 
 (defn view [i]
   [screen/view-screen i :screen/profile

@@ -4,4 +4,4 @@
 
 (defn view []
   [:div.w-full.flex-1.grid.place-items-center
-   [icon/spinner {:class "size-20 animate-spin"}]])
+   [icon/spinner {:class "size-12 animate-spin"}]])
