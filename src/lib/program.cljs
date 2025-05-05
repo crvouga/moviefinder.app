@@ -137,6 +137,9 @@
   matching the given msg-type. The listener is removed after the message is delivered."
   [{:keys [program/listener-fns!]} msg-type]
   #_(pprint/pprint {:take! msg-type})
+  (when-not (keyword? msg-type)
+    (throw (ex-info "take! expects a keyword as msg-type" {:msg-type msg-type})))
+
   (let [ch (a/chan 1)] ; Output channel
     (add-listener! listener-fns! msg-type
                    (fn [msg]

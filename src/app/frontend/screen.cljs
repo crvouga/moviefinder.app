@@ -15,7 +15,7 @@
 (defn to-screen-name [i] (-> i to-screen first))
 (defn to-screen-payload [i] (-> i to-screen second))
 
-(defn take-every-change! [i screen-name f]
+(defn take-every! [i screen-name f]
   (p/take-every!
    i :screen/screen-changed
    (fn [[_ [screen-name-new _]]]

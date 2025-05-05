@@ -7,10 +7,11 @@
    [lib.ui.icon :as icon]
    [lib.ui.icon-button :as icon-button]))
 
-(defn- init []
-  {::toast-queue []
-   ::toast nil
-   ::toast-status nil})
+(defn- init [state]
+  (merge {::toast-queue []
+          ::toast nil
+          ::toast-status nil}
+         state))
 
 (defn exiting? [state]
   (-> state ::toast-status (= :toast-status/exit)))
@@ -23,31 +24,26 @@
   (filterv #(not= (:toast/id %) (:toast/id toast)) toasts))
 
 (defn- logic [i]
-  (p/reg-reducer i ::init (fn [state _] (merge state (init))))
-  (a/go (p/put! i [::init]))
 
   (p/reg-reducer
    i ::set-toast
-   (fn [state [_ toast]] (assoc state ::toast toast)))
+   (fn [s [_ toast]] (-> s init (assoc ::toast toast))))
 
   (p/reg-reducer
    i ::set-toast-status
-   (fn [state [_ toast-status]] (assoc state ::toast-status toast-status)))
+   (fn [s [_ toast-status]] (-> s init (assoc ::toast-status toast-status))))
 
   (p/reg-reducer
    i ::add-toast
-   (fn [state [_ toast]]
-     (-> state (update ::toast-queue conj toast))))
+   (fn [s [_ toast]]
+     (-> s init (update ::toast-queue conj toast))))
 
   (p/reg-reducer
    i ::remove-toast
-   (fn [state [_ toast]]
-     (-> state (update ::toast-queue remove-toast toast))))
+   (fn [s [_ toast]]
+     (-> s init (update ::toast-queue remove-toast toast))))
 
-  (p/take-every!
-   i :toaster/show
-   (fn [[_ toast]]
-     (p/put! i [::add-toast toast])))
+  (p/take-every! i :toaster/show  (fn [[_ toast]] (p/put! i [::add-toast toast])))
 
   (a/go-loop []
     (let [toast (to-next-toast (p/state! i))]

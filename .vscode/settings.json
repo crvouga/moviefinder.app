@@ -29,6 +29,7 @@
     "honeysql",
     "juxt",
     "keywordize",
+    "kmap",
     "Linecap",
     "Linejoin",
     "mapcat",

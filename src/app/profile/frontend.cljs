@@ -15,7 +15,7 @@
 
 
 (defn- logic [i]
-  (screen/take-every-change! i :screen/profile (fn [] (p/put! i [:current-user/load]))))
+  (screen/take-every! i :screen/profile (fn [] (p/put! i [:current-user/load]))))
 
 (defn view-logout-button [i]
   [button/view
