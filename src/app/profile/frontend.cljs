@@ -5,6 +5,7 @@
    [app.frontend.screen :as screen]
    [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
    [app.profile.login-cta :as login-cta]
+   [clojure.core.async :as a]
    [lib.program :as p]
    [lib.result :as result]
    [lib.ui.avatar :as avatar]
@@ -14,12 +15,14 @@
 
 
 (defn- logic [i]
+  (a/go
+    (p/put! i [:current-user/load]))
+
   (p/take-every!
    i :screen/screen-changed
    (fn [[_ [screen-name _]]]
      (when (= screen-name :screen/profile)
        (p/put! i [:current-user/load])))))
-
 
 
 (defn view-logout-button [i]
