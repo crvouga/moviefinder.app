@@ -10,7 +10,7 @@
   "New is a function that takes no arguments. It returns a program. new"
   []
   (let [state! (atom {})
-        msg-chan! (a/chan 10)
+        msg-chan! (a/chan (a/sliding-buffer 10))
         msg-mult! (a/mult msg-chan!)
         eff-fns! (atom {})
         reducer-fns! (atom {})

@@ -53,7 +53,7 @@
 
 (defn view-submit-button [i]
   [button/view
-   {:button/type :button-type/submit
+   {:button/type :button/submit
     :button/full? true
     :button/loading? (loading? i)
     :button/label "Send Code"}])

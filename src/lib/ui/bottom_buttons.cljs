@@ -9,7 +9,7 @@
                view-icon (-> button :bottom-button/view-icon)
                selected? (-> button :bottom-button/selected? (or false))]]
      ^{:key label}
-     [:button {:on-click on-click
+     [:button {:on-pointer-down on-click
                :class (str
                        "flex flex-col items-center justify-center flex-1 h-full text-base text-sm gap-0.5 cursor-pointer "
                        (if selected? "text-blue-500 " "text-white "))}

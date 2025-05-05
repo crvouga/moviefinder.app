@@ -70,7 +70,7 @@
 
 (defn- view-submit [i]
   [button/view
-   {:button/type :button-type/submit
+   {:button/type :button/submit
     :button/loading? (loading? i)
     :button/full? true
     :button/label "Verify Code"}])

@@ -3,13 +3,13 @@
    [lib.ui.icon :as icon]))
 
 (def button-type->html-type
-  {:button-type/submit "submit"
-   :button-type/reset "reset"
-   :button-type/button "button"})
+  {:button/submit "submit"
+   :button/reset "reset"
+   :button/button "button"})
 
 (defn- button-classes [i]
   (str
-   "bg-blue-500 text-white py-3 px-4 rounded flex items-center justify-center font-bold text-lg relative cursor-pointer "
+   "bg-blue-500 text-white py-3 px-4 rounded flex items-center justify-center font-bold text-lg relative cursor-pointer touch-manipulation "
 
    (if (-> i :button/full?) "w-full " "w-fit ")
 
