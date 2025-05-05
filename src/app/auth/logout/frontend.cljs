@@ -39,8 +39,8 @@
     :confirmation/on-cancel #(p/put! i [::clicked-cancel])
     :confirmation/on-confirm #(p/put! i [::clicked-confirmed])}])
 
-(mod/reg {:mod/name :mod/logout
-          :mod/logic-fn logic
-          :mod/view-fn view})
+(mod/reg {:mod/name ::mod
+          :mod/logic logic
+          :mod/view view})
 
 

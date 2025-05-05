@@ -105,6 +105,6 @@
      [view-toast i toast]]))
 
 (mod/reg
- {:mod/name :mod/toaster
-  :mod/view-fn view
-  :mod/logic-fn logic})
+ {:mod/name ::mod
+  :mod/view view
+  :mod/logic logic})

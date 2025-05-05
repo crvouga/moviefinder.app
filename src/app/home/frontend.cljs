@@ -111,6 +111,6 @@
        [image/view {:class "w-full h-full"}])
      [top-level-bottom-buttons/view i]]))
 
-(mod/reg {:mod/name :mod/home
-          :mod/view-fn view
-          :mod/logic-fn logic})
+(mod/reg {:mod/name ::mod
+          :mod/view view
+          :mod/logic logic})

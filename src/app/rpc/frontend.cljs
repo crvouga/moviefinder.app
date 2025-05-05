@@ -54,5 +54,5 @@
             :err/data e}))))))
 
 (mod/reg
- {:mod/name :mod/rpc
-  :mod/logic-fn logic})
+ {:mod/name ::mod
+  :mod/logic logic})

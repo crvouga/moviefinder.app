@@ -74,16 +74,15 @@
 
 (defn view-screen [i screen-name & children]
   (let [current-screen-name (-> i ::screen (or (fallback)) first)]
-    [:<>
-     (concatv
-      [:div.w-full.h-full.overflow-hidden.flex.flex-col
-       {:data-screen-name screen-name
-        :class (when (not= screen-name current-screen-name) "hidden")}]
-      children)]))
+    (concatv
+     [:div.w-full.h-full.overflow-hidden.flex.flex-col
+      {:data-screen-name screen-name
+       :class (when (not= screen-name current-screen-name) "hidden")}]
+     children)))
 
 ;; 
 ;; 
 ;; 
 
-(mod/reg {:mod/name :mod/screen
-          :mod/logic-fn logic})
+(mod/reg {:mod/name ::mod
+          :mod/logic logic})

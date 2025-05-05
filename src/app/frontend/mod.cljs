@@ -7,13 +7,13 @@
   (swap! mods assoc (:mod/name mod) mod))
 
 (defn logic [i]
-  (doseq [{:keys [mod/logic-fn]} (vals @mods)]
-    (when (fn? logic-fn)
-      (logic-fn i))))
+  (doseq [{:keys [mod/logic]} (vals @mods)]
+    (when (fn? logic)
+      (logic i))))
 
 (defn view [i]
   [:<>
-   (for [[mod-name {:keys [mod/view-fn]}] @mods
-         :when (fn? view-fn)]
+   (for [[mod-name {:keys [mod/view]}] @mods
+         :when (fn? view)]
      ^{:key mod-name}
-     [view-fn i])])
+     [view i])])

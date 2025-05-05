@@ -78,6 +78,6 @@
       [view-overview media]]]))
 
 (mod/reg
- {:mod/name :mod/media-details
-  :mod/view-fn view
-  :mod/logic-fn logic})
+ {:mod/name ::mod
+  :mod/view view
+  :mod/logic logic})

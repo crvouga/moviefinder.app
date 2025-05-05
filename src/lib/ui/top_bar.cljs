@@ -8,6 +8,8 @@
   (let [title (-> i :top-bar/title)
         on-back (-> i :top-bar/on-back)]
     [:nav.flex.items-center.justify-center.w-full.h-20.px-4.shrink-0
+     (when-not on-back
+       [:div.size-8])
      (when on-back
        (icon-button/view {:icon-button/on-pointer-down on-back
                           :icon-button/view-icon icon/arrow-left}))

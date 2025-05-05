@@ -67,6 +67,6 @@
     [view-submit-button i]]])
 
 (mod/reg
- {:mod/name :mod/login
-  :mod/view-fn view
-  :mod/logic-fn logic})
+ {:mod/name ::mod
+  :mod/view view
+  :mod/logic logic})

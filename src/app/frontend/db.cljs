@@ -67,5 +67,5 @@
   (-> state ::entity-by-id (get entity-id)))
 
 (mod/reg
- {:mod/name :mod/db
-  :mod/logic-fn logic})
+ {:mod/name ::mod
+  :mod/logic logic})

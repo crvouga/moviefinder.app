@@ -48,5 +48,5 @@
   (-> i ::current-user))
 
 (mod/reg
- {:mod/name :mod/current-user
-  :mod/logic-fn logic})
+ {:mod/name ::mod
+  :mod/logic logic})

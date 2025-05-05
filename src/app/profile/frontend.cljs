@@ -9,6 +9,7 @@
    [lib.result :as result]
    [lib.ui.avatar :as avatar]
    [lib.ui.button :as button]
+   [app.profile.edit.frontend]
    [lib.ui.spinner-screen :as spinner-screen]
    [lib.ui.top-bar :as top-bar]))
 
@@ -27,7 +28,7 @@
 (defn view-edit-button [i]
   [button/view
    {:button/full? true
-    :button/on-click #(p/put! i [::clicked-edit-profile-button])
+    :button/on-click #(p/put! i [:screen/push [:screen/profile-edit]])
     :button/loading? (-> i ::request result/loading?)
     :button/color :button/color-neutral
     :button/label "Edit Profile"}])
@@ -59,6 +60,6 @@
    [top-level-bottom-buttons/view i]])
 
 (mod/reg
- {:mod/name :mod/profile
-  :mod/view-fn view
-  :mod/logic-fn logic})
+ {:mod/name ::mod
+  :mod/view view
+  :mod/logic logic})
