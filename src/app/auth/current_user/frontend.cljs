@@ -37,7 +37,8 @@
      (p/put! i [:db/patch (:user/user-id current-user) current-user])
      (p/put! i [::set ::request (merge current-user result/ok)])))
 
-  (p/reg-reducer i :current-user/dissoc (fn [s _] (dissoc s ::request)))
+  (p/reg-reducer i :current-user/dissoc (fn [s _] (assoc s ::request nil)))
+
 
   (a/go
     (p/put! i [::load]))
