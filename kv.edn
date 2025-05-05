@@ -13,10 +13,5 @@
   :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
   :user/name "User 69675439-abba-4ae6-b1f3-852a849d2a2f",
   :user/created-at 1746091429898,
-  :result/type :result/ok,
-  :result/data nil},
- [:app.auth.session.session-db.impl-kv/by-session-id
-  "c7baa457-e0cb-4758-aa18-13d91bff0fbf"]
- {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :session/session-id "c7baa457-e0cb-4758-aa18-13d91bff0fbf",
-  :session/created-at 1746410416030}}
+  :result/type :result/ok, 
+  :result/data nil}}
