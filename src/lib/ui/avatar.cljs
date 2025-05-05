@@ -24,10 +24,20 @@
    [icon/user {:class "w-full h-full" :style {:margin-top "25%"}}]])
 
 
+(defn- view-loading [i]
+  [:div
+   {:style (to-style i)
+    :class (cn "aspect-square rounded-full overflow-hidden bg-neutral-600 grid place-items-center text-neutral-300 animate-pulse"
+               (:avatar/class i))}])
+
 (defn- image? [i]
   (not-empty (:avatar/src i)))
 
+(defn loading? [i]
+  (-> i :avatar/loading? (or false)))
+
 (defn view [i]
-  (if (image? i)
-    (view-image i)
-    (view-icon i)))
+  (cond
+    (loading? i) (view-loading i)
+    (image? i) (view-image i)
+    :else (view-icon i)))

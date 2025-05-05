@@ -32,3 +32,6 @@
 (defn eq? [a b]
   (= (select-keys a [:user/phone-number :user/user-id])
      (select-keys b [:user/phone-number :user/user-id])))
+
+(defn edit [user edits]
+  (merge user (select-keys edits [:user/avatar-seed :user/fullname :user/username])))

@@ -33,10 +33,13 @@
       (if ok?
         edn
         (merge edn {:result/type :result/err
-                    :err/err :err/rpc-error})))))
+                    :err/err :rpc/rpc-exception})))))
 
-(defmethod err/message :err/rpc-error []
+(defmethod err/message :rpc/rpc-exception []
   "Errored while requesting from backend")
+
+(defmethod err/message :rpc-error/rpc-fn-not-found [_]
+  "Feature is not implemented yet")
 
 (defn- logic [i]
   (p/reg-eff
@@ -50,7 +53,7 @@
            res)
          (catch js/Error e
            {:result/type :result/err
-            :err/err :err/rpc-error
+            :err/err :rpc/rpc-exception
             :err/data e}))))))
 
 (mod/reg

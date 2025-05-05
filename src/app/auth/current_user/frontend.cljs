@@ -1,12 +1,14 @@
 (ns app.auth.current-user.frontend
   (:require
    [app.frontend.mod :as mod]
+   [app.user.entity :as user]
    [clojure.core.async :as a]
    [lib.program :as p]
    [lib.result :as result]))
 
 (defn- logic [i]
   (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
+  (p/reg-reducer i :current-user/edit (fn [s [_ edits]] (-> s (update ::current-user user/edit edits))))
 
   (a/go
     (p/put! i [:current-user/hard-load]))

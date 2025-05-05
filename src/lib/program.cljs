@@ -44,7 +44,8 @@
 
 (defn- reduce-reducers [reducers state msg]
   (reduce
-   (fn [current-state reducer-fn] (reducer-fn current-state msg))
+   (fn [acc f]
+     (merge acc (f acc msg)))
    state
    reducers))
 

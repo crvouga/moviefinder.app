@@ -11,7 +11,8 @@
    [lib.ui.button :as button]
    [app.profile.edit.frontend]
    [lib.ui.spinner-screen :as spinner-screen]
-   [lib.ui.top-bar :as top-bar]))
+   [lib.ui.top-bar :as top-bar]
+   [app.profile.avatar-url :as avatar-url]))
 
 
 (defn- logic [i]
@@ -45,7 +46,7 @@
   [:div.w-full.h-full.p-6.flex.flex-col.items-center.gap-6
    [:div.w-full.flex.flex-col.gap-4.items-center
     [avatar/view {:avatar/size 100
-                  :avatar/src (-> i current-user/to-current-user :user/avatar-url)
+                  :avatar/src (-> i current-user/to-current-user avatar-url/from-user)
                   :avatar/alt "avatar for current user"}]
     [:p.text-2xl.font-bold (-> i current-user/to-current-user :user/username)]]
    [:div.w-full.flex.items-center.gap-6

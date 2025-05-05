@@ -5,6 +5,7 @@
    [app.frontend.screen :as screen]
    [app.profile.avatar-url :as avatar-url]
    [clojure.core.async :as a]
+   [clojure.set :refer [rename-keys]]
    [lib.map-ext :as map-ext]
    [lib.program :as p]
    [lib.result :as result]
@@ -12,31 +13,47 @@
    [lib.ui.confirmation :as confirmation]
    [lib.ui.form :as form]
    [lib.ui.text-field :as text-field]
-   [lib.ui.top-bar :as top-bar]))
+   [lib.ui.top-bar :as top-bar]
+   [app.frontend.toast :as toast]
+   [lib.err :as err]))
 
 
 
 (def kmap-user->form {:user/username ::username
                       :user/fullname ::fullname
                       :user/avatar-seed ::avatar-seed})
+(def user-keys (keys kmap-user->form))
 (def kmap-form->user (map-ext/inverse kmap-user->form))
-(defn form->user [f] (map-ext/rename-keys-select f kmap-user->form))
-(defn user->form [u] (map-ext/rename-keys-select u kmap-form->user))
+
 
 (defn logic [i]
   (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
-  (p/reg-reducer i ::reset (fn [s _] (-> s current-user/to-current-user user->form (merge s))))
+  (p/reg-reducer i ::reset (fn [s _] (-> s current-user/to-current-user (rename-keys kmap-user->form))))
 
   (screen/take-every! i :screen/profile-edit (fn [] (p/put! i [::reset])))
   (p/take-every! i :current-user/loaded (fn [] (p/put! i [::reset])))
   (p/take-every! i ::cancel (fn [] (p/put! i [:screen/push [:screen/profile]])))
 
   (a/go-loop []
-    (let [_ (a/<! (p/take! i ::form-submitted))
-          user-new (-> p/state! form->user)]
-      (println "user-new" user-new)
-      (p/put! i [:set ::request result/loading])
-      (recur))))
+    (let [_ (a/<! (p/take! i ::form-submitted))]
+
+      (p/put! i [::set ::request result/loading])
+
+      (let [edits (-> i p/state! (rename-keys kmap-form->user) (select-keys user-keys))
+            res (a/<! (p/eff! i [:rpc/send! [:profile-edit/rpc edits]]))]
+
+        (p/put! i [::set ::request res])
+
+        (when (result/err? res)
+          (p/put! i [:toaster/show (toast/error (err/message res))]))
+
+        (when (result/ok? res)
+          (p/put! i [:current-user/edit edits])
+          (p/put! i [:current-user/load])
+          (p/put! i [:screen/push [:screen/profile]])
+          (p/put! i [:toaster/show (toast/info "Profile updated")]))
+
+        (recur)))))
 
 (defn view-section [& children]
   (vec (concat [:div.w-full.flex.flex-col.items-center.justify-center.p-6.gap-3] children)))
@@ -47,6 +64,7 @@
 (defn view-edit-avatar-section [i]
   [view-section
    [avatar/view {:avatar/size 100
+                 :avatar/loading? (-> i current-user/loading?)
                  :avatar/src (-> i ::avatar-seed avatar-url/to)}]
    [text-field/view
     {:text-field/class "w-full"

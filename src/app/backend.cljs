@@ -2,6 +2,7 @@
   (:require
    [app.auth.backend]
    [app.backend.ctx :as config]
+   [app.profile.backend]
    [app.backend.http-respond :refer [http-respond!]]
    [app.backend.serve-single-page-app]
    [app.media.backend]
