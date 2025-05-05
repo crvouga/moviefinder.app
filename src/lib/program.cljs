@@ -33,11 +33,11 @@
   (let [state! (atom {})
         eff-fns! (atom {})       ; Stores effect handlers: {eff-type eff-fn}
         reducer-fns! (atom {})   ; Stores reducer functions: {msg-type [reducer-fn ...]}
-        listeners! (atom {})     ; Stores message listeners: {id listener-spec}
+        listener-fns! (atom {})     ; Stores message listeners: {id listener-spec}
         program {:program/state! state!
                  :program/eff-fns! eff-fns!
                  :program/reducer-fns! reducer-fns!
-                 :program/listeners! listeners!}]
+                 :program/listener-fns! listener-fns!}]
     program))
 
 ;; --- State and Reducers ---
@@ -109,12 +109,12 @@
 (defn put!
   "Updates the program state using registered reducers for the message type
   and notifies all matching listeners."
-  [{:keys [program/listeners!] :as program} msg]
+  [{:keys [program/listener-fns!] :as program} msg]
   (update-state! program msg)
   (pprint/pprint {:put! (msg->str msg)})
 
   ;; Notify listeners
-  (let [current-listeners @listeners!
+  (let [current-listeners @listener-fns!
         listeners-to-remove (atom [])]
     (doseq [[id {:keys [fn msg-type once?]}] current-listeners]
       (when (msg-match? msg msg-type)
@@ -127,7 +127,7 @@
 
     ;; Remove listeners marked as :once? that were triggered
     (when (seq @listeners-to-remove)
-      (swap! listeners! (fn [listeners] (apply dissoc listeners @listeners-to-remove)))))
+      (swap! listener-fns! (fn [listeners] (apply dissoc listeners @listeners-to-remove)))))
   program)
 
 ;; --- Message Consumption (take!, take-every!) ---
@@ -135,10 +135,10 @@
 (defn take!
   "Returns a core.async channel that will receive the *next* message
   matching the given msg-type. The listener is removed after the message is delivered."
-  [{:keys [program/listeners!]} msg-type]
+  [{:keys [program/listener-fns!]} msg-type]
   #_(pprint/pprint {:take! msg-type})
   (let [ch (a/chan 1)] ; Output channel
-    (add-listener! listeners! msg-type
+    (add-listener! listener-fns! msg-type
                    (fn [msg]
                      ;; This function runs when put! finds a match.
                      ;; It puts the message onto the channel and closes it.
@@ -153,9 +153,9 @@
   a message matching `msg-type` is put!.
   The function `f` receives the matching message as its argument.
   Returns nil (registers a side-effect)."
-  [{:keys [program/listeners!]} msg-type f]
+  [{:keys [program/listener-fns!]} msg-type f]
   #_(pprint/pprint {:take-every! msg-type})
-  (add-listener! listeners! msg-type
+  (add-listener! listener-fns! msg-type
                  (fn [msg]
                    ;; This function runs when put! finds a match.
                    ;; It simply calls the user-provided function f.
