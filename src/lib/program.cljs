@@ -80,7 +80,7 @@
   Effect messages are typically vectors like [:effect/type payload].
   Returns the result of the effect handler (often a channel or promise)."
   [program eff]
-  (pprint/pprint {:eff eff})
+  #_(pprint/pprint {:eff eff})
   (let [{:keys [program/eff-fns!]} program
         eff-type (first eff)
         eff-fn! (get @eff-fns! eff-type)]
@@ -93,7 +93,7 @@
   "Registers an effect handler function for a specific effect type.
   Effect handlers have the signature: (fn [eff-msg] result)."
   [program eff-type eff-fn]
-  (pprint/pprint {:reg-eff eff-type})
+  #_(pprint/pprint {:reg-eff eff-type})
   (let [{:keys [program/eff-fns!]} program]
     (swap! eff-fns! assoc eff-type eff-fn))
   program) ; Return program for chaining
@@ -111,7 +111,7 @@
   and notifies all matching listeners."
   [{:keys [program/listener-fns!] :as program} msg]
   (update-state! program msg)
-  (pprint/pprint {:put! (msg->str msg)})
+  #_(pprint/pprint {:put! (msg->str msg)})
 
   ;; Notify listeners
   (let [current-listeners @listener-fns!

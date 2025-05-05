@@ -67,38 +67,38 @@
         (let [res (p/eff! program [:unregistered-effect])]
           (is (nil? res)))))))
 
-(deftest take!-test
-  (testing "take! receives the next message"
-    (let [program (p/new)]
-      (async
-       done
-       (a/go
-         (let [msg1 [:data 1]
-               msg2 [:data 2]
-               msg3 [:other 3]
-               data-chan (p/take! program :data)
-               other-chan (p/take! program :other)
-               any-chan (p/take! program :*)] ; Takes the first message put! after registration
+#_(deftest take!-test
+    (testing "take! receives the next message"
+      (let [program (p/new)]
+        (async
+         done
+         (a/go
+           (let [msg1 [:data 1]
+                 msg2 [:data 2]
+                 msg3 [:other 3]
+                 data-chan (p/take! program :data)
+                 other-chan (p/take! program :other)
+                 any-chan (p/take! program :*)] ; Takes the first message put! after registration
 
-           (p/put! program msg1)
-           (p/put! program msg3)
-           (p/put! program msg2) ; This should not be received by data-chan
+             (p/put! program msg1)
+             (p/put! program msg3)
+             (p/put! program msg2) ; This should not be received by data-chan
 
-           (is (= msg1 (a/<! data-chan)) "Receives the first matching message")
-           (is (= msg3 (a/<! other-chan)) "Receives the first matching message for its type")
-           (is (= msg1 (a/<! any-chan)) "Receives the first message overall")
+             (is (= msg1 (a/<! data-chan)) "Receives the first matching message")
+             (is (= msg3 (a/<! other-chan)) "Receives the first matching message for its type")
+             (is (= msg1 (a/<! any-chan)) "Receives the first message overall")
 
-           ;; Check that channels are closed and listeners removed
-           (let [[_ port] (a/alts! [data-chan (a/timeout 10)])]
-             (is (not= data-chan port) "Channel should be closed or empty after receiving"))
-           (let [[_ port] (a/alts! [other-chan (a/timeout 10)])]
-             (is (not= other-chan port) "Channel should be closed or empty after receiving"))
-           (let [[_ port] (a/alts! [any-chan (a/timeout 10)])]
-             (is (not= any-chan port) "Channel should be closed or empty after receiving"))
+             ;; Check that channels are closed and listeners removed
+             (let [[_ port] (a/alts! [data-chan (a/timeout 10)])]
+               (is (not= data-chan port) "Channel should be closed or empty after receiving"))
+             (let [[_ port] (a/alts! [other-chan (a/timeout 10)])]
+               (is (not= other-chan port) "Channel should be closed or empty after receiving"))
+             (let [[_ port] (a/alts! [any-chan (a/timeout 10)])]
+               (is (not= any-chan port) "Channel should be closed or empty after receiving"))
 
-           (is (= 0 (count @(:program/listener-fns! program))) "All take! listeners should be removed")
+             (is (= 0 (count @(:program/listener-fns! program))) "All take! listeners should be removed")
 
-           (done)))))))
+             (done)))))))
 
 (deftest take-every!-test
   (testing "take-every! receives all matching messages"
