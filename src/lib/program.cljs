@@ -84,6 +84,7 @@
     ch))
 
 (defn msg-match? [msg msg-type]
+
   (or (= msg-type :*)
       (= (first msg) msg-type)))
 

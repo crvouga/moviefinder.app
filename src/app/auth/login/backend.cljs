@@ -14,26 +14,20 @@
  :rpc/send-code
  (fn [req]
    (a/go
-     (let [res (a/<! (verify-sms/send-code! req))]
-       res))))
+     (let [sent (a/<! (verify-sms/send-code! req))]
+       sent))))
 
 (rpc/reg
  :rpc/verify-code
- (fn [{:keys [user/phone-number session/session-id] :as i}]
+ (fn [{:keys [verify-sms/phone-number session/session-id] :as i}]
    (a/go
      (let [verified (a/<! (verify-sms/verify-code! i))
-           existing-user (a/<! (user-db/find-by-phone-number! i phone-number))
-           new-user (user/create-from-phone-number phone-number)
-           user (merge new-user existing-user)
-           {:keys [user/user-id]} user
-           session-new (session/create {:session/user-id user-id
-                                        :session/session-id session-id})
-           res (if (result/ok? verified) (merge verified user) verified)]
-
-       (when (result/ok? res)
-         (println "put user" user)
+           user-existing (a/<! (user-db/find-by-phone-number! i phone-number))
+           user-new (user/create-from-phone-number phone-number)
+           user (merge user-new user-existing)
+           session-new (session/create {:session/user-id (:user/user-id user)
+                                        :session/session-id session-id})]
+       (when (result/ok? verified)
          (a/<! (user-db/put! i user))
-         (println "put session" session-new)
          (a/<! (session-db/put! i session-new)))
-
-       res))))
+       verified))))

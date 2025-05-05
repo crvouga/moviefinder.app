@@ -9,7 +9,8 @@
    [lib.http-client :as http-client]
    [lib.pretty :as pretty]
    [lib.program :as p]
-   [lib.serialize :as serialize]))
+   [lib.serialize :as serialize]
+   [clojure.pprint :as pprint]))
 
 (defn to-url [req]
   (str (-> ctx/ctx :rpc/backend-url) shared/endpoint
@@ -43,7 +44,10 @@
    (fn [[_ req]]
      (a/go
        (try
-         (a/<! (rpc-res-chan! req))
+         (pprint/pprint {:rpc/send! req})
+         (let [res (a/<! (rpc-res-chan! req))]
+           (pprint/pprint {:rpc/res res})
+           res)
          (catch js/Error e
            {:result/type :result/err
             :err/err :err/rpc-error

@@ -16,3 +16,10 @@
 (def ok {:result/type :result/ok})
 
 (def error {:result/type :result/err})
+
+
+(defn merge-ok [& results]
+  (reduce
+   (fn [acc result] (if (ok? result) (merge acc result) (reduced result)))
+   ok
+   results))

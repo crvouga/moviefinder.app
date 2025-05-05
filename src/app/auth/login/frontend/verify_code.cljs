@@ -11,9 +11,6 @@
    [lib.ui.text-field :as text-field]
    [lib.ui.top-bar :as top-bar]))
 
-(defn to-phone-number [i]
-  (-> i screen/to-screen-payload :user/phone-number))
-
 (defn- loading? [i]
   (-> i  ::request result/loading?))
 
@@ -21,30 +18,21 @@
   "Wrong code")
 
 (defn- logic [i]
-  (p/put! i [::tick])
-
-  #_(a/go
-      (a/<! (p/put! i [::tick])))
-
-  (p/reg-reducer i ::set-code (fn [state [_ code]] (assoc state ::code code)))
-  (p/reg-reducer i ::set-request (fn [state [_ request]] (assoc state ::request request)))
-
-  (p/take-every!
-   i ::user-inputted-code
-   (fn [[_ code]] (p/put! i [::set-code code])))
+  (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
 
   (a/go-loop []
-    (a/<! (p/take! i ::user-submitted-form))
+    (a/<! (p/take! i :form-submitted))
 
-    (p/put! i [::set-request result/loading])
+    (p/put! i [::set ::request result/loading])
 
     (let [state (p/state! i)
-          code (::code state)
-          phone-number (to-phone-number state)
-          req [:rpc/verify-code {:user/phone-number phone-number :verify-sms/code code}]
+          payload (-> state
+                      (merge (screen/to-screen-payload state))
+                      (select-keys [:verify-sms/phone-number :verify-sms/code]))
+          req [:rpc/verify-code payload]
           res (a/<! (p/eff! i [:rpc/send! req]))]
 
-      (p/put! i [::set-request res])
+      (p/put! i [::set ::request res])
 
       (when (result/ok? res)
         (p/put! i [:toaster/show (toast/info "Logged in")])
@@ -62,11 +50,11 @@
 (defn- view-code [i]
   [text-field/view
    {:text-field/label "Code"
-    :text-field/value (-> i ::code)
-    :text-field/type :text-field-type/number-pad
+    :text-field/value (-> i :verify-sms/code)
+    :text-field/type :text-field/num-pad
     :text-field/required? true
     :text-field/disabled? (loading? i)
-    :text-field/on-change #(p/put! i [::user-inputted-code %])}])
+    :text-field/on-change #(p/put! i [::set :verify-sms/code %])}])
 
 (defn- view-submit [i]
   [button/view
@@ -80,12 +68,12 @@
                  :top-bar/on-back #(p/put! i [:screen/clicked-link [:screen/login]])}])
 
 (defn view-message [i]
-  [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/to-screen-payload :user/phone-number)]])
+  [:p.text-lg "Enter the code we sent to " [:span.font-bold (-> i screen/to-screen-payload :verify-sms/phone-number)]])
 
 (defn view-form [i & children]
   (vec
    (concat [:form.flex.flex-col.w-full.gap-6.p-6
-            {:on-submit #(do (.preventDefault %) (p/put! i [::user-submitted-form]))}]
+            {:on-submit #(do (.preventDefault %) (p/put! i [:form-submitted]))}]
            children)))
 
 (defn view [i]

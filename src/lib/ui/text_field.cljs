@@ -5,7 +5,7 @@
 
 (def type->html-type
   {:text-field-type/keyboard "text"
-   :text-field-type/number-pad "tel"})
+   :text-field/num-pad "tel"})
 
 (defn view [i]
   (let [on-change (:text-field/on-change i)

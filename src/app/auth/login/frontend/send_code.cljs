@@ -11,31 +11,20 @@
    [lib.ui.top-bar :as top-bar]))
 
 (defn- logic [i]
-  (p/reg-reducer i ::set-phone-number (fn [state [_ phone-number]] (assoc state ::phone-number phone-number)))
-  (p/reg-reducer i ::set-request (fn [state [_ request]] (assoc state ::request request)))
-
-  (p/take-every!
-   i ::inputted-phone-number (fn [msg] (p/put! i [::set-phone-number (-> msg second)])))
-
+  (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
 
   (a/go-loop []
-    (let [_ (a/<! (p/take! i ::user-submitted-form))]
-
-      (p/put! i [::set-request result/loading])
-
+    (let [_ (a/<! (p/take! i ::form-submitted))]
+      (p/put! i [::set ::request result/loading])
       (let [state (p/state! i)
-            phone-number (-> state ::phone-number)
-            res (a/<! (p/eff! i [:rpc/send! [:rpc/send-code {:user/phone-number phone-number}]]))]
-
-        (p/put! i [::set-request res])
-
+            payload (-> state (select-keys [:verify-sms/phone-number]))
+            res (a/<! (p/eff! i [:rpc/send! [:rpc/send-code payload]]))]
+        (p/put! i [::set ::request res])
         (when (result/ok? res)
-          (p/put! i [:screen/push [:screen/login-verify-code {:user/phone-number phone-number}]])
+          (p/put! i [:screen/push [:screen/login-verify-code payload]])
           (p/put! i [:toaster/show (toast/info "Code sent")]))
-
         (when (result/err? res)
           (p/put! i [:toaster/show (toast/error (-> res :error/message))]))
-
         (recur)))))
 
 
@@ -45,11 +34,11 @@
 (defn view-field-phone-number [i]
   [text-field/view
    {:text-field/label "Phone Number"
-    :text-field/value (-> i ::phone-number)
+    :text-field/value (-> i :verify-sms/phone-number)
     :text-field/required? true
-    :text-field/type :text-field-type/number-pad
+    :text-field/type :text-field/num-pad
     :text-field/disabled? (loading? i)
-    :text-field/on-change #(p/put! i [::inputted-phone-number %])}])
+    :text-field/on-change #(p/put! i [::set :verify-sms/phone-number %])}])
 
 (defn view-submit-button [i]
   [button/view
@@ -65,7 +54,7 @@
 (defn view-form [i & children]
   (vec
    (concat [:form.flex.flex-col.w-full.gap-6.p-6
-            {:on-submit #(do (.preventDefault %) (p/put! i [::user-submitted-form]))}]
+            {:on-submit #(do (.preventDefault %) (p/put! i [::form-submitted]))}]
            children)))
 
 

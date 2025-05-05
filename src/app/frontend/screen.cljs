@@ -16,41 +16,34 @@
 (defn to-screen-payload [i] (-> i to-screen second))
 
 (defn- logic [i]
-  (p/reg-reducer
-   i ::set-screen
-   (fn [state [_ screen]] (assoc state ::screen screen)))
+  (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
 
-  (p/reg-eff
-   i ::push-screen!
-   (fn [[_ screen]]
-     (-> screen route/encode browser/push-state!)))
+  (p/reg-eff i ::push-screen! (fn [[_ screen]] (-> screen route/encode browser/push-state!)))
 
-  (p/reg-eff
-   i ::get-screen
-   (fn [_] (or (route/get!) (fallback))))
+  (p/reg-eff i ::get-screen (fn [_] (or (route/get!) (fallback))))
 
   (a/go
-    (p/put! i [::set-screen (p/eff! i [::get-screen])])
+    (p/put! i [::set ::screen (p/eff! i [::get-screen])])
     (p/put! i [:screen/screen-changed (p/eff! i [::get-screen])]))
 
   (p/take-every!
    i :screen/clicked-link
    (fn [[_ screen]]
-     (p/put! i [::set-screen screen])
+     (p/put! i [::set ::screen screen])
      (p/eff! i [::push-screen! screen])
      (p/put! i [:screen/screen-changed screen])))
 
   (p/take-every!
    i :screen/push
    (fn [[_ screen]]
-     (p/put! i [::set-screen screen])
+     (p/put! i [::set ::screen screen])
      (p/eff! i [::push-screen! screen])
      (p/put! i [:screen/screen-changed screen])))
 
   (p/take-every!
    i ::got-screen
    (fn [[_ screen]]
-     (p/put! i [::set-screen screen])
+     (p/put! i [::set ::screen screen])
      (p/put! i [:screen/screen-changed screen])))
 
   (a/go-loop []

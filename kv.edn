@@ -1,5 +1,18 @@
-{[:namespace-1 "same-key"] {:data "value-1"},
- [:namespace-2 "same-key"] {:data "value-2"},
+{[:app.user.user-db.impl-kv/by-user-id
+  "b5ae0c41-52d8-4327-b157-d09ce6e1fc27"]
+ {:user/phone-number "1233",
+  :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
+  :user/created-at 1746414602096,
+  :result/type :result/ok,
+  :result/data nil},
+ [:app.user.user-db.impl-kv/by-user-id
+  "84274018-adaf-4324-b856-c96be2bababd"]
+ {:user/phone-number "1",
+  :user/user-id "84274018-adaf-4324-b856-c96be2bababd",
+  :user/name "movie finder 959677",
+  :user/created-at 1746420783878,
+  :result/type :result/ok,
+  :result/data nil},
  [:app.user.user-db.impl-kv/by-user-id
   "f0e22cf2-3b35-4f93-8746-1bd80be58cfd"]
  {:user/phone-number "123",
@@ -15,11 +28,11 @@
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :result/data nil},
- [:app.user.user-db.impl-kv/by-user-id
-  "b5ae0c41-52d8-4327-b157-d09ce6e1fc27"]
- {:user/phone-number "1233",
-  :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
-  :user/created-at 1746414602096,
+ [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "1"]
+ {:user/phone-number "1",
+  :user/user-id "84274018-adaf-4324-b856-c96be2bababd",
+  :user/name "movie finder 959677",
+  :user/created-at 1746420783878,
   :result/type :result/ok,
   :result/data nil},
  [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "1233"]
@@ -28,8 +41,5 @@
   :user/created-at 1746414602096,
   :result/type :result/ok,
   :result/data nil},
- [:app.auth.session.session-db.impl-kv/by-session-id
-  "c7baa457-e0cb-4758-aa18-13d91bff0fbf"]
- {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :session/session-id "c7baa457-e0cb-4758-aa18-13d91bff0fbf",
-  :session/created-at 1746418319585}}
+ [:namespace-2 "same-key"] {:data "value-2"},
+ [:namespace-1 "same-key"] {:data "value-1"}}
