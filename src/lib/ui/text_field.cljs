@@ -11,7 +11,7 @@
   [:fieldset.flex.flex-col.gap-2
    {:class (-> i :text-field/class)}
    [:label.font-bold.flex.flex-col.gap-2 (-> i :text-field/label)
-    [:input.p-4.text-lg.bg-neutral-800.rounded.overflow-hidden.font-normal.min-w-0.max-w-full.flex-basis
+    [:input.p-4.text-lg.bg-neutral-800.rounded.overflow-hidden.font-normal.min-w-0.max-w-full.flex-basis.border-2.border-neutral-700
      {:type (-> i :text-field/type type->html-type (or "text"))
       :value (-> i :text-field/value (or ""))
       :placeholder (-> i :text-field/placeholder)

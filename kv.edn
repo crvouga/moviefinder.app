@@ -17,8 +17,8 @@
   "f0e22cf2-3b35-4f93-8746-1bd80be58cfd"]
  {:user/phone-number "123",
   :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :user/username "movie finder 123",
-  :user/avatar-seed "12",
+  :user/username "movie finder123",
+  :user/avatar-seed "123",
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :result/data nil,
@@ -26,8 +26,8 @@
  [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "123"]
  {:user/phone-number "123",
   :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :user/username "movie finder 123",
-  :user/avatar-seed "12",
+  :user/username "movie finder123",
+  :user/avatar-seed "123",
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :result/data nil,
