@@ -1,21 +1,23 @@
 (ns app.rpc.frontend
   (:require
-   [app.frontend.ctx :refer [ctx]]
+   [app.frontend.ctx :as ctx]
    [app.frontend.mod :as mod]
    [app.rpc.shared :as shared]
    [clojure.core.async :as a]
    [clojure.edn :as edn]
    [lib.err :as err]
    [lib.http-client :as http-client]
+   [lib.pretty :as pretty]
    [lib.program :as p]
-   [lib.serialize :as serialize]
-   [lib.pretty :as pretty]))
+   [lib.serialize :as serialize]))
 
 (defn to-url [req]
-  (str (:wire/backend-url ctx) shared/endpoint "?req=" (pr-str (first req))))
+  (str (-> ctx/ctx :rpc/backend-url) shared/endpoint
+       "?req=" (pr-str (first req))))
 
 (defn- rpc-fetch! [req]
   (serialize/assert-serializable req)
+
   (http-client/fetch!
    {:http/url (to-url req)
     :http/method :http/post

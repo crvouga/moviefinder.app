@@ -20,19 +20,23 @@
 
 
 
+(defmulti view-body current-user/to-status)
+
+(defmethod view-body :current-user/loading []
+  [spinner-screen/view])
+
+(defmethod view-body :current-user/logged-out [i]
+  [login-cta/view i])
+
+(defmethod view-body :current-user/logged-in [i]
+  [:div.w-full.h-full
+   [logout/view-button i]])
+
 (defn view [i]
   [screen/view-screen i :screen/profile
    [top-bar/view {:top-bar/title "Profile"}]
    [:div.w-full.flex-1.flex.flex-col
-    (cond
-      (current-user/logged-out? i)
-      [login-cta/view i]
-
-      (current-user/logged-in? i)
-      [:div
-       [logout/view-button i]]
-
-      :else [spinner-screen/view])]
+    (view-body i)]
    [top-level-bottom-buttons/view i]])
 
 (mod/reg

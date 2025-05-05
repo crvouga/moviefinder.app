@@ -8,6 +8,5 @@
  :rpc/logout
  (fn [{:keys [session/session-id] :as req}]
    (a/go
-     (a/<! (a/timeout 1000))
      (a/<! (session-db/zap! req session-id)))))
 

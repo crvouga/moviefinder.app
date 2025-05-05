@@ -15,7 +15,7 @@
 
 (def ctx
   (merge db
-         {:wire/backend-url backend-url
+         {:rpc/backend-url backend-url
           :verify-sms/impl :verify-sms-impl/fake
           :media-db/impl :media-db/impl-rpc
           ;; :media-db/impl :media-db-impl/dual-source

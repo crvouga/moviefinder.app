@@ -16,8 +16,10 @@
   (swap! rpc-fns! assoc rpc-name rpc-fn))
 
 (defn- rpc! [rpc-name rpc-body]
-  (let [rpc-fn (get @rpc-fns! rpc-name identity)]
-    (rpc-fn rpc-body)))
+  (let [rpc-fn (get @rpc-fns! rpc-name)]
+    (if (fn? rpc-fn)
+      (rpc-fn rpc-body)
+      (throw (ex-info "RPC function not found" {:rpc-name rpc-name})))))
 
 (defn handle-rpc-request! [rpc-req session-id]
   (a/go

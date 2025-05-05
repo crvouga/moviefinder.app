@@ -5,19 +5,15 @@
    [lib.program :as p]
    [lib.result :as result]))
 
-(defn set-current-user [state [_ current-user]]
-  (assoc state ::current-user current-user))
-
 (defn- logic [i]
-  (p/reg-reducer i ::set-current-user set-current-user)
+  (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
 
-  (p/take-every!
-   i :current-user/load
-   (fn [_]
-     (a/go
-       (p/put! i [::set-current-user result/loading])
-       (let [got-current-user (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
-         (p/put! i [::set-current-user got-current-user]))))))
+  (a/go-loop []
+    (let [_ (a/<! (p/take! i :current-user/load))]
+      (p/put! i [::set ::current-user result/loading])
+      (let [got (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
+        (p/put! i [::set ::current-user got])
+        (recur)))))
 
 
 (defn loading? [i]
@@ -32,6 +28,12 @@
 (defn logged-out? [i]
   (and (not (loading? i))
        (-> i logged-in? not)))
+
+(defn to-status [i]
+  (cond
+    (logged-in? i) :current-user/logged-in
+    (logged-out? i) :current-user/logged-out
+    :else :current-user/loading))
 
 (mod/reg
  {:mod/name :mod/current-user

@@ -28,5 +28,10 @@
   :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
   :user/name "User 46cfac48-c955-41e9-8536-7cccbe451e28",
   :user/created-at 1746414602096,
-  :result/type :result/ok, 
-  :result/data nil}}
+  :result/type :result/ok,
+  :result/data nil},
+ [:app.auth.session.session-db.impl-kv/by-session-id
+  "c7baa457-e0cb-4758-aa18-13d91bff0fbf"]
+ {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
+  :session/session-id "c7baa457-e0cb-4758-aa18-13d91bff0fbf",
+  :session/created-at 1746415618226}}
