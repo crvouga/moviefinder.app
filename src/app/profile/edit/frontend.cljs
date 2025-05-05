@@ -39,7 +39,9 @@
 
       (p/put! i [::set ::request result/loading])
 
-      (let [edits (-> i p/state! (rename-keys kmap-form->user) (select-keys user-keys))
+      (let [state (p/state! i)
+            edits (-> state (rename-keys kmap-form->user) (select-keys user-keys))
+            current-user (-> state current-user/to-current-user)
             res (a/<! (p/eff! i [:rpc/send! [:profile-edit/rpc edits]]))]
 
         (p/put! i [::set ::request res])
@@ -48,8 +50,7 @@
           (p/put! i [:toaster/show (toast/error (err/message res))]))
 
         (when (result/ok? res)
-          (p/put! i [:current-user/edit edits])
-          (p/put! i [:current-user/load])
+          (p/put! i [:db/patch (-> current-user :user/user-id) edits])
           (p/put! i [:screen/push [:screen/profile]])
           (p/put! i [:toaster/show (toast/info "Profile updated")]))
 

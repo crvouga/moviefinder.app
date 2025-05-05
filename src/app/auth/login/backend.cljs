@@ -26,8 +26,11 @@
            user-new (user/create-from-phone-number phone-number)
            user (merge user-new user-existing)
            session-new (session/create {:session/user-id (:user/user-id user)
-                                        :session/session-id session-id})]
-       (when (result/ok? verified)
+                                        :session/session-id session-id})
+           res (if (result/ok? verified) (merge verified user) verified)]
+
+       (when (result/ok? res)
          (a/<! (user-db/put! i user))
          (a/<! (session-db/put! i session-new)))
-       verified))))
+
+       res))))

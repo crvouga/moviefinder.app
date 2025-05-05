@@ -13,10 +13,10 @@
                    (take limit))]
     (-> q
         (merge {:queried/query (select-keys q [:query/select :query/where :query/order :query/limit :query/offset])
-                :queried/limit limit
-                :queried/offset offset
-                :queried/total total
-                :queried/primary-key :media/id
+                :query-result/limit limit
+                :query-result/offset offset
+                :query-result/total total
+                :query-result/primary-key :media/id
                 :queried/rows items}))))
 
 (defmethod media-db/query-result-chan! :media-db/impl-fake [q]

@@ -35,8 +35,8 @@
       (p/put! i [::set ::request res])
 
       (when (result/ok? res)
+        (p/put! i [:current-user/patch res])
         (p/put! i [:toaster/show (toast/info "Logged in")])
-        (p/put! i [:current-user/hard-load])
         (p/put! i [:screen/push [:screen/profile]]))
 
       (when (result/err? res)

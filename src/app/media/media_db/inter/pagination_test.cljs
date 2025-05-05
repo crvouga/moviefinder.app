@@ -28,12 +28,12 @@
                      "Second page should match items 6-10 of full result")
 
                  ; Test returned limit/offset match input
-                 (is (= (:queried/limit result1) 5)
+                 (is (= (:query-result/limit result1) 5)
                      "Returned limit should match input")
-                 (is (= (:queried/offset result1) 0)
+                 (is (= (:query-result/offset result1) 0)
                      "Returned offset should match input")
-                 (is (= (:queried/limit result2) 5)
+                 (is (= (:query-result/limit result2) 5)
                      "Returned limit should match input")
-                 (is (= (:queried/offset result2) 5)
+                 (is (= (:query-result/offset result2) 5)
                      "Returned offset should match input")))
              (done)))))
