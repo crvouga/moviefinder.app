@@ -5,7 +5,7 @@
 
 (defn init [hiccup]
   (fn [props]
-    (update hiccup 1 (fn [attrs] (-> attrs (merge props))))))
+    (update hiccup 1 (fn [attrs] (-> attrs (dissoc :class) (merge props))))))
 
 (def spinner
   (init
@@ -44,3 +44,8 @@
   (init
    [:svg {:xmlns "http://www.w3.org/2000/svg", :viewBox "0 0 24 24", :fill "currentColor"}
     [:path {:fill-rule "evenodd", :d "M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z", :clip-rule "evenodd"}]]))
+
+(def adjustments-horizontal
+  (init
+   [:svg {:xmlns "http://www.w3.org/2000/svg", :viewBox "0 0 24 24", :fill "currentColor", :class "size-6"}
+    [:path {:d "M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z"}]]))

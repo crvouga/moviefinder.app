@@ -4,7 +4,8 @@
    [app.frontend.route :as route]
    [clojure.core.async :as a]
    [lib.browser :as browser]
-   [lib.program :as p]))
+   [lib.program :as p]
+   [lib.ui.children :as children]))
 
 ;; 
 ;; 
@@ -68,13 +69,10 @@
 
 
 
-(defn- concatv [node children]
-  (vec (concat node children)))
-
 
 (defn view-screen [i screen-name & children]
   (let [current-screen-name (-> i ::screen (or (fallback)) first)]
-    (concatv
+    (children/with
      [:div.w-full.h-full.overflow-hidden.flex.flex-col
       {:data-screen-name screen-name
        :class (when (not= screen-name current-screen-name) "hidden")}]

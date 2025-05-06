@@ -9,9 +9,12 @@
    [clojure.core.async :as a]
    [lib.dom :as dom]
    [lib.program :as p]
+   [lib.ui.icon :as icon]
+   [lib.ui.icon-button :as icon-button]
    [lib.ui.image :as image]
    [lib.ui.image-preload :as image-preload]
-   [lib.ui.top-bar :as top-bar]))
+   [lib.ui.top-bar :as top-bar]
+   [app.media.details.frontend :as media-details]))
 
 (def popular-media-query
   {:query/limit 25
@@ -61,11 +64,7 @@
        (p/put! i [::load]))))
 
 
-  (p/take-every!
-   i ::clicked-swiper-slide
-   (fn [[_ media]]
-     (let [screen [:screen/media-details (select-keys media [:media/id])]]
-       (p/put! i [:screen/clicked-link screen]))))
+
 
   #_(let [slide-index-chan (swiper-slide-change-chan)]
       (a/go-loop []
@@ -81,7 +80,7 @@
 (defn- view-swiper-slide [i row]
   [:swiper-slide {}
    [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
-    {:on-click #(p/put! i [::clicked-swiper-slide row])}
+    {:on-click #(p/put! i [:screen/clicked-link (media-details/to-screen row)])}
     [image-preload/view {:image/url (:media/backdrop-url row)}]
     [image/view {:image/url (:media/poster-url row)
                  :image/alt (:media/title row)
@@ -101,13 +100,19 @@
      [view-swiper-slide i row])
    (view-swiper-last-slide i)])
 
-(defn view-topbar [i]
-  [:div.w-full.h-96.border-b])
+(defn view-top-bar [i]
+  [:button.w-full.cursor-pointer.select-none
+   [top-bar/root
+    [:div.flex-1.flex.items-center.justify-end.h-full
+     [icon-button/view
+      {:icon-button/view-icon icon/adjustments-horizontal
+       :icon-button/on-pointer-down #(println "adjustments-horizontal")}]]]])
 
 (defn- view [i]
   (let [query-result (db/to-query-result i popular-media-query)
         rows (:query-result/rows query-result)]
     [screen/view-screen i :screen/feed
+     [view-top-bar i]
      #_[top-bar/view {:top-bar/title "Feed"}]
      [view-swiper i rows]
      (when (empty? rows)

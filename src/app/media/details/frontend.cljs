@@ -65,6 +65,8 @@
 (defn view-overview [media]
   [:div.text-lg.text-neutral-300 (:media/overview media)])
 
+(defn to-screen [media]
+  [:screen/media-details (select-keys media [:media/id])])
 
 
 (defn view [i]

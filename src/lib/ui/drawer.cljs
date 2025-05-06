@@ -1,9 +1,8 @@
 (ns lib.ui.drawer
   (:require
+   [lib.ui.children :as children]
    [lib.ui.cn :refer [cn]]))
 
-(defn- concatv [v1 v2]
-  (vec (concat v1 v2)))
 
 
 (defn view [i & children]
@@ -25,7 +24,7 @@
     {:class "w-full flex-1"
      :aria-label "Close"
      :on-click (i :drawer/on-close)}]
-   (concatv
+   (children/with
     [:div
      {:class (cn
               "bg-black h-fit w-full border"
