@@ -13,7 +13,8 @@
     :role "dialog"
     :aria-label (i :drawer/aria-label)
     :class (cn
-            "absolute inset-0 z-50 flex bg-black/80 transition-opacity duration-200"
+            "absolute inset-0 z-50 flex bg-black/80"
+            "transition-opacity duration-200"
             (if (= (i :drawer/position) :drawer/top)
               "flex-col-reverse "
               "flex-col")
@@ -27,9 +28,15 @@
    (concatv
     [:div
      {:class (cn
-              "bg-black h-fit w-full border border-neutral-800 transition-transform duration-200"
+              "bg-black h-fit w-full border"
+              "transition-transform duration-200"
               (if (= (i :drawer/position) :drawer/top)
                 (cn "rounded-b-2xl"
-                    (if (i :drawer/open?) "translate-y-0" "-translate-y-full"))
-                (cn "rounded-t-2xl" (if (i :drawer/open?) "translate-y-0" "translate-y-full"))))}]
+                    (if (i :drawer/open?)
+                      "translate-y-0"
+                      "-translate-y-full"))
+                (cn "rounded-t-2xl"
+                    (if (i :drawer/open?)
+                      "translate-y-0"
+                      "translate-y-full"))))}]
     children)])

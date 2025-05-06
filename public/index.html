@@ -8,7 +8,18 @@
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
     <!-- <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script> -->
-
+    <style type="text/tailwindcss">
+        @layer base {
+            *,
+            ::after,
+            ::before,
+            ::backdrop,
+            ::file-selector-button {
+                border-color: var(--color-neutral-800, currentColor);
+            }
+        }
+        
+      </style>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='32' font-size='32'>🍿</text></svg>">
     <link rel="stylesheet" href="/index.css">

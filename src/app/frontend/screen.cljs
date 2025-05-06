@@ -10,7 +10,7 @@
 ;; 
 ;; 
 
-(defn- fallback [] [:screen/home])
+(defn- fallback [] [:screen/feed])
 (defn to-screen [i] (-> i ::screen))
 (defn to-screen-name [i] (-> i to-screen first))
 (defn to-screen-payload [i] (-> i to-screen second))

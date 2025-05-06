@@ -6,7 +6,7 @@
    [app.frontend.db]
    [app.frontend.mod :as mod]
    [app.frontend.toaster]
-   [app.home.frontend]
+   [app.feed.frontend]
    [app.media.frontend]
    [app.profile.frontend]
    [app.rpc.frontend]
@@ -16,7 +16,7 @@
 
 (defn view [i]
   [:div {:class "fixed left-1/2 top-1/2 flex h-[100dvh] w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden bg-black text-white"}
-   [:div {:class "relative flex h-full max-h-[915px] w-full max-w-[520px] flex-col items-center justify-center overflow-hidden rounded min-[520px]:border border-neutral-500"}
+   [:div {:class "relative flex h-full max-h-[915px] w-full max-w-[520px] flex-col items-center justify-center overflow-hidden rounded min-[520px]:border"}
     #_[:code (pr-str (screen/screen-name i))]
     [mod/view i]]])
 

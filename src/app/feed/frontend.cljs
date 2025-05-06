@@ -1,4 +1,4 @@
-(ns app.home.frontend
+(ns app.feed.frontend
   (:require
    [app.frontend.db :as db]
    [app.frontend.mod :as mod]
@@ -57,7 +57,7 @@
   (p/take-every!
    i :screen/screen-changed
    (fn [[_ [screen-name _]]]
-     (when (= screen-name :screen/home)
+     (when (= screen-name :screen/feed)
        (p/put! i [::load]))))
 
 
@@ -101,11 +101,14 @@
      [view-swiper-slide i row])
    (view-swiper-last-slide i)])
 
+(defn view-topbar [i]
+  [:div.w-full.h-96.border-b])
+
 (defn- view [i]
   (let [query-result (db/to-query-result i popular-media-query)
         rows (:query-result/rows query-result)]
-    [screen/view-screen i :screen/home
-     [top-bar/view {:top-bar/title "Home"}]
+    [screen/view-screen i :screen/feed
+     #_[top-bar/view {:top-bar/title "Feed"}]
      [view-swiper i rows]
      (when (empty? rows)
        [image/view {:class "w-full h-full"}])

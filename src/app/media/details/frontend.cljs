@@ -25,7 +25,7 @@
 
 
 (defn- logic [i]
-  (p/take-every! i ::clicked-back (fn [_] (p/put! i [:screen/push [:screen/home]])))
+  (p/take-every! i ::clicked-back (fn [_] (p/put! i [:screen/push [:screen/feed]])))
 
   (p/take-every!
    i ::load
