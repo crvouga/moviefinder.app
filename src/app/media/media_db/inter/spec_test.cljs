@@ -30,7 +30,7 @@
                (let [_put-result (<! (media-db/upsert-chan! (assoc config :media/entity fixture/test-media)))
                      query (test-query config)
                      result (<! (media-db/query-result-chan! config query))]
-                 (is (seq (:queried/rows result))
+                 (is (seq (:query-result/rows result))
                      (str "Query result should not be empty for implementation " (:media-db/impl config)))))
              (done)))))
 
@@ -50,7 +50,7 @@
              (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
                      result (<! (media-db/query-result-chan! config query))]
-                 (doseq [row (:queried/rows result)]
+                 (doseq [row (:query-result/rows result)]
                    (is (valid-url? (:media/poster-url row))
                        (str "Invalid or missing poster URL for implementation " (:media-db/impl config)))
                    (is (valid-url? (:media/backdrop-url row))

@@ -3,7 +3,8 @@
    [app.auth.session.session-db.inter :as session-db]
    [clojure.core.async :as a]
    [clojure.set :refer [rename-keys]]
-   [lib.db.inter :as db]))
+   [lib.db.inter :as db]
+   [lib.posix :as posix]))
 
 
 
@@ -25,14 +26,11 @@
    :on-conflict [:session-id]
    :do-update-set [:user-id :created-at-posix :ended-at-posix]])
 
-(defn now! []
-  (.getTime (js/Date.)))
 
 (defn- query-delete [session-id]
   [:update [:sessions]
-   :set [:ended-at-posix (now!)]
+   :set [:ended-at-posix (posix/now!)]
    :where [:= :session-id session-id]])
-
 
 (defn- row->user-session [row]
   (rename-keys row {:session-id :user-session/session-id
@@ -42,7 +40,7 @@
 
 (defn- query-result->user-sessions [query-result]
   (->> query-result
-       :queried/rows
+       :query-result/rows
        (map row->user-session)))
 
 (defmethod session-db/new! :session-db/impl-db
@@ -53,8 +51,8 @@
   [{:keys [:db/db]} session-id]
   (a/go
     (let [q (query-find-by-session-id session-id)
-          query-result (a/<! (db/query-chan! db q))
-          user-sessions (query-result->user-sessions query-result)]
+          queried (a/<! (db/query-chan! db q))
+          user-sessions (query-result->user-sessions queried)]
       (first user-sessions))))
 
 

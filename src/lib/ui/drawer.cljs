@@ -6,36 +6,30 @@
   (vec (concat v1 v2)))
 
 
-(defn view
-  [{:keys [drawer/open?
-           drawer/on-close
-           drawer/id
-           drawer/aria-label
-           drawer/position]}
-   & children]
+(defn view [i & children]
   [:div
-   {:id id
-    :aria-hidden (not open?)
+   {:id (i :drawer/id)
+    :aria-hidden (-> i :drawer/open? not)
     :role "dialog"
-    :aria-label aria-label
+    :aria-label (i :drawer/aria-label)
     :class (cn
             "absolute inset-0 z-50 flex bg-black/80 transition-opacity duration-200"
-            (if (= position :drawer/top)
+            (if (= (i :drawer/position) :drawer/top)
               "flex-col-reverse "
               "flex-col")
-            (if open?
+            (if (i :drawer/open?)
               "pointer-events-auto opacity-100"
               "pointer-events-none opacity-0"))}
    [:div
     {:class "w-full flex-1"
      :aria-label "Close"
-     :on-click on-close}]
+     :on-click (i :drawer/on-close)}]
    (concatv
     [:div
      {:class (cn
               "bg-black h-fit w-full border border-neutral-800 transition-transform duration-200"
-              (if (= position :drawer/top)
+              (if (= (i :drawer/position) :drawer/top)
                 (cn "rounded-b-2xl"
-                    (if open? "translate-y-0" "-translate-y-full"))
-                (cn "rounded-t-2xl" (if open? "translate-y-0" "translate-y-full"))))}]
+                    (if (i :drawer/open?) "translate-y-0" "-translate-y-full"))
+                (cn "rounded-t-2xl" (if (i :drawer/open?) "translate-y-0" "translate-y-full"))))}]
     children)])

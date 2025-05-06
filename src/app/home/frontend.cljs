@@ -103,7 +103,7 @@
 
 (defn- view [i]
   (let [query-result (db/to-query-result i popular-media-query)
-        rows (:queried/rows query-result)]
+        rows (:query-result/rows query-result)]
     [screen/view-screen i :screen/home
      [top-bar/view {:top-bar/title "Home"}]
      [view-swiper i rows]

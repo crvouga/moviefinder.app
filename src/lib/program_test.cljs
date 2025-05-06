@@ -1,6 +1,6 @@
 (ns lib.program-test
   (:require
-   [cljs.test :refer-macros [deftest is testing async]]
+   [cljs.test :refer-macros [deftest is testing]]
    [lib.program :as p]
    [clojure.core.async :as a]))
 

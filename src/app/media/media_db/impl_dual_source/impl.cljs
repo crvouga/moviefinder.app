@@ -12,7 +12,7 @@
         #_(println "primary-result" primary-result)
         (go
           (let [secondary-result (<! (media-db/query-result-chan! secondary q))]
-            (doseq [entity (:queried/rows secondary-result)]
+            (doseq [entity (:query-result/rows secondary-result)]
               #_(println "putting entity into primary" (-> entity :media/title))
               (<! (media-db/upsert-chan! (assoc primary :media/entity entity))))))
 

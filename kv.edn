@@ -18,7 +18,7 @@
  {:user/phone-number "123",
   :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
   :user/username "movie finder123",
-  :user/avatar-seed "123",
+  :user/avatar-seed "123123",
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :result/data nil,
@@ -27,7 +27,7 @@
  {:user/phone-number "123",
   :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
   :user/username "movie finder123",
-  :user/avatar-seed "123",
+  :user/avatar-seed "123123",
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :result/data nil,
@@ -56,7 +56,7 @@
   "c7baa457-e0cb-4758-aa18-13d91bff0fbf"]
  {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
   :session/session-id "c7baa457-e0cb-4758-aa18-13d91bff0fbf",
-  :session/created-at 1746430740180},
+  :session/created-at 1746431343823},
  [:app.user.user-db.impl-kv/by-user-id nil]
  {:result/type :result/ok,
   :result/data nil,

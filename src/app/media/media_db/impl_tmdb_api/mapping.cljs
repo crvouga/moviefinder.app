@@ -39,6 +39,6 @@
      :query-result/offset offset
      :query-result/total total
      :query-result/primary-key :media/id
-     :queried/rows items}))
+     :query-result/rows items}))
 
 

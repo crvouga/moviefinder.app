@@ -23,13 +23,13 @@
 (defn- reducer-query-result-by-query [query-result-by-query msg-payload]
   (let [query (-> msg-payload :queried/query query-to-key)
         primary-key (-> msg-payload :query-result/primary-key)
-        entity-ids (->> msg-payload :queried/rows (map primary-key))
+        entity-ids (->> msg-payload :query-result/rows (map primary-key))
         query-result (-> msg-payload (select-keys query-result-keys) (assoc :queried/row-ids entity-ids))]
     (assoc query-result-by-query query query-result)))
 
 (defn- to-entity-by-id [msg-payload]
   (->> msg-payload
-       :queried/rows
+       :query-result/rows
        (group-by (to-primary-key msg-payload))
        (map-vals first)
        (into {})))
@@ -73,7 +73,7 @@
   (let [query-result (-> state ::query-result-by-query (get (query-to-key query)))
         entities (->> query-result :queried/row-ids (map (-> state ::entity-by-id)))]
     (-> query-result
-        (assoc :queried/rows entities))))
+        (assoc :query-result/rows entities))))
 
 (defn entity [state entity-id]
   (-> state ::entity-by-id (get entity-id)))
