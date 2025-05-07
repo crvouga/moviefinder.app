@@ -14,6 +14,7 @@
    [lib.ui.image :as image]
    [lib.ui.image-preload :as image-preload]
    [lib.ui.top-bar :as top-bar]
+   [app.feed.edit.frontend]
    [app.media.details.frontend :as media-details]))
 
 (def popular-media-query
@@ -102,6 +103,7 @@
 
 (defn view-top-bar [i]
   [:button.w-full.cursor-pointer.select-none
+   {:on-pointer-down #(p/put! i [:screen/clicked-link [:screen/feed-edit]])}
    [top-bar/root
     [:div.flex-1.flex.items-center.justify-end.h-full
      [icon-button/view

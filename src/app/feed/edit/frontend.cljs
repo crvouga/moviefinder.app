@@ -2,7 +2,8 @@
 (ns app.feed.edit.frontend
   (:require
    [app.frontend.mod :as mod]
-   [app.media.media-db.frontend]))
+   [app.media.media-db.frontend]
+   [app.frontend.screen :as screen]))
 
 
 ;; 
@@ -19,8 +20,10 @@
 ;; 
 ;; 
 
-(defn- view [_]
-  [:div "edit"])
+(defn- view [i]
+  [screen/view-screen
+   i :screen/feed-edit
+   [:div "edit"]])
 
 (mod/reg {:mod/name ::mod
           :mod/view view
