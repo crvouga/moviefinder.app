@@ -4,6 +4,7 @@
   :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
   :user/created-at 1746414602096,
   :result/type :result/ok},
+ [:kv-test/ns-2 "same-key"] {:kv-test/data "value-2"},
  [:app.user.user-db.impl-kv/by-user-id
   "84274018-adaf-4324-b856-c96be2bababd"]
  {:user/phone-number "1",
@@ -11,6 +12,7 @@
   :user/username "movie finder 959677",
   :user/created-at 1746420783878,
   :result/type :result/ok},
+ [:kv-test/ns-1 "same-key"] {:kv-test/data "value-1"},
  [:app.user.user-db.impl-kv/by-user-id
   "f0e22cf2-3b35-4f93-8746-1bd80be58cfd"]
  {:user/phone-number "123",
@@ -45,6 +47,7 @@
   :user/created-at 1746414602096,
   :result/type :result/ok},
  [:namespace-2 "same-key"] {:data "value-2"},
+ [:test-namespace-2 "same-key"] {:kv-test/data "value-2"},
  [:app.auth.session.session-db.impl-kv/by-session-id
   "c7baa457-e0cb-4758-aa18-13d91bff0fbf"]
  {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
@@ -55,4 +58,5 @@
   :user/avatar-seed "12",
   :user/fullname "123123",
   :user/username "movie finder 123"},
- [:namespace-1 "same-key"] {:data "value-1"}}
+ [:namespace-1 "same-key"] {:data "value-1"},
+ [:test-namespace-1 "same-key"] {:kv-test/data "value-1"}}
