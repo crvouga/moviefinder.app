@@ -10,7 +10,6 @@
  :profile-edit/rpc
  (fn [i]
    (a/go
-     (println "update-current-user" i)
      (a/<! (a/timeout 1000))
      (let [session (a/<! (session-db/find-by-session-id! i (-> i :session/session-id)))
            user-existing (a/<! (user-db/find-by-user-id! i (:session/user-id session)))

@@ -15,7 +15,7 @@
    [app.profile.avatar-url :as avatar-url]))
 
 
-(defn- logic [i]
+(defn- logic [_]
   #_(screen/take-every! i :screen/profile (fn [] (p/put! i [:current-user/load]))))
 
 (defn view-logout-button [i]
