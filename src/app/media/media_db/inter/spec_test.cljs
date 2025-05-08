@@ -17,7 +17,7 @@
            (go
              (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
-                     result (<! (media-db/query-result-chan! config query))]
+                     result (<! (media-db/query! config query))]
                  (is (s/valid? :query-result/query-result result)
                      (str "Invalid query result for implementation " (:media-db/impl config)))))
              (done)))))
@@ -29,7 +29,7 @@
              (doseq [config fixture/configs-read-only]
                (let [_put-result (<! (media-db/upsert-chan! (assoc config :media/entity fixture/test-media)))
                      query (test-query config)
-                     result (<! (media-db/query-result-chan! config query))]
+                     result (<! (media-db/query! config query))]
                  (is (seq (:query-result/rows result))
                      (str "Query result should not be empty for implementation " (:media-db/impl config)))))
              (done)))))
@@ -49,7 +49,7 @@
            (go
              (doseq [config fixture/configs-read-only]
                (let [query (test-query config)
-                     result (<! (media-db/query-result-chan! config query))]
+                     result (<! (media-db/query! config query))]
                  (doseq [row (:query-result/rows result)]
                    (is (valid-url? (:media/poster-url row))
                        (str "Invalid or missing poster URL for implementation " (:media-db/impl config)))

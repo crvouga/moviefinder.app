@@ -30,6 +30,11 @@
   :user/created-at 1746091429898,
   :result/type :result/ok,
   :user/fullname "123123"},
+ [:app.auth.session.session-db.impl-kv/by-session-id
+  "aa31b7e5-c879-4ef3-829e-edc39251d357"]
+ {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
+  :session/session-id "aa31b7e5-c879-4ef3-829e-edc39251d357",
+  :session/created-at 1746746444240},
  [:app.user.user-db.impl-kv/by-user-ids-by-phone-number nil]
  {:result/type :result/ok,
   :user/avatar-seed "12",

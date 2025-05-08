@@ -8,7 +8,7 @@
    [app.auth.session.entity :as session]
    [clojure.core.async :as a]
    [lib.result :as result]
-   [app.user.entity :as user]))
+   [app.user.user :as user]))
 
 (rpc/reg
  :rpc/send-code

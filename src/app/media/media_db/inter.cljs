@@ -18,7 +18,7 @@
 (s/def :query-result/offset number?)
 (s/def :query-result/total number?)
 (s/def :query-result/primary-key keyword?)
-(s/def :query-result/rows (s/coll-of :media/entity))
+(s/def :query-result/rows (s/coll-of map?))
 
 (s/def :query-result/query-result
   (s/keys :req [:queried/query
@@ -44,11 +44,11 @@
 (defmethod new! :default [q]
   q)
 
-(defmulti query-result-chan!
+(defmulti query!
   "Used for querying media data from the database using query spec"
   :media-db/impl)
 
-(defmethod query-result-chan! :default [q]
+(defmethod query! :default [q]
   (go
     (assoc empty-query-result
            :error/message "Media db implementation not found"

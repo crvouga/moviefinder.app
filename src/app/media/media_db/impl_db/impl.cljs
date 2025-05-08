@@ -52,7 +52,7 @@
       {:media-db/impl :media-db/impl-db
        :result/type :result/ok})))
 
-(defmethod media-db/query-result-chan! :media-db/impl-db
+(defmethod media-db/query! :media-db/impl-db
   [{:keys [query/where query/limit query/offset query/select query/order] :as config}]
   (go
     (<! (run-migrations! config))

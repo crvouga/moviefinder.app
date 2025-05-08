@@ -2,7 +2,7 @@
   (:require
    [app.rpc.backend :as rpc]
    [clojure.core.async :as a]
-   [app.user.entity :as user]
+   [app.user.user :as user]
    [app.user.user-db.inter :as user-db]
    [app.auth.session.session-db.inter :as session-db]))
 

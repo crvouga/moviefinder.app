@@ -1,4 +1,4 @@
-(ns app.user.entity
+(ns app.user.user
   (:require
    [cljs.spec.alpha :as s]
    [lib.time :as time]))

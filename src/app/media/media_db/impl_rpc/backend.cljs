@@ -15,5 +15,5 @@
  :rpc/media-db-query
  (fn [req]
    (go
-     (let [res (<! (media-db/query-result-chan! (-> req ensure-not-rpc-impl) req))]
+     (let [res (<! (media-db/query! (-> req ensure-not-rpc-impl) req))]
        res))))

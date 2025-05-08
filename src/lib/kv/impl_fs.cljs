@@ -2,7 +2,7 @@
   (:require
    [lib.kv.inter :as kv]
    [clojure.core.async :as a]
-   [lib.kv.namespaced :as namespaced]
+   [lib.kv.shared :refer [assoc-ok to-key]]
    [lib.fs.inter :as fs]
    [cljs.reader :as reader]
    [lib.pretty :as pretty]))
@@ -27,12 +27,6 @@
     true))
 
 
-(defn- assoc-ok [value]
-  (if (map? value)
-    (assoc value :result/type :result/ok)
-    {:result/type :result/ok
-     :kv/data value}))
-
 (defmethod kv/new! :kv/impl-fs
   [config]
   (let [file-path (or (:file-path config) default-file-path)]
@@ -43,7 +37,7 @@
   [{:keys [fs file-path] :as inst} key]
   (a/go
     (let [store (a/<! (read-store! fs file-path))
-          namespaced-key (namespaced/to-key inst key)
+          namespaced-key (to-key inst key)
           value (get store namespaced-key)]
       (assoc-ok value))))
 
@@ -51,7 +45,7 @@
   [{:keys [fs file-path] :as inst} key value]
   (a/go
     (let [store (a/<! (read-store! fs file-path))
-          namespaced-key (namespaced/to-key inst key)
+          namespaced-key (to-key inst key)
           updated-store (assoc store namespaced-key value)]
       (a/<! (write-store! fs file-path updated-store))
       (assoc-ok value))))
@@ -60,7 +54,7 @@
   [{:keys [fs file-path] :as inst} key]
   (a/go
     (let [store (a/<! (read-store! fs file-path))
-          namespaced-key (namespaced/to-key inst key)
+          namespaced-key (to-key inst key)
           updated-store (dissoc store namespaced-key)]
       (a/<! (write-store! fs file-path updated-store))
       (assoc-ok {}))))

@@ -19,7 +19,7 @@
                 :query-result/primary-key :media/id
                 :query-result/rows items}))))
 
-(defmethod media-db/query-result-chan! :media-db/impl-fake [q]
+(defmethod media-db/query! :media-db/impl-fake [q]
   (go
     (<! (timeout 100))
     (->> (to-query-result q medias))))

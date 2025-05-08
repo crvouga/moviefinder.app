@@ -34,7 +34,7 @@
       (recur (conj query-results (<! (query-plan-item/query-result-chan! (first query-plan-items))))
              (rest query-plan-items)))))
 
-(defmethod media-db/query-result-chan! :media-db/impl-tmdb-api [q]
+(defmethod media-db/query! :media-db/impl-tmdb-api [q]
   (go
     (let [query-plan-items (to-query-plan-items q)
           query-results (<! (query-plan-query-results-chan! query-plan-items))

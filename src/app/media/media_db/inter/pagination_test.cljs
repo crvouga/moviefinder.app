@@ -13,9 +13,9 @@
                (let [full-query (merge config {:query/limit 20 :query/offset 0})
                      query1 (merge config {:query/limit 5 :query/offset 0})
                      query2 (merge config {:query/limit 5 :query/offset 5})
-                     full-result (<! (interface/query-result-chan! full-query))
-                     result1 (<! (interface/query-result-chan! query1))
-                     result2 (<! (interface/query-result-chan! query2))
+                     full-result (<! (interface/query! full-query))
+                     result1 (<! (interface/query! query1))
+                     result2 (<! (interface/query! query2))
                      full-rows (:query-result/rows full-result)]
 
                  ; Test paginated results are subsequences of full result

@@ -85,6 +85,6 @@
 
          (let [got (<! (kv/get! kv k))]
            (is (result/ok? got) "Getting after zap should still return a ok result")
-           (is (nil? (:kv-test/data got)) "String value should be nil after being zapped"))
+           (is (nil? (:kv/value got)) "String value should be nil after being zapped"))
 
          (done))))))

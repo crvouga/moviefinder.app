@@ -31,7 +31,7 @@
    i ::load
    (fn [[_ media-id]]
      (a/go
-       (let [query-result (a/<! (media-db/query-result-chan! i (to-media-query media-id)))]
+       (let [query-result (a/<! (media-db/query! i (to-media-query media-id)))]
          (p/put! i [:db/got-query-result query-result])))))
 
   (p/take-every!

@@ -5,7 +5,7 @@
    [app.user.user-db.inter :as user-db]
    [app.user.user-db.impl-kv]
    [lib.kv.impl]
-   [app.user.entity :as user])
+   [app.user.user :as user])
   (:require-macros
    [cljs.core.async.macros :refer [go]]))
 
