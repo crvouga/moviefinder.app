@@ -2,7 +2,8 @@
   (:require
    [lib.kv.inter :as kv]
    [clojure.core.async :as a]
-   [lib.kv.namespaced :as namespaced]))
+   [lib.kv.namespaced :as namespaced]
+   [lib.result :as result]))
 
 (defmethod kv/new! :kv/impl-atom
   [config]
@@ -10,9 +11,8 @@
 
 (defn- assoc-ok [value]
   (if (map? value)
-    (assoc value :result/type :result/ok)
-    {:result/type :result/ok
-     :result/data value}))
+    (merge value result/ok)
+    (merge {:kv/value value} result/ok)))
 
 (defmethod kv/get! :kv/impl-atom
   [{:keys [::state!] :as inst} key]

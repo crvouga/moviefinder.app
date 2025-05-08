@@ -1,14 +1,19 @@
 (ns lib.result)
 
 
-(defn ok? [result]
+(defn ok?
+  "Check if the result is ok"
+  [result]
   (= (:result/type result) :result/ok))
 
-(defn err? [result]
-  (= (:result/type result) :result/err))
+(defn err?
+  "Check if the result is an error"
+  [result] (= (:result/type result) :result/err))
 
 
-(defn loading? [result]
+(defn loading?
+  "Check if the result is loading"
+  [result]
   (= (:result/type result) :result/loading))
 
 (def loading {:result/type :result/loading})

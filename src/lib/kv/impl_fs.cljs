@@ -31,7 +31,7 @@
   (if (map? value)
     (assoc value :result/type :result/ok)
     {:result/type :result/ok
-     :result/data value}))
+     :kv/data value}))
 
 (defmethod kv/new! :kv/impl-fs
   [config]

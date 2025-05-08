@@ -17,10 +17,10 @@
     "cloc": "npx cloc src"
   },
   "devDependencies": {
-    "shadow-cljs": "^3.0.2"
+    "shadow-cljs": "^3.0.5"
   },
   "dependencies": {
-    "better-sqlite3": "^11.9.1",
+    "better-sqlite3": "^11.10.0",
     "process": "^0.11.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
