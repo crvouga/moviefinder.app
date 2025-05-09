@@ -1,15 +1,13 @@
 (ns lib.ui.top-bar
   (:require
-   [lib.ui.children :as children]
+   [lib.ui.bar :as bar]
    [lib.ui.icon :as icon]
    [lib.ui.icon-button :as icon-button]))
 
 
-(defn root [props & children]
-  (children/with [:div.w-full.h-20.shrink-0.flex.items-center.px-4 props] children))
-
 (defn view [i]
-  [root
+  [:div.w-full.shrink-0.flex.items-center.px-4
+   {:class bar/h-class}
    (when-not (-> i :top-bar/on-back)
      [icon-button/whitespace])
    (when (-> i :top-bar/on-back)

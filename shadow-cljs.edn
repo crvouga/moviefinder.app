@@ -12,12 +12,14 @@
  {:frontend
   {:target :browser
    :modules {:main {:init-fn app.frontend/-main}}}
+
   :backend
   {:target :node-script
    :main app.backend/-main
    :output-to "out/backend/main.js"
    :devtools {:autoload true
-              :repl true}}
+              :repl true}
+   :watch-script "node out/backend/main.js"}
   :test
   {:target :node-test
    :output-to "out/test/test.js"

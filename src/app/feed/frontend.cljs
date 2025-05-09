@@ -1,21 +1,21 @@
 (ns app.feed.frontend
   (:require
+   [app.feed.edit.frontend]
    [app.frontend.db :as db]
    [app.frontend.mod :as mod]
    [app.frontend.screen :as screen]
    [app.frontend.ui.top-level-bottom-buttons :as top-level-bottom-buttons]
+   [app.media.details.frontend :as media-details]
    [app.media.media-db.frontend]
    [app.media.media-db.inter :as media-db]
    [clojure.core.async :as a]
    [lib.dom :as dom]
    [lib.program :as p]
+   [lib.ui.bar :as bar]
    [lib.ui.icon :as icon]
    [lib.ui.icon-button :as icon-button]
    [lib.ui.image :as image]
-   [lib.ui.image-preload :as image-preload]
-   [lib.ui.top-bar :as top-bar]
-   [app.feed.edit.frontend]
-   [app.media.details.frontend :as media-details]))
+   [lib.ui.image-preload :as image-preload]))
 
 (def popular-media-query
   {:query/limit 25
@@ -104,18 +104,14 @@
 (defn view-top-bar [i]
   [:button.w-full.cursor-pointer.select-none
    {:on-pointer-down #(p/put! i [:screen/clicked-link [:screen/feed-edit]])}
-   [top-bar/root
-    [:div.flex-1.flex.items-center.justify-end.h-full
-     [icon-button/view
-      {:icon-button/view-icon icon/adjustments-horizontal
-       :icon-button/on-pointer-down #(println "adjustments-horizontal")}]]]])
+   [:div.flex-1.flex.items-center.justify-end.h-full.px-4 {:class bar/h-class}
+    [icon-button/view {:icon-button/view-icon icon/adjustments-horizontal}]]])
 
 (defn- view [i]
   (let [query-result (db/to-query-result i popular-media-query)
         rows (:query-result/rows query-result)]
     [screen/view-screen i :screen/feed
      [view-top-bar i]
-     #_[top-bar/view {:top-bar/title "Feed"}]
      [view-swiper i rows]
      (when (empty? rows)
        [image/view {:class "w-full h-full"}])

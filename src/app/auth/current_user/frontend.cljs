@@ -26,7 +26,7 @@
 
 (defn to-current-user-id [i] (-> i ::request :user/user-id))
 
-(defn to-current-user [i] (db/entity i (to-current-user-id i)))
+(defn to-current-user [i] (db/to-entity i (to-current-user-id i)))
 
 (defn- logic [i]
   (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))

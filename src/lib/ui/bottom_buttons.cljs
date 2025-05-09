@@ -1,18 +1,25 @@
-(ns lib.ui.bottom-buttons)
+(ns lib.ui.bottom-buttons
+  (:require
+   [lib.ui.bar :as bar]
+   [lib.ui.cn :refer [cn]]))
 
+(defn to-btn-class [i]
+  (cn
+   "flex flex-col items-center justify-center flex-1 h-full text-sm gap-0.5 cursor-pointer"
+   (if (-> i :bottom-buttons/selected?)
+     "text-blue-500"
+     "text-white")))
+
+(defn- view-btn [i]
+  [:button
+   {:on-pointer-down (-> i :bottom-button/on-click)
+    :class (to-btn-class i)}
+   (when-let [view-icon (-> i :bottom-button/view-icon)]
+     [view-icon {:class "size-7 flex items-center justify-center"}])
+   [:p (-> i :bottom-button/label)]])
 
 (defn view [i]
-  [:div.flex.w-full.items-center.h-20.shrink-0
-   (for [button (-> i :bottom-buttons/buttons)
-         :let [on-click (-> button  :bottom-button/on-click)
-               label (-> button :bottom-button/label)
-               view-icon (-> button :bottom-button/view-icon)
-               selected? (-> button :bottom-button/selected? (or false))]]
-     ^{:key label}
-     [:button {:on-pointer-down on-click
-               :class (str
-                       "flex flex-col items-center justify-center flex-1 h-full text-base text-sm gap-0.5 cursor-pointer "
-                       (if selected? "text-blue-500 " "text-white "))}
-      (when view-icon
-        [view-icon {:class "size-7 flex items-center justify-center"}])
-      [:p label]])])
+  [:div.flex.w-full.items-center {:class bar/h-class}
+   (for [button (-> i :bottom-buttons/buttons)]
+     ^{:key (-> button :bottom-button/label)}
+     [view-btn button])])

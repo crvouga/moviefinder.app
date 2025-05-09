@@ -75,9 +75,6 @@
     (-> query-result
         (assoc :query-result/rows entities))))
 
-(defn entity [state entity-id]
-  (-> state ::entity-by-id (get entity-id)))
-
 
 (defn to-entity [state entity-id]
   (-> state ::entity-by-id (get entity-id)))
