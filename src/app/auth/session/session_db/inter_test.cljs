@@ -10,8 +10,8 @@
    [cljs.core.async.macros :refer [go]]))
 
 (defn new-db []
-  (session-db/new! {:session-db/impl :session-db/impl-kv
-                    :kv/impl :kv/impl-atom}))
+  (session-db/init! {:session-db/impl :session-db/impl-kv
+                     :kv/impl :kv/impl-atom}))
 
 (deftest session-db-operations
   (testing "Basic session-db operations"

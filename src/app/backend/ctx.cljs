@@ -15,17 +15,18 @@
 
 (def port {:http-server/port (-> "PORT" env/get-else-throw! str/remove-quotes js/parseInt)})
 
-(def db (db/new! {:db/impl :db/impl-better-sqlite3}))
+(def db (db/init! {:db/impl :db/impl-better-sqlite3}))
 
-(def kv (kv/new! {:kv/impl :kv/impl-fs}))
+(def kv (kv/init {:kv/impl :kv/impl-fs}))
 
-(def session-db (session-db/new! (merge kv {:session-db/impl :session-db/impl-kv})))
+(def session-db (session-db/init! (merge kv {:session-db/impl :session-db/impl-kv})))
 
-(def user-db (user-db/new! (merge kv {:user-db/impl :user-db/impl-kv})))
+(def user-db (user-db/init! (merge kv {:user-db/impl :user-db/impl-kv})))
 
 (def verify-sms {:verify-sms/impl :verify-sms-impl/fake})
 
-(def ctx (merge api-key port kv db session-db user-db verify-sms))
+(def ctx
+  (merge api-key port kv db session-db user-db verify-sms))
 
 (defn assoc-ctx
   " assoc application configuration to map "

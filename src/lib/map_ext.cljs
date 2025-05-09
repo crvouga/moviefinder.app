@@ -28,3 +28,9 @@
   (-> m
       (select-keys (keys kmap))
       (rename-keys kmap)))
+
+
+(defn ensure [m]
+  (if (map? m)
+    m
+    {}))

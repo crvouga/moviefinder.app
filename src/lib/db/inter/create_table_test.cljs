@@ -11,7 +11,7 @@
    done
    (testing "Can create a table"
      (go
-       (let [db (db/new! {:db/impl :db/impl-better-sqlite3})]
+       (let [db (db/init! {:db/impl :db/impl-better-sqlite3})]
          (<! (db/query-chan! db q-create-table))
          (is true "Table creation should not throw error")
          (done))))))

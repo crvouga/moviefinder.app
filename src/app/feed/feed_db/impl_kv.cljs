@@ -5,7 +5,7 @@
    [lib.kv.inter :as kv]))
 
 (defn- new-feed-kv [kv]
-  (->> {:kv/namespace ::feed} (merge kv) kv/new!))
+  (->> {:kv/namespace ::feed} (merge kv) kv/init))
 
 (defmethod feed-db/new! :feed-db/impl-kv
   [i] (-> i (assoc :feed-db/feed-kv (new-feed-kv i))))

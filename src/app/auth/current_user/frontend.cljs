@@ -34,7 +34,7 @@
   (p/take-every!
    i :current-user/patch
    (fn [[_ current-user]]
-     (p/put! i [:db/patch (:user/user-id current-user) current-user])
+     (p/put! i [:db/got-entity (:user/user-id current-user) current-user])
      (p/put! i [::set ::request (merge current-user result/ok)])))
 
   (p/reg-reducer i :current-user/dissoc (fn [s _] (assoc s ::request nil)))
@@ -50,7 +50,7 @@
        (p/put! i [::set ::request result/loading])
        (let [got (a/<! (p/eff! i [:rpc/send! [:rpc/get-current-user]]))]
          (p/put! i [::set ::request got])
-         (p/put! i [:db/patch (:user/user-id got) got])
+         (p/put! i [:db/got-entity (:user/user-id got) got])
          (p/put! i [:current-user/loaded]))))))
 
 

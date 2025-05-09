@@ -11,8 +11,8 @@
 
 
 (defn new-db []
-  (user-db/new! {:user-db/impl :user-db/impl-kv
-                 :kv/impl :kv/impl-atom}))
+  (user-db/init! {:user-db/impl :user-db/impl-kv
+                  :kv/impl :kv/impl-atom}))
 
 
 

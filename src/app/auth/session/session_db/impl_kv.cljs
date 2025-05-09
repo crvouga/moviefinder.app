@@ -6,9 +6,9 @@
 
 (defn new-by-session-id-kv [kv]
   (-> (assoc kv :kv/namespace ::by-session-id)
-      kv/new!))
+      kv/init))
 
-(defmethod session-db/new! :session-db/impl-kv
+(defmethod session-db/init! :session-db/impl-kv
   [config]
   (-> config
       (assoc ::by-session-id-kv (new-by-session-id-kv config))))

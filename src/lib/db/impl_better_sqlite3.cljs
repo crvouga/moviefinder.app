@@ -9,7 +9,7 @@
         db (sqlite3 db-path)]
     db))
 
-(defmethod db/new! :db/impl-better-sqlite3
+(defmethod db/init! :db/impl-better-sqlite3
   [config]
   (let [db (new-db-instance config)]
     (merge config {::sqlite-instance db})))

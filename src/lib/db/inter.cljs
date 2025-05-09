@@ -1,6 +1,6 @@
 (ns lib.db.inter)
 
-(defmulti new!
+(defmulti init!
   "Create a new db connection"
   :db/impl)
 

@@ -3,11 +3,12 @@
    [app.backend.ctx :as ctx]
    [app.backend.http-respond :refer [http-respond!]]
    [app.rpc.shared :as shared]
-   [clojure.core.async :refer [go <!]]
+   [clojure.core.async :refer [<! go]]
    [clojure.pprint :refer [pprint]]
    [lib.http-server.cors :as cors]
    [lib.http-server.http-req :as http-req]
    [lib.http-server.http-res :as http-res]
+   [lib.map-ext :as map-ext]
    [lib.pretty :as pretty]
    [lib.session-id-cookie :as session-id-cookie]))
 
@@ -26,18 +27,28 @@
                          :err/err :rpc-error/rpc-fn-not-found
                          :err/data {:rpc-name rpc-name}})))))
 
+
+(defn to-rpc-input [rpc-req session-id]
+  (-> rpc-req
+      second
+      map-ext/ensure
+      ctx/assoc-ctx
+      (assoc :session/session-id session-id)))
+
+(defn to-rpc-output [rpc-res]
+  (-> rpc-res
+      ctx/dissoc-ctx
+      (dissoc :session/session-id)))
+
+
 (defn handle-rpc-request! [rpc-req session-id]
   (go
-    (let [rpc-body (-> rpc-req
-                       second
-                       (or {})
-                       (ctx/assoc-ctx) (assoc :session/session-id session-id))
-          rpc-res (<! (rpc! (first rpc-req) rpc-body))
-          rpc-res (-> rpc-res ctx/dissoc-ctx (dissoc :session/session-id))]
-      (pprint {:rpc (first rpc-req)
-               :req rpc-req
-               :res rpc-res})
-      rpc-res)))
+    (let [rpc-input (to-rpc-input rpc-req session-id)
+          rpc-res (<! (rpc! (first rpc-req) rpc-input))
+          rpc-output (to-rpc-output rpc-res)]
+      (binding [*print-level* 6]
+        (pprint {:rpc (first rpc-req) :req rpc-req :res rpc-output}))
+      rpc-output)))
 
 (defmethod http-respond! shared/endpoint [req res]
   (go

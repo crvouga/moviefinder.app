@@ -8,7 +8,7 @@
    [app.media.details.frontend :as media-details]
    [app.media.media-db.frontend]
    [app.media.media-db.inter :as media-db]
-   [clojure.core.async :as a]
+   [clojure.core.async :refer [go <!]]
    [lib.dom :as dom]
    [lib.program :as p]
    [lib.ui.bar :as bar]
@@ -43,14 +43,12 @@
 (defn swiper-slide-change-chan []
   (dom/watch-event-chan! "#swiper-container" "swiperslidechange" (map swiper-event->slide-index)))
 
-
-
 (defn- logic [i]
   (p/take-every!
    i ::load
    (fn [_]
-     (a/go
-       (let [query-result (a/<! (media-db/query! i popular-media-query))]
+     (go
+       (let [query-result (<! (media-db/query! i popular-media-query))]
          (p/put! i [:db/got-query-result query-result])))))
 
   (p/take-every!

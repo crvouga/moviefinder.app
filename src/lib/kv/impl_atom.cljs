@@ -2,27 +2,26 @@
   (:require
    [lib.kv.inter :as kv]
    [clojure.core.async :as a]
-   [lib.kv.shared :refer [assoc-ok to-key]]))
+   [lib.kv.shared :refer [assoc-ok to-namespaced-key]]))
 
-(defmethod kv/new! :kv/impl-atom
-  [config]
-  (merge config {::state! (atom {})}))
+(def ^:private state! (atom {}))
 
+(defmethod kv/init :kv/impl-atom [_] _)
 
 (defmethod kv/get! :kv/impl-atom
-  [{:keys [::state!] :as inst} key]
+  [inst key]
   (a/go
-    (-> (get @state! (to-key inst key))
+    (-> (get @state! (to-namespaced-key inst key))
         assoc-ok)))
 
 (defmethod kv/set! :kv/impl-atom
-  [{:keys [::state!] :as inst} key value]
+  [inst key value]
   (a/go
-    (swap! state! assoc (to-key inst key) value)
+    (swap! state! assoc (to-namespaced-key inst key) value)
     (assoc-ok value)))
 
 (defmethod kv/zap! :kv/impl-atom
-  [{:keys [::state!] :as inst} key]
+  [inst key]
   (a/go
-    (swap! state! dissoc (to-key inst key))
+    (swap! state! dissoc (to-namespaced-key inst key))
     (assoc-ok {})))

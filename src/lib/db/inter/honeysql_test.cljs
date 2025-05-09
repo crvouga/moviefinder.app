@@ -12,7 +12,7 @@
    done
    (go
      (testing "Can insert and select data using HoneySQL"
-       (let [db (db/new! {:db/impl :db/impl-better-sqlite3})
+       (let [db (db/init! {:db/impl :db/impl-better-sqlite3})
              _ (<! (db/query-chan! db q-create-table))
              before (<! (db/query-chan! db q-select))
              _ (<! (db/query-chan! db q-insert))

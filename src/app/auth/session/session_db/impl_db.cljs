@@ -43,7 +43,7 @@
        :query-result/rows
        (map row->user-session)))
 
-(defmethod session-db/new! :session-db/impl-db
+(defmethod session-db/init! :session-db/impl-db
   [config]
   config)
 

@@ -10,7 +10,7 @@
   ([]
    (new-kv :test-namespace))
   ([namespace]
-   (kv/new! {:kv/impl :kv/impl-fs
+   (kv/init {:kv/impl :kv/impl-fs
              :kv/namespace namespace})))
 
 (def k "some-key")

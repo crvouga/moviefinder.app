@@ -8,5 +8,5 @@
     (merge {:kv/value value} result/ok)))
 
 
-(defn to-key [{:keys [:kv/namespace]} key]
+(defn to-namespaced-key [{:keys [:kv/namespace]} key]
   (vec (flatten [namespace key])))

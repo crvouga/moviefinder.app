@@ -50,7 +50,7 @@
           (p/put! i [:toaster/show (toast/error (err/message res))]))
 
         (when (result/ok? res)
-          (p/put! i [:db/patch (-> current-user :user/user-id) edits])
+          (p/put! i [:db/got-entity (-> current-user :user/user-id) edits])
           (p/put! i [:screen/push [:screen/profile]])
           (p/put! i [:toaster/show (toast/info "Profile updated")]))
 

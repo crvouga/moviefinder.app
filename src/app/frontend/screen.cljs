@@ -2,7 +2,7 @@
   (:require
    [app.frontend.mod :as mod]
    [app.frontend.route :as route]
-   [clojure.core.async :as a]
+   [clojure.core.async :refer [<! go go-loop]]
    [lib.browser :as browser]
    [lib.program :as p]
    [lib.ui.children :as children]))
@@ -23,14 +23,16 @@
      (when (= screen-name screen-name-new)
        (f screen-name-new)))))
 
+(defn- push-screen! [screen]
+  (-> screen route/encode browser/push-state!))
+
 (defn- logic [i]
   (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
 
-  (p/reg-eff i ::push-screen! (fn [[_ screen]] (-> screen route/encode browser/push-state!)))
-
+  (p/reg-eff i ::push-screen! (fn [[_ screen]] (push-screen! screen)))
   (p/reg-eff i ::get-screen (fn [_] (or (route/get!) (fallback))))
 
-  (a/go
+  (go
     (p/put! i [::set ::screen (p/eff! i [::get-screen])])
     (p/put! i [:screen/screen-changed (p/eff! i [::get-screen])]))
 
@@ -54,9 +56,8 @@
      (p/put! i [::set ::screen screen])
      (p/put! i [:screen/screen-changed screen])))
 
-  (a/go-loop []
-    (let [_ (a/<! (browser/history-event-chan))]
-      (println "history event")
+  (go-loop []
+    (let [_ (<! (browser/history-event-chan))]
       (p/put! i [::got-screen (p/eff! i [::get-screen])])
       (recur))))
 

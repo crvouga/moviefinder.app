@@ -8,15 +8,15 @@
 (defn- new-by-user-id-kv [kv]
   (->> {:kv/namespace ::by-user-id}
        (merge kv)
-       kv/new!))
+       kv/init))
 
 (defn- new-index-user-id-by-phone-number [kv]
   (->> {:kv/namespace ::by-user-ids-by-phone-number}
        (merge kv)
-       kv/new!))
+       kv/init))
 
 
-(defmethod user-db/new! :user-db/impl-kv
+(defmethod user-db/init! :user-db/impl-kv
   [config]
   (-> config
       (assoc :user-db/by-user-id-kv (new-by-user-id-kv config))
