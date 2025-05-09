@@ -18,7 +18,7 @@
                             :tmdb/include-adult false
                             :tmdb/include-video false
                             :tmdb/page 1})
-             result (<! (discover-movie/fetch-chan! params))]
+             result (<! (discover-movie/fetch! params))]
 
          (is (s/valid? :tmdb/response result)
              (s/explain-str :tmdb/response result))

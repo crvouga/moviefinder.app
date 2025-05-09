@@ -6,7 +6,7 @@
    [lib.tmdb-api.shared :as shared]
    [lib.tmdb-api.shared-spec :as shared-spec]))
 
-(defn fetch-chan!
+(defn fetch!
   "Returns a channel containing a :tmdb/response"
   [params]
   (go

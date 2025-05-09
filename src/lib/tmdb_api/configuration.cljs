@@ -29,7 +29,7 @@
   (s/keys :req [:tmdb/images
                 :tmdb/change-keys]))
 
-(def configuration-cache (atom {}))
+(def ^:private configuration-cache (atom {}))
 
 (defn to-poster-url [configuration poster-path]
   (when (and configuration poster-path)
@@ -47,7 +47,7 @@
           largest-size (last sizes)]
       (str base-url largest-size backdrop-path))))
 
-(defn fetch-chan! [input]
+(defn fetch! [input]
   (go
     (if-let [cached (@configuration-cache input)]
       cached

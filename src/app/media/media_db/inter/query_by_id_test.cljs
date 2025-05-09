@@ -1,24 +1,25 @@
-#_(ns app.media.media-db.inter.query-by-id-test
-    (:require [cljs.test :refer-macros [deftest testing is async]]
-              [clojure.core.async :refer [go <!]]
-              [app.media.media-db.inter :as media-db]
-              [app.media.media-db.inter.fixture :as fixture]))
+(ns app.media.media-db.inter.query-by-id-test
+  (:require
+   [app.media.media-db.inter :as media-db]
+   [app.media.media-db.inter.fixture :as fixture]
+   [app.media.media-id :as media-id]
+   [cljs.test :refer-macros [deftest testing is async]]
+   [clojure.core.async :refer [<! go]]
+   [lib.tmdb-api.shared]))
 
-#_(deftest query-by-id-test
-    (testing "Can query media by id"
-      (async
-       done
-       (go
-         (doseq [config fixture/configs-read-only]
-           (let [test-media (assoc fixture/test-media :media/id "123")
-                 _put-result (<! (media-db/upsert-chan! (assoc config :media/entity test-media)))
-                 query (merge config
-                              {:query/limit 1
-                               :query/offset 0
-                               :query/where [:= :media/id "123"]})
-                 result (<! (media-db/query-result-chan! config query))
-                 first-result (first (:queried/rows result))]
+(def media-id-fight-club (media-id/from-tmdb-id lib.tmdb-api.shared/movie-id-fight-club))
+(deftest query-by-id-test
+  (testing "Can query media by id"
+    (async
+     done
+     (go
+       (doseq [media-db fixture/configs-read-only]
+         (let [query {:query/limit 1
+                      :query/offset 0
+                      :query/where [:= :media/id media-id-fight-club]}
+               result (<! (media-db/query! media-db query))
+               first-result (first (:query-result/rows result))]
 
-             (is (= "123" (-> first-result :media/id str))
-                 (str "Media ID should match for implementation " (:media-db/impl config)))))
-         (done)))))
+           (is (= media-id-fight-club (-> first-result :media/id))
+               (str "Media ID should match for implementation " (:media-db/impl media-db)))))
+       (done)))))

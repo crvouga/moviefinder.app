@@ -22,24 +22,28 @@
       (select-keys (vals key-mapping))
       (assoc :media/id (media-id/from-tmdb-id (:tmdb/id item)))))
 
-(defn- assoc-image-urls [config movie]
-  (assoc movie
-         :media/poster-url (lib.tmdb-api.configuration/to-poster-url config (:media/poster-path movie))
-         :media/backdrop-url (lib.tmdb-api.configuration/to-backdrop-url config (:media/backdrop-path movie))))
+(defn to-poster-url [tmdb-config media]
+  (lib.tmdb-api.configuration/to-poster-url tmdb-config (:media/poster-path media)))
 
-(defn tmdb-result->query-result [input]
-  (let [total (:tmdb/total-results input)
-        limit (-> input :query/limit (or 25))
-        offset (-> input :query/offset (or 0))
-        items (->> (:tmdb/results input)
+(defn to-backdrop-url [tmdb-config media]
+  (lib.tmdb-api.configuration/to-backdrop-url tmdb-config (:media/backdrop-path media)))
+
+(defn- assoc-image-urls [tmdb-config media]
+  (-> media
+      (assoc :media/poster-url (to-poster-url tmdb-config media))
+      (assoc :media/backdrop-url (to-backdrop-url tmdb-config media))))
+
+(defn tmdb-result->query-result
+  [{:keys [page/limit page/offset tmdb/total-results tmdb/results] :as input}]
+  (let [items (->> results
                    (map tmdb-item->media)
                    (map #(assoc-image-urls input %))
-                   (drop offset)
-                   (take limit))]
+                   (drop (or offset 0))
+                   (take (or limit 25)))]
     {:query-result/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
      :query-result/limit limit
      :query-result/offset offset
-     :query-result/total total
+     :query-result/total total-results
      :query-result/primary-key :media/id
      :query-result/rows items}))
 

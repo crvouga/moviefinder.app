@@ -1,3 +1,3 @@
 (ns app.media.media-db.impl-tmdb-api.query-plan-item)
 
-(defmulti query-result-chan! first)
+(defmulti result-chan! (fn [query-plan-item _ctx] (first query-plan-item)))

@@ -15,7 +15,7 @@
        (let [movie-id 550  ; Fight Club movie ID
              params (merge fixture/ctx
                            {:tmdb/language "en-US"})
-             result (<! (movie-details/fetch-chan! movie-id params))]
+             result (<! (movie-details/fetch! movie-id params))]
 
          (is (s/valid? :tmdb/movie result)
              (s/explain-str :tmdb/movie result))

@@ -11,7 +11,7 @@
     (async
      done
      (go
-       (let [result (<! (configuration/fetch-chan! fixture/ctx))]
+       (let [result (<! (configuration/fetch! fixture/ctx))]
          (is (s/valid? :tmdb.configuration/response result)
              (s/explain-str :tmdb.configuration/response result))
          (done))))))

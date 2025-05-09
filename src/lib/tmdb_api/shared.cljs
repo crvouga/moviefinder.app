@@ -5,7 +5,11 @@
    [lib.map-ext :as map-ext]))
 
 
-(def ^:private base-url "https://api.themoviedb.org/3")
+(def base-url "https://api.themoviedb.org/3")
+
+(def page-size 20)
+
+(def movie-id-fight-club (str 550))
 
 (defn namespace-key->external-key [k]
   (when (keyword? k)
@@ -21,18 +25,18 @@
       (when (string? s-str)
         (keyword "tmdb" (str/replace s-str "_" "-"))))))
 
-(defn- build-query-params [params]
+(defn- to-query-params [params]
   (->> params
        (map (fn [[k v]] [(namespace-key->external-key k) v]))
        (filter first)
        (into {})))
 
-(defn ->api-key [params]
+(defn to-api-key [params]
   (some-> params :tmdb/api-key (or "") (str/replace #"\"" "")))
 
 (defn build-request [params endpoint]
-  (let [api-key (->api-key params)
-        query-params (build-query-params params)]
+  (let [api-key (to-api-key params)
+        query-params (to-query-params params)]
     {:http/method :http/get
      :http/url (str base-url endpoint)
      :http-req/query-params query-params
