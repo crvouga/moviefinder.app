@@ -17,18 +17,18 @@
   (:feed/feed-id feed))
 
 (defn to-media-query [feed]
-  {:query/select [:media/id
-                  :media/title
-                  :media/year
-                  :media/popularity
-                  :media/genre-ids
-                  :media/poster-url]
-   :query/where [:query/and
-                 [:> :media/popularity 80]
-                 [:= :media/media-type :media-type/movie]]
-   :query/order [:media/popularity :desc]
-   :query/limit 25
-   :query/offset (-> feed :feed/start-index (or 0))})
+  {:q/select [:media/id
+              :media/title
+              :media/year
+              :media/popularity
+              :media/genre-ids
+              :media/poster-url]
+   :q/where [:q/and
+             [:q/> :media/popularity 80]
+             [:q/= :media/media-type :media-type/movie]]
+   :q/order [:media/popularity :desc]
+   :q/limit 25
+   :q/offset (-> feed :feed/start-index (or 0))})
 
 (defn valid? [feed]
   (s/valid? :feed/feed feed))

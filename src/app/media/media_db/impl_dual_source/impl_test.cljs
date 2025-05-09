@@ -16,9 +16,9 @@
                                          :media-db-impl-dual-source/secondary secondary-config}
                      _put-result (<! (media-db/upsert-chan! (assoc primary-config :media/entity test-media)))
                      query (merge dual-source-config
-                                  {:query/limit 1
-                                   :query/offset 0
-                                   :query/where [:= :media/id "123"]})
+                                  {:q/limit 1
+                                   :q/offset 0
+                                   :q/where [:= :media/id "123"]})
                      result (<! (media-db/query-result-chan! dual-source-config query))
                      first-result (first (:query-result/rows result))]
 
@@ -38,9 +38,9 @@
                                          :media-db-impl-dual-source/secondary secondary-config}
                    ; First verify it exists in secondary
                      secondary-query (merge secondary-config
-                                            {:query/limit 1
-                                             :query/offset 0
-                                             :query/where [:= :media/id test-id]})
+                                            {:q/limit 1
+                                             :q/offset 0
+                                             :q/where [:= :media/id test-id]})
                      secondary-result (<! (media-db/query-result-chan! dual-source-config secondary-query))
                      secondary-item (first (:query-result/rows secondary-result))
                      _ (is (some? secondary-item)
@@ -48,9 +48,9 @@
 
                    ; Then query through dual source
                      dual-query (merge dual-source-config
-                                       {:query/limit 1
-                                        :query/offset 0
-                                        :query/where [:= :media/id test-id]})
+                                       {:q/limit 1
+                                        :q/offset 0
+                                        :q/where [:= :media/id test-id]})
                      _dual-result (<! (media-db/query-result-chan! dual-source-config dual-query))
 
                    ; Add a timeout to allow time for secondary results to be stored
@@ -58,9 +58,9 @@
 
                    ; Then query primary directly to check if data was stored
                      primary-query (merge primary-config
-                                          {:query/limit 1
-                                           :query/offset 0
-                                           :query/where [:= :media/id test-id]})
+                                          {:q/limit 1
+                                           :q/offset 0
+                                           :q/where [:= :media/id test-id]})
                      primary-result (<! (media-db/query-result-chan! dual-source-config primary-query))
                      stored-result (first (:query-result/rows primary-result))]
 

@@ -21,13 +21,13 @@
    [lib.ui.swiper :as swiper]))
 
 (def popular-media-query
-  {:query/limit 25
-   :query/offset 0
-   :query/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
-   :query/order [:media/popularity :desc]
-   :query/where [:query/and
-                 [:> :media/popularity 80]
-                 [:= :media/media-type :media-type/movie]]})
+  {:q/limit 25
+   :q/offset 0
+   :q/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
+   :q/order [:media/popularity :desc]
+   :q/where [:q/and
+             [:q/> :media/popularity 80]
+             [:q/= :media/media-type :media-type/movie]]})
 
 
 ;; 

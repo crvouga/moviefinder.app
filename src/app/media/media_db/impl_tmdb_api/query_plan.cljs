@@ -11,20 +11,24 @@
 (defn- to-movie-details-query-plan-items [_q media-id]
   [[:tmdb-query-plan-item/movie-details {:tmdb/id (media-id/to-tmdb-id media-id)}]])
 
-
-(defn from-query [{:keys [query/where] :as q}]
+(defn- from-query-recursively [{:keys [q/where] :as q}]
   (cond
     (nil? where)
     (to-discover-movie-query-plan-items q)
 
     (and (vector? where)
-         (= := (first where))
+         (= :q/= (first where))
          (= :media/id (second where)))
     (to-movie-details-query-plan-items q (nth where 2))
 
-    (and (vector? where)
-         (= :or (first where)))
-    (mapcat #(from-query (assoc q :query/where %)) (rest where))
+    (and (vector? where) (= :q/or (first where)))
+    (mapcat #(from-query-recursively (assoc q :q/where %)) (rest where))
+
+    (and (vector? where) (= :q/and (first where)))
+    (mapcat #(from-query-recursively (assoc q :q/where %)) (rest where))
 
     :else
     (to-discover-movie-query-plan-items q)))
+
+(defn from-query [q]
+  (-> q from-query-recursively distinct))

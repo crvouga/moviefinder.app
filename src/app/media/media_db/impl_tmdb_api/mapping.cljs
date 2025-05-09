@@ -40,7 +40,7 @@
                    (map #(assoc-image-urls input %))
                    (drop (or offset 0))
                    (take (or limit 25)))]
-    {:query-result/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
+    {:query-result/query (select-keys input [:q/where :q/limit :q/offset :q/order :q/select])
      :query-result/limit limit
      :query-result/offset offset
      :query-result/total total-results

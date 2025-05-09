@@ -9,7 +9,7 @@
    :query-result/primary-key])
 
 
-(s/def :query-result/query (s/keys :opt [:query/select :query/where :query/order :query/limit :query/offset]))
+(s/def :query-result/query (s/keys :opt [:q/select :q/where :q/order :q/limit :q/offset]))
 (s/def :query-result/limit number?)
 (s/def :query-result/offset number?)
 (s/def :query-result/total number?)

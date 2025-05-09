@@ -8,8 +8,8 @@
 
 
 (defn test-query [config]
-  (merge config {:query/limit 10
-                 :query/offset 0}))
+  (merge config {:q/limit 10
+                 :q/offset 0}))
 
 (deftest query-result-spec-test
   (testing "query-result-chan! returns spec valid response"

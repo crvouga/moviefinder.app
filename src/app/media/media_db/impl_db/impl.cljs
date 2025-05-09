@@ -53,7 +53,7 @@
        :result/type :result/ok})))
 
 (defmethod media-db/query! :media-db/impl-db
-  [config {:keys [query/where query/limit query/offset query/select query/order] :as query}]
+  [config {:keys [q/where q/limit q/offset q/select q/order] :as query}]
   (go
     (<! (run-migrations! config))
     (let [limit (or limit 25)

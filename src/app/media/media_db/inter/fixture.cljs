@@ -7,8 +7,8 @@
 
 (def config-tmdb-api {:media-db/impl :media-db/impl-tmdb-api
                       :tmdb/api-key (config/ctx :tmdb/api-key)
-                      :query/limit 10
-                      :query/offset 0})
+                      :q/limit 10
+                      :q/offset 0})
 
 (def configs-read-only
   [config-tmdb-api])

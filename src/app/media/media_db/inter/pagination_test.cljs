@@ -12,12 +12,12 @@
      done
      (go
        (doseq [media-db fixture/configs-read-only]
-         (let [result-all (<! (media-db/query! media-db {:query/limit 25 :query/offset 0}))
-               result-1 (<! (media-db/query! media-db {:query/limit 5 :query/offset 0}))
-               result-2 (<! (media-db/query! media-db {:query/limit 5 :query/offset 5}))
-               result-3 (<! (media-db/query! media-db {:query/limit 5 :query/offset 10}))
-               result-4 (<! (media-db/query! media-db {:query/limit 5 :query/offset 15}))
-               result-5 (<! (media-db/query! media-db {:query/limit 5 :query/offset 20}))
+         (let [result-all (<! (media-db/query! media-db {:q/limit 25 :q/offset 0}))
+               result-1 (<! (media-db/query! media-db {:q/limit 5 :q/offset 0}))
+               result-2 (<! (media-db/query! media-db {:q/limit 5 :q/offset 5}))
+               result-3 (<! (media-db/query! media-db {:q/limit 5 :q/offset 10}))
+               result-4 (<! (media-db/query! media-db {:q/limit 5 :q/offset 15}))
+               result-5 (<! (media-db/query! media-db {:q/limit 5 :q/offset 20}))
                rows-all (:query-result/rows result-all)]
 
            (is (= (:query-result/rows result-1) (->> rows-all (drop 0) (take 5)))

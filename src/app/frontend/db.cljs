@@ -10,10 +10,10 @@
   (-> i :query-result/primary-key))
 
 (defn- query-to-key [query]
-  (select-keys query [:query/where
-                      :query/order
-                      :query/limit
-                      :query/offset]))
+  (select-keys query [:q/where
+                      :q/order
+                      :q/limit
+                      :q/offset]))
 
 (def query-result-keys [:query-result/limit
                         :query-result/offset

@@ -6,13 +6,13 @@
 
 (defn to-query-result [q medias]
   (let [total (count medias)
-        limit (-> q :query/limit (or 25))
-        offset (-> q :query/offset (or 0))
+        limit (-> q :q/limit (or 25))
+        offset (-> q :q/offset (or 0))
         items (->> medias
                    (drop offset)
                    (take limit))]
     (-> q
-        (merge {:query-result/query (select-keys q [:query/select :query/where :query/order :query/limit :query/offset])
+        (merge {:query-result/query (select-keys q [:q/select :q/where :q/order :q/limit :q/offset])
                 :query-result/limit limit
                 :query-result/offset offset
                 :query-result/total total

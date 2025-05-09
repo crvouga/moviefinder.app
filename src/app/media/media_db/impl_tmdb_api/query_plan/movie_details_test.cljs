@@ -5,17 +5,26 @@
    [clojure.test :refer [deftest is testing]]
    [lib.tmdb-api.shared]))
 
-(defn to-query [media-id]
-  {:query/select
-   [:media/id
-    :media/title
-    :media/year
-    :media/popularity
-    :media/genre-ids
-    :media/poster-url],
-   :query/where [:= :media/id media-id]})
+(def tmdb-id lib.tmdb-api.shared/movie-id-fight-club)
+(def media-id (media-id/from-tmdb-id tmdb-id))
 
 (deftest query-plan-test
   (testing "movie details"
-    (is (= (query-plan/from-query (to-query (media-id/from-tmdb-id lib.tmdb-api.shared/movie-id-fight-club)))
-           [[:tmdb-query-plan-item/movie-details {:tmdb/id lib.tmdb-api.shared/movie-id-fight-club}]])))) 
+    (let [q {:q/select [:media/id],
+             :q/where [:q/= :media/id media-id]}]
+      (is (= (query-plan/from-query q)
+             [[:tmdb-query-plan-item/movie-details {:tmdb/id tmdb-id}]]))))
+
+
+  (testing "movie details with and"
+    (let [q {:q/select [:media/id],
+             :q/where [:q/and [:q/= :media/id media-id]]}]
+      (is (= (query-plan/from-query q)
+             [[:tmdb-query-plan-item/movie-details {:tmdb/id tmdb-id}]]))))
+
+
+  (testing "movie details with or"
+    (let [q {:q/select [:media/id],
+             :q/where [:q/or [:q/= :media/id media-id]]}]
+      (is (= (query-plan/from-query q)
+             [[:tmdb-query-plan-item/movie-details {:tmdb/id tmdb-id}]]))))) 

@@ -14,9 +14,9 @@
      done
      (go
        (doseq [media-db fixture/configs-read-only]
-         (let [query {:query/limit 1
-                      :query/offset 0
-                      :query/where [:= :media/id media-id-fight-club]}
+         (let [query {:q/limit 1
+                      :q/offset 0
+                      :q/where [:q/= :media/id media-id-fight-club]}
                result (<! (media-db/query! media-db query))
                first-result (first (:query-result/rows result))]
 

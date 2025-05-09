@@ -15,12 +15,12 @@
 ;; 
 
 (defn to-media-query [media-id]
-  {:query/limit 25
-   :query/offset 0
-   :query/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
-   :query/order [:media/popularity :desc]
-   :query/where [:query/and
-                 [:= :media/id media-id]]})
+  {:q/limit 25
+   :q/offset 0
+   :q/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
+   :q/order [:media/popularity :desc]
+   :q/where [:q/and
+             [:q/= :media/id media-id]]})
 
 
 

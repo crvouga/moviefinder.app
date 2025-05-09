@@ -12,9 +12,9 @@
                (doseq [config fixture/configs]
                  (let [put-result (<! (media-db/upsert-chan! (assoc config :media/entity fixture/test-media)))
                        query (merge config
-                                    {:query/limit 10
-                                     :query/offset 0
-                                     :query/where [:= :media/id "test-id"]})
+                                    {:q/limit 10
+                                     :q/offset 0
+                                     :q/where [:= :media/id "test-id"]})
                        query-result (<! (media-db/query-result-chan! config query))]
 
                    (is (= :result/ok (:result/type put-result))
