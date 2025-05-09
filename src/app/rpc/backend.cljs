@@ -3,11 +3,13 @@
    [app.backend.ctx :as ctx]
    [app.backend.http-respond :refer [http-respond!]]
    [app.rpc.shared :as shared]
-   [clojure.core.async :as a]
+   [clojure.core.async :refer [go <!]]
    [clojure.pprint :refer [pprint]]
+   [lib.http-server.cors :as cors]
    [lib.http-server.http-req :as http-req]
    [lib.http-server.http-res :as http-res]
-   [lib.pretty :as pretty]))
+   [lib.pretty :as pretty]
+   [lib.session-id-cookie :as session-id-cookie]))
 
 
 (def rpc-fns! (atom {}))
@@ -16,18 +18,21 @@
   (swap! rpc-fns! assoc rpc-name rpc-fn))
 
 (defn- rpc! [rpc-name rpc-body]
-  (a/go
+  (go
     (let [rpc-fn (get @rpc-fns! rpc-name)]
       (if (fn? rpc-fn)
-        (a/<! (rpc-fn rpc-body))
+        (<! (rpc-fn rpc-body))
         (merge rpc-body {:result/type :result/err
                          :err/err :rpc-error/rpc-fn-not-found
                          :err/data {:rpc-name rpc-name}})))))
 
 (defn handle-rpc-request! [rpc-req session-id]
-  (a/go
-    (let [rpc-body (-> rpc-req second (or {}) (ctx/assoc-ctx) (assoc :session/session-id session-id))
-          rpc-res (a/<! (rpc! (first rpc-req) rpc-body))
+  (go
+    (let [rpc-body (-> rpc-req
+                       second
+                       (or {})
+                       (ctx/assoc-ctx) (assoc :session/session-id session-id))
+          rpc-res (<! (rpc! (first rpc-req) rpc-body))
           rpc-res (-> rpc-res ctx/dissoc-ctx (dissoc :session/session-id))]
       (pprint {:rpc (first rpc-req)
                :req rpc-req
@@ -35,10 +40,10 @@
       rpc-res)))
 
 (defmethod http-respond! shared/endpoint [req res]
-  (a/go
-    (let [rpc-req (a/<! (http-req/body-edn-chan req))
-          session-id (http-req/get-cookie req "session-id")
-          rpc-res (a/<! (handle-rpc-request! rpc-req session-id))]
-      (http-res/allow-cors! res)
+  (go
+    (let [rpc-req (<! (http-req/read-body-edn! req))
+          session-id (session-id-cookie/read req)
+          rpc-res (<! (handle-rpc-request! rpc-req session-id))]
+      (cors/allow! res)
       (http-res/set-header! res "Content-Type" "text/plain")
       (http-res/end! res (pretty/str-edn rpc-res)))))

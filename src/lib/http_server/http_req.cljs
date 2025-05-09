@@ -14,7 +14,7 @@
       (.substring full-url 0 question-mark-idx)
       full-url)))
 
-(defn body-binary-chan
+(defn read-body-binary!
   "Collects binary chunks from the HTTP request into a single binary sequence."
   [^js req]
   (let [body-chan (chan)]
@@ -25,26 +25,27 @@
         (recur (conj chunks chunk))
         (.toString (js/Buffer.concat (clj->js chunks)))))))
 
-(defn body-text-chan
+(defn read-body-text!
   "Converts the binary body of the request into a text string."
   [^js req]
   (go
     (try
-      (<! (body-binary-chan req))
+      (<! (read-body-binary! req))
       (catch :default e
-        (js/console.error "Failed to read body text:" e)
+        (println "Failed to read body text:" e)
         nil))))
 
-(defn body-edn-chan
+(defn read-body-edn!
   "Parses the request body as EDN."
   [^js req]
   (go
     (try
-      (let [body-text (<! (body-text-chan req))]
+      (let [body-text (<! (read-body-text! req))]
         (edn/read-string body-text))
       (catch :default e
-        (js/console.error "Failed to parse EDN:" e)
+        (println "Failed to parse EDN:" e)
         nil))))
+
 (defn headers->map [^js req]
   (let [headers (.-headers req)
         entries (js->clj headers)]

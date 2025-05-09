@@ -1,7 +1,6 @@
 (ns lib.program
   (:require
-   [clojure.core.async :as a] ; Still required for take! return type
-   [clojure.pprint :as pprint]))
+   [clojure.core.async :as a]))
 
 ;; --- Listener Management ---
 
@@ -60,7 +59,6 @@
   "Registers a reducer function for a specific message type.
   Reducer functions have the signature: (fn [state msg] new-state)."
   [program msg-type reducer-fn]
-  #_(pprint/pprint {:reg-reducer msg-type})
   (let [{:keys [program/reducer-fns!]} program]
     (swap! reducer-fns! update msg-type (fnil conj []) reducer-fn))
   program) ; Return program for chaining
@@ -81,20 +79,16 @@
   Effect messages are typically vectors like [:effect/type payload].
   Returns the result of the effect handler (often a channel or promise)."
   [program eff]
-  #_(pprint/pprint {:eff eff})
   (let [{:keys [program/eff-fns!]} program
         eff-type (first eff)
         eff-fn! (get @eff-fns! eff-type)]
-    (if eff-fn!
-      (eff-fn! eff)
-      (do (js/console.warn "No effect handler registered for type:" eff-type)
-          nil))))
+    (when (fn? eff-fn!)
+      (eff-fn! eff))))
 
 (defn reg-eff
   "Registers an effect handler function for a specific effect type.
   Effect handlers have the signature: (fn [eff-msg] result)."
   [program eff-type eff-fn]
-  #_(pprint/pprint {:reg-eff eff-type})
   (let [{:keys [program/eff-fns!]} program]
     (swap! eff-fns! assoc eff-type eff-fn))
   program) ; Return program for chaining
@@ -112,7 +106,7 @@
   and notifies all matching listeners."
   [{:keys [program/listener-fns!] :as program} msg]
   (update-state! program msg)
-  (pprint/pprint {:put! (msg->str msg)})
+
 
   ;; Notify listeners
   (let [current-listeners @listener-fns!
@@ -137,7 +131,6 @@
   "Returns a core.async channel that will receive the *next* message
   matching the given msg-type. The listener is removed after the message is delivered."
   [{:keys [program/listener-fns!]} msg-type]
-  #_(pprint/pprint {:take! msg-type})
   (when-not (keyword? msg-type)
     (throw (ex-info "take! expects a keyword as msg-type" {:msg-type msg-type})))
 
@@ -158,7 +151,6 @@
   The function `f` receives the matching message as its argument.
   Returns nil (registers a side-effect)."
   [{:keys [program/listener-fns!]} msg-type f]
-  #_(pprint/pprint {:take-every! msg-type})
   (add-listener! listener-fns! msg-type
                  (fn [msg]
                    ;; This function runs when put! finds a match.

@@ -5,10 +5,10 @@
    [lib.session-id :as session-id]))
 
 
-(defn get-cookie [^js req]
+(defn read [^js req]
   (http-req/get-cookie req "session-id"))
 
-(defn to-cookie [session-id]
+(defn create [session-id]
   {:cookie/name "session-id"
    :cookie/value session-id
    :cookie/max-age 31536000
@@ -18,12 +18,12 @@
    :cookie/same-site "Lax"
    :cookie/http-only true})
 
-(defn set-cookie [res session-id]
-  (http-res/set-cookie! res (to-cookie session-id)))
+(defn write [res session-id]
+  (http-res/set-cookie! res (create session-id)))
 
 (defn with-cookie [respond]
   (fn [req res]
-    (let [session-id (get-cookie req)]
+    (let [session-id (read req)]
       (when-not session-id
-        (set-cookie res (session-id/gen)))
+        (write res (session-id/gen)))
       (respond req res))))
