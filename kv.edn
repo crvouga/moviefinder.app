@@ -21,4 +21,9 @@
   :session/session-id "c7baa457-e0cb-4758-aa18-13d91bff0fbf",
   :session/created-at 1746752045202},
  [:kv-test/ns-1 "same-key"] {:kv-test/data "value-1"},
- [:kv-test/ns-2 "same-key"] {:kv-test/data "value-2"}}
+ [:kv-test/ns-2 "same-key"] {:kv-test/data "value-2"},
+ [:app.auth.session.session-db.impl-kv/by-session-id
+  "session:VXw3hmcy"]
+ {:session/user-id "user:ce4f2e78-ade2-4a0d-b9ac-a43056cd2280",
+  :session/session-id "session:VXw3hmcy",
+  :session/created-at 1746780647306}}

@@ -44,6 +44,6 @@
     (let [rpc-req (<! (http-req/read-body-edn! req))
           session-id (session-id-cookie/read req)
           rpc-res (<! (handle-rpc-request! rpc-req session-id))]
-      (cors/allow! res)
+      (cors/allow! req res)
       (http-res/set-header! res "Content-Type" "text/plain")
       (http-res/end! res (pretty/str-edn rpc-res)))))

@@ -3,7 +3,7 @@
    [app.frontend.ctx :as ctx]
    [app.frontend.mod :as mod]
    [app.rpc.shared :as shared]
-   [clojure.core.async :as a]
+   [clojure.core.async :refer [go <!]]
    [clojure.edn :as edn]
    [lib.err :as err]
    [lib.http-client :as http-client]
@@ -27,8 +27,8 @@
     :http/body (pretty/str-edn req)}))
 
 (defn rpc-res-chan! [req]
-  (a/go
-    (let [{:keys [http/ok? http/body]} (a/<! (rpc-fetch! req))
+  (go
+    (let [{:keys [http/ok? http/body]} (<! (rpc-fetch! req))
           edn (edn/read-string body)]
       (if ok?
         edn
@@ -45,10 +45,10 @@
   (p/reg-eff
    i :rpc/send!
    (fn [[_ req]]
-     (a/go
+     (go
        (try
          (pprint/pprint {:rpc/send! req})
-         (let [res (a/<! (rpc-res-chan! req))]
+         (let [res (<! (rpc-res-chan! req))]
            (pprint/pprint {:rpc/res res})
            res)
          (catch js/Error e
