@@ -1,6 +1,9 @@
 (ns app.feed.frontend
   (:require
    [app.feed.edit.frontend]
+   [app.feed.feed :as feed]
+   [app.feed.feed-db.impl]
+   [app.feed.feed-db.inter :as feed-db]
    [app.frontend.db :as db]
    [app.frontend.mod :as mod]
    [app.frontend.screen :as screen]
@@ -8,14 +11,14 @@
    [app.media.details.frontend :as media-details]
    [app.media.media-db.frontend]
    [app.media.media-db.inter :as media-db]
-   [clojure.core.async :refer [go <!]]
-   [lib.dom :as dom]
+   [clojure.core.async :refer [<! go go-loop]]
    [lib.program :as p]
    [lib.ui.bar :as bar]
    [lib.ui.icon :as icon]
    [lib.ui.icon-button :as icon-button]
    [lib.ui.image :as image]
-   [lib.ui.image-preload :as image-preload]))
+   [lib.ui.image-preload :as image-preload]
+   [lib.ui.swiper :as swiper]))
 
 (def popular-media-query
   {:query/limit 25
@@ -33,43 +36,24 @@
 ;; 
 ;; 
 
+(def swiper-slide-index-chan
+  (swiper/slide-index-chan "#swiper-container"))
 
-(defn swiper-event->slide-index [event]
-  (let [detail (.-detail event)
-        first-item (aget detail 0)
-        active-index (aget first-item "activeIndex")]
-    (js/parseInt active-index)))
-
-(defn swiper-slide-change-chan []
-  (dom/watch-event-chan! "#swiper-container" "swiperslidechange" (map swiper-event->slide-index)))
+(defn load [i]
+  (go
+    (let [;; feed-id-result {:feed/feed-id "feed:123"}
+          ;; feed-result (<! (feed-db/get-else-default! i (:feed/feed-id feed-id-result)))
+          media-query-result (<! (media-db/query! i (feed/to-media-query {})))]
+      (p/put! i [:db/got-query-result media-query-result]))))
 
 (defn- logic [i]
-  (p/take-every!
-   i ::load
-   (fn [_]
-     (go
-       (let [query-result (<! (media-db/query! i popular-media-query))]
-         (p/put! i [:db/got-query-result query-result])))))
-
-  (p/take-every!
-   i ::swiper-slide-changed
-   (fn [[_ slide-index]]
-     (println "swiper-slide-changed" slide-index)))
-
-  (p/take-every!
-   i :screen/screen-changed
-   (fn [[_ [screen-name _]]]
-     (when (= screen-name :screen/feed)
-       (p/put! i [::load]))))
-
-
-
-
-  #_(let [slide-index-chan (swiper-slide-change-chan)]
-      (a/go-loop []
-        (let [slide-index (a/<! slide-index-chan)]
-          (p/put! i [::swiper-slide-changed slide-index])
-          (recur)))))
+  (screen/take-every! i :screen/feed (fn [_] (p/put! i [::load])))
+  (p/take-every! i ::load (fn [_] (load i)))
+  (p/take-every! i ::swiper-slide-changed (fn [[_ idx]] (println "swiper-slide-changed" idx)))
+  #_(go-loop []
+      (let [slide-index (<! swiper-slide-index-chan)]
+        (p/put! i [::swiper-slide-changed slide-index])
+        (recur))))
 
 ;; 
 ;; 
@@ -77,7 +61,7 @@
 ;; 
 
 (defn- view-swiper-slide [i row]
-  [:swiper-slide {}
+  [swiper/slide {}
    [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
     {:on-click #(p/put! i [:screen/clicked-link (media-details/to-screen row)])}
     [image-preload/view {:image/url (:media/backdrop-url row)}]
@@ -87,13 +71,14 @@
 
 
 (defn- view-swiper-last-slide [_]
-  [:swiper-slide {}
+  [swiper/slide {}
    [image/view {:class "w-full h-full"}]])
 
 (defn- view-swiper [i rows]
-  [:swiper-container {:class "w-full flex-1 overflow-hidden"
-                      :direction :vertical
-                      :id "swiper-container"}
+  [swiper/container
+   {:class "w-full flex-1 overflow-hidden"
+    :direction :vertical
+    :id "swiper-container"}
    (for [row rows]
      ^{:key row}
      [view-swiper-slide i row])

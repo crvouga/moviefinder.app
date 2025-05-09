@@ -7,6 +7,7 @@
    [app.frontend.mod :as mod]
    [app.frontend.toaster]
    [app.feed.frontend]
+   [app.kv.frontend]
    [app.media.frontend]
    [app.profile.frontend]
    [app.rpc.frontend]

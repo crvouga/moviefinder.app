@@ -6,12 +6,12 @@
    [app.user.user-db.inter :as user-db]
    [app.auth.session.session-db.inter :as session-db]))
 
-(rpc/reg
+(rpc/reg-fn
  :profile-edit/rpc
- (fn [i]
+ (fn [ctx edits]
    (a/go
      (a/<! (a/timeout 1000))
-     (let [session (a/<! (session-db/find-by-session-id! i (-> i :session/session-id)))
-           user-existing (a/<! (user-db/find-by-user-id! i (:session/user-id session)))
-           user-new (user/edit user-existing i)]
-       (a/<! (user-db/put! i user-new))))))
+     (let [session (a/<! (session-db/find-by-session-id! ctx (-> ctx :session/session-id)))
+           user-existing (a/<! (user-db/find-by-user-id! ctx (:session/user-id session)))
+           user-new (user/edit user-existing edits)]
+       (a/<! (user-db/put! ctx user-new))))))

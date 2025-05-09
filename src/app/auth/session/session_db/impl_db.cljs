@@ -51,15 +51,15 @@
   [{:keys [:db/db]} session-id]
   (a/go
     (let [q (query-find-by-session-id session-id)
-          queried (a/<! (db/query-chan! db q))
+          queried (a/<! (db/query! db q))
           user-sessions (query-result->user-sessions queried)]
       (first user-sessions))))
 
 
 (defmethod session-db/put! :session-db/impl-db
   [{:keys [:db/db]} session]
-  (db/query-chan! db (query-upsert session)))
+  (db/query! db (query-upsert session)))
 
 (defmethod session-db/zap! :session-db/impl-db
   [{:keys [:db/db]} session-id]
-  (db/query-chan! db (query-delete session-id)))
+  (db/query! db (query-delete session-id)))

@@ -18,7 +18,7 @@
     (let [_ (a/<! (p/take! i ::clicked-confirmed))]
       (p/put! i [::set ::request result/loading])
       (p/put! i [::set ::opened ::confirmation])
-      (let [res (a/<! (p/eff! i [:rpc/send! [:rpc/logout]]))]
+      (let [res (a/<! (p/eff! i [:rpc/call! [:rpc/logout]]))]
         (p/put! i [::set ::request res])
         (when (result/ok? res)
           (p/put! i [:current-user/dissoc])

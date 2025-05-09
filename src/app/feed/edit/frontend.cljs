@@ -12,8 +12,7 @@
 ;; 
 ;; 
 
-(defn- logic [i]
-  (println "logic" i))
+(defn- logic [_])
 
 ;; 
 ;; 

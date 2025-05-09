@@ -5,6 +5,8 @@
    [app.profile.backend]
    [app.backend.http-respond :refer [http-respond!]]
    [app.backend.serve-single-page-app]
+   [app.feed.backend]
+   [app.kv.backend]
    [app.media.backend]
    [app.rpc.backend]
    [clojure.core.async :refer [<! go]]

@@ -5,7 +5,8 @@
             [lib.tmdb-api.movie-details]
             [app.media.media-db.inter :as media-db]
             [app.media.media-db.impl-tmdb-api.query-plan-item.index]
-            [app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]))
+            [app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]
+            [lib.result :as result]))
 
 (defn to-query-plan-items [q]
   (let [where (:query/where q)]
@@ -26,17 +27,19 @@
       [[:tmdb-query-plan-item/discover-movie q]])))
 
 
-(defn query-plan-query-results-chan! [q-plan-items]
+(defn query-plan-query-results-chan! [ctx q-plan-items]
   (go-loop [q-results []
             q-plan-items q-plan-items]
     (if (empty? q-plan-items)
       q-results
-      (let [q (<! (query-plan-item/query-result-chan! (first q-plan-items)))]
+      (let [q (<! (query-plan-item/query-result-chan! (first q-plan-items) ctx))]
         (recur (conj q-results q) (rest q-plan-items))))))
 
-(defmethod media-db/query! :media-db/impl-tmdb-api [_config q]
+(defmethod media-db/query! :media-db/impl-tmdb-api [ctx q]
   (go
     (let [query-plan-items (to-query-plan-items q)
-          query-results (<! (query-plan-query-results-chan! query-plan-items))
+          query-results (<! (query-plan-query-results-chan! ctx query-plan-items))
           query-result (first query-results)]
-      query-result)))
+      (-> query-result
+          (merge result/ok)
+          (assoc :query-result/query q)))))

@@ -18,7 +18,7 @@
       (p/put! i [::set ::request result/loading])
       (let [state (p/state! i)
             payload (-> state (select-keys [:verify-sms/phone-number]))
-            res (a/<! (p/eff! i [:rpc/send! [:rpc/send-code payload]]))]
+            res (a/<! (p/eff! i [:rpc/call! [:rpc-fn/send-code payload]]))]
         (p/put! i [::set ::request res])
         (when (result/ok? res)
           (p/put! i [:screen/push [:screen/login-verify-code payload]])

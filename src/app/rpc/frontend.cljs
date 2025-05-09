@@ -16,7 +16,7 @@
   (str (-> ctx/ctx :rpc/backend-url) shared/endpoint
        "?req=" (pr-str (first req))))
 
-(defn- rpc-fetch! [req]
+(defn- http-fetch! [req]
   (serialize/assert-serializable req)
 
   (http-client/fetch!
@@ -26,9 +26,9 @@
     :http/headers {"Content-Type" "text/plain"}
     :http/body (pretty/str-edn req)}))
 
-(defn rpc-res-chan! [req]
+(defn call! [req]
   (go
-    (let [{:keys [http/ok? http/body]} (<! (rpc-fetch! req))
+    (let [{:keys [http/ok? http/body]} (<! (http-fetch! req))
           edn (edn/read-string body)]
       (if ok?
         edn
@@ -43,12 +43,12 @@
 
 (defn- logic [i]
   (p/reg-eff
-   i :rpc/send!
+   i :rpc/call!
    (fn [[_ req]]
      (go
        (try
-         (pprint/pprint {:rpc/send! req})
-         (let [res (<! (rpc-res-chan! req))]
+         (pprint/pprint {:rpc/call! req})
+         (let [res (<! (call! req))]
            (pprint/pprint {:rpc/res res})
            res)
          (catch js/Error e

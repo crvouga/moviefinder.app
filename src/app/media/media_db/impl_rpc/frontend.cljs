@@ -6,5 +6,5 @@
 (defmethod media-db/query! :media-db/impl-rpc [_inst q]
   (go
     (let [q (assoc q :media-db/impl :media-db/impl-tmdb-api)
-          res (<! (rpc/rpc-res-chan! [:media-db/rpc q]))]
+          res (<! (rpc/call! [:rpc-fn/media-db-query q]))]
       res)))

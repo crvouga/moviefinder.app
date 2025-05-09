@@ -4,9 +4,9 @@
    [app.rpc.backend :as rpc]
    [clojure.core.async :as a]))
 
-(rpc/reg
+(rpc/reg-fn
  :rpc/logout
- (fn [{:keys [session/session-id] :as req}]
+ (fn [ctx]
    (a/go
-     (a/<! (session-db/zap! req session-id)))))
+     (a/<! (session-db/zap! ctx (-> ctx :session/session-id))))))
 

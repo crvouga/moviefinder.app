@@ -11,11 +11,11 @@
             [app.user.user-db.inter :as user-db]
             [app.user.user-db.impl]))
 
-(def api-key {:tmdb/api-key (-> "TMDB_API_READ_ACCESS_TOKEN" env/get-else-throw!)})
+(def tmdb-api-key {:tmdb/api-key (-> "TMDB_API_READ_ACCESS_TOKEN" env/get-else-throw!)})
 
 (def port {:http-server/port (-> "PORT" env/get-else-throw! str/remove-quotes js/parseInt)})
 
-(def db (db/init! {:db/impl :db/impl-better-sqlite3}))
+(def db (db/init {:db/impl :db/impl-better-sqlite3}))
 
 (def kv (kv/init {:kv/impl :kv/impl-fs}))
 
@@ -25,15 +25,15 @@
 
 (def verify-sms {:verify-sms/impl :verify-sms-impl/fake})
 
+(def media-db {:media-db/impl :media-db/impl-tmdb-api})
+
 (def ctx
-  (merge api-key port kv db session-db user-db verify-sms))
-
-(defn assoc-ctx
-  " assoc application configuration to map "
-  [i]
-  (merge ctx i))
-
-(defn dissoc-ctx
-  " dissoc application configuration from map so we don't leak secrets "
-  [i]
-  (apply dissoc i (keys ctx)))
+  (merge
+   tmdb-api-key
+   port
+   kv
+   db
+   session-db
+   user-db
+   verify-sms
+   media-db))

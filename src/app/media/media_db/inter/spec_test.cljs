@@ -27,7 +27,7 @@
     (async done
            (go
              (doseq [config fixture/configs-read-only]
-               (let [_put-result (<! (media-db/upsert-chan! (assoc config :media/entity fixture/test-media)))
+               (let [_put-result (<! (media-db/put! (assoc config :media/entity fixture/test-media)))
                      query (test-query config)
                      result (<! (media-db/query! config query))]
                  (is (seq (:query-result/rows result))

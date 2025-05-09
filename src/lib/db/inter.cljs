@@ -1,10 +1,10 @@
 (ns lib.db.inter)
 
-(defmulti init!
+(defmulti init
   "Create a new db connection"
   :db/impl)
 
-(defmulti query-chan!
+(defmulti query!
   "Query the db and return the result.
    
    Required parameters:

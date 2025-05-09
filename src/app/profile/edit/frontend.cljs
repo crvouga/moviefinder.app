@@ -42,7 +42,7 @@
       (let [state (p/state! i)
             edits (-> state (rename-keys kmap-form->user) (select-keys user-keys))
             current-user (-> state current-user/to-current-user)
-            res (a/<! (p/eff! i [:rpc/send! [:profile-edit/rpc edits]]))]
+            res (a/<! (p/eff! i [:rpc/call! [:profile-edit/rpc edits]]))]
 
         (p/put! i [::set ::request res])
 

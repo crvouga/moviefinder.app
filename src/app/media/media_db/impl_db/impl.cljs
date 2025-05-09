@@ -37,14 +37,14 @@
 (defn- run-migrations! [config]
   (go
     (doseq [migration migrations/migrations]
-      (<! (db/query-chan! (merge config {:db/query migration}))))))
+      (<! (db/query! (merge config {:db/query migration}))))))
 
-(defmethod media-db/upsert-chan! :media-db/impl-db
+(defmethod media-db/put! :media-db/impl-db
   [{:keys [media/entity] :as config}]
   (go
     (<! (run-migrations! config))
     (let [row (media->row entity)
-          _result (<! (db/query-chan!
+          _result (<! (db/query!
                        (merge config
                               {:db/query {:insert-into :media
                                           :columns (keys row)
@@ -58,13 +58,13 @@
     (<! (run-migrations! config))
     (let [limit (or limit 25)
           offset (or offset 0)
-          count-result (<! (db/query-chan!
+          count-result (<! (db/query!
                             config
                             {:select [[:%count.* :total]]
                              :from [:media]
                              :where (or where [])}))
           total (get-in count-result [:db/rows 0 :total])
-          result (<! (db/query-chan!
+          result (<! (db/query!
                       config
                       {:select (or select [:*])
                        :from [:media]

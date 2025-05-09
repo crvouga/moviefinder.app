@@ -21,7 +21,7 @@
      done
      (go
        (let [db (new-db)
-             test-feed (feed/create)]
+             test-feed (feed/default)]
 
          (let [put (<! (feed-db/put! db test-feed))]
            (is (result/ok? put) "Putting a user should return a success result"))

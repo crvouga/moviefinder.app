@@ -8,53 +8,47 @@
    [lib.http-server.cors :as cors]
    [lib.http-server.http-req :as http-req]
    [lib.http-server.http-res :as http-res]
-   [lib.map-ext :as map-ext]
    [lib.pretty :as pretty]
    [lib.session-id-cookie :as session-id-cookie]))
 
 
 (def rpc-fns! (atom {}))
 
-(defn reg [rpc-name rpc-fn]
+(defn reg-fn [rpc-name rpc-fn]
   (swap! rpc-fns! assoc rpc-name rpc-fn))
 
-(defn- rpc! [rpc-name rpc-body]
+(defn err-not-found [rpc-name]
+  {:result/type :result/err
+   :err/err :rpc-error/rpc-fn-not-found
+   :err/data {:rpc-name rpc-name}})
+
+(defn- call! [ctx rpc-fn-name rpc-fn-args]
   (go
-    (let [rpc-fn (get @rpc-fns! rpc-name)]
+    (let [rpc-fn (get @rpc-fns! rpc-fn-name)]
       (if (fn? rpc-fn)
-        (<! (rpc-fn rpc-body))
-        (merge rpc-body {:result/type :result/err
-                         :err/err :rpc-error/rpc-fn-not-found
-                         :err/data {:rpc-name rpc-name}})))))
+        (<! (apply rpc-fn ctx rpc-fn-args))
+        (err-not-found rpc-fn-name)))))
 
+(defn- log [rpc-fn-name rpc-fn-args rpc-res]
+  (binding [*print-level* 6]
+    (pprint {:rpc rpc-fn-name :args rpc-fn-args :res rpc-res})))
 
-(defn to-rpc-input [rpc-req session-id]
-  (-> rpc-req
-      second
-      map-ext/ensure
-      ctx/assoc-ctx
-      (assoc :session/session-id session-id)))
+(defn- dissoc-ctx [input]
+  (apply dissoc input (keys ctx/ctx)))
 
-(defn to-rpc-output [rpc-res]
-  (-> rpc-res
-      ctx/dissoc-ctx
-      (dissoc :session/session-id)))
-
-
-(defn handle-rpc-request! [rpc-req session-id]
+(defn handle-rpc-req! [session-id [rpc-fn-name & rpc-fn-args]]
   (go
-    (let [rpc-input (to-rpc-input rpc-req session-id)
-          rpc-res (<! (rpc! (first rpc-req) rpc-input))
-          rpc-output (to-rpc-output rpc-res)]
-      (binding [*print-level* 6]
-        (pprint {:rpc (first rpc-req) :req rpc-req :res rpc-output}))
-      rpc-output)))
+    (let [rpc-ctx (-> ctx/ctx (assoc :session/session-id session-id))
+          rpc-res (<! (call! rpc-ctx rpc-fn-name rpc-fn-args))
+          rpc-res (dissoc-ctx rpc-res)]
+      (log rpc-fn-name rpc-fn-args rpc-res)
+      rpc-res)))
 
 (defmethod http-respond! shared/endpoint [req res]
   (go
     (let [rpc-req (<! (http-req/read-body-edn! req))
           session-id (session-id-cookie/read req)
-          rpc-res (<! (handle-rpc-request! rpc-req session-id))]
+          rpc-res (<! (handle-rpc-req! session-id rpc-req))]
       (cors/allow! req res)
       (http-res/set-header! res "Content-Type" "text/plain")
       (http-res/end! res (pretty/str-edn rpc-res)))))

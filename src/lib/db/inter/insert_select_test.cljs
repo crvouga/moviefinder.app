@@ -11,11 +11,11 @@
    done
    (testing "Can insert and select data"
      (go
-       (let [db (db/init! {:db/impl :db/impl-better-sqlite3})
-             _ (<! (db/query-chan! db q-create-table))
-             before (<! (db/query-chan! db q-select))
-             _ (<! (db/query-chan! db q-insert))
-             after (<! (db/query-chan! db q-select))]
+       (let [db (db/init {:db/impl :db/impl-better-sqlite3})
+             _ (<! (db/query! db q-create-table))
+             before (<! (db/query! db q-select))
+             _ (<! (db/query! db q-insert))
+             after (<! (db/query! db q-select))]
 
          (is (-> before :db/rows empty?) "Should have no rows before insert")
          (is (-> after :db/rows count (= 1)) "Should return one row after insert")

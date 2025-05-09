@@ -29,13 +29,13 @@
           payload (-> state
                       (merge (screen/to-screen-payload state))
                       (select-keys [:verify-sms/phone-number :verify-sms/code]))
-          req [:rpc/verify-code payload]
-          res (a/<! (p/eff! i [:rpc/send! req]))]
+          req [:rpc-fn/verify-code payload]
+          res (a/<! (p/eff! i [:rpc/call! req]))]
 
       (p/put! i [::set ::request res])
 
       (when (result/ok? res)
-        (p/put! i [:current-user/patch res])
+        (p/put! i [:current-user/got res])
         (p/put! i [:toaster/show (toast/info "Logged in")])
         (p/put! i [:screen/push [:screen/profile]]))
 

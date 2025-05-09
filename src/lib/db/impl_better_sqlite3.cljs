@@ -9,12 +9,12 @@
         db (sqlite3 db-path)]
     db))
 
-(defmethod db/init! :db/impl-better-sqlite3
+(defmethod db/init :db/impl-better-sqlite3
   [config]
   (let [db (new-db-instance config)]
     (merge config {::sqlite-instance db})))
 
-(defmethod db/query-chan! :db/impl-better-sqlite3
+(defmethod db/query! :db/impl-better-sqlite3
   [conn query]
   (let [sqlite-instance (::sqlite-instance conn)
         raw-sql (sql/sql-query->raw-sql query)

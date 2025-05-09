@@ -10,19 +10,20 @@
    [lib.result :as result]
    [app.user.user :as user]))
 
-(rpc/reg
- :rpc/send-code
- (fn [req]
+(rpc/reg-fn
+ :rpc-fn/send-code
+ (fn [ctx]
    (a/go
-     (let [sent (a/<! (verify-sms/send-code! req))]
+     (let [sent (a/<! (verify-sms/send-code! ctx))]
        sent))))
 
-(rpc/reg
- :rpc/verify-code
- (fn [{:keys [verify-sms/phone-number session/session-id] :as i}]
+(rpc/reg-fn
+ :rpc-fn/verify-code
+ (fn [{:keys [session/session-id] :as ctx}
+      {:keys [verify-sms/phone-number] :as payload}]
    (a/go
-     (let [verified (a/<! (verify-sms/verify-code! i))
-           user-existing (a/<! (user-db/find-by-phone-number! i phone-number))
+     (let [verified (a/<! (verify-sms/verify-code! ctx payload))
+           user-existing (a/<! (user-db/find-by-phone-number! ctx phone-number))
            user-new (user/create-from-phone-number phone-number)
            user (merge user-new user-existing)
            session-new (session/create {:session/user-id (:user/user-id user)
@@ -30,7 +31,7 @@
            res (if (result/ok? verified) (merge verified user) verified)]
 
        (when (result/ok? res)
-         (a/<! (user-db/put! i user))
-         (a/<! (session-db/put! i session-new)))
+         (a/<! (user-db/put! ctx user))
+         (a/<! (session-db/put! ctx session-new)))
 
        res))))

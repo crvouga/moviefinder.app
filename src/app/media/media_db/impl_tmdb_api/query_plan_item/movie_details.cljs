@@ -5,12 +5,12 @@
             [app.media.media-db.impl-tmdb-api.mapping :as mapping]
             [app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]))
 
-(defmethod query-plan-item/query-result-chan! :tmdb-query-plan-item/movie-details [query-plan-item]
+(defmethod query-plan-item/query-result-chan! :tmdb-query-plan-item/movie-details [query-plan-item ctx]
   (go
     (let [q (second query-plan-item)
           where (:query/where q)
           movie-id (get where 2) ; Get the third element which is the ID value
-          params (merge q {:tmdb/language "en-US"})
+          params (merge ctx {:tmdb/language "en-US"})
           configuration-response (<! (lib.tmdb-api.configuration/fetch-chan! params))
           movie-details-response (<! (lib.tmdb-api.movie-details/fetch-chan! movie-id params))
           response (merge params
