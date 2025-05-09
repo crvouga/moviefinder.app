@@ -19,11 +19,11 @@
 
 
 
-(defmulti new!
+(defmulti init
   "Used for creating a new media db implementation"
   :media-db/impl)
 
-(defmethod new! :default [q]
+(defmethod init :default [q]
   q)
 
 (defmulti query!

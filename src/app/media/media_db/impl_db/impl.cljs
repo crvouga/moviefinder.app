@@ -53,27 +53,27 @@
        :result/type :result/ok})))
 
 (defmethod media-db/query! :media-db/impl-db
-  [{:keys [query/where query/limit query/offset query/select query/order] :as config}]
+  [config {:keys [query/where query/limit query/offset query/select query/order] :as query}]
   (go
     (<! (run-migrations! config))
     (let [limit (or limit 25)
           offset (or offset 0)
           count-result (<! (db/query-chan!
-                            (merge config
-                                   {:db/query {:select [[:%count.* :total]]
-                                               :from [:media]
-                                               :where (or where [])}})))
+                            config
+                            {:select [[:%count.* :total]]
+                             :from [:media]
+                             :where (or where [])}))
           total (get-in count-result [:db/rows 0 :total])
           result (<! (db/query-chan!
-                      (merge config
-                             {:db/query {:select (or select [:*])
-                                         :from [:media]
-                                         :where (or where [])
-                                         :order-by (or order [[:media/id :desc]])
-                                         :limit limit
-                                         :offset offset}})))
+                      config
+                      {:select (or select [:*])
+                       :from [:media]
+                       :where (or where [])
+                       :order-by (or order [[:media/id :desc]])
+                       :limit limit
+                       :offset offset}))
           rows (map row->media (:db/rows result))
-          query-result {:query-result/query config
+          query-result {:query-result/query query
                         :query-result/rows rows
                         :query-result/limit limit
                         :query-result/offset offset

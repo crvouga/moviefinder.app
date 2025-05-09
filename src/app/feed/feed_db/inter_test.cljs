@@ -12,7 +12,7 @@
 
 
 (defn new-db []
-  (feed-db/new! {:feed-db/impl :feed-db/impl-kv
+  (feed-db/init {:feed-db/impl :feed-db/impl-kv
                  :kv/impl :kv/impl-atom}))
 
 (deftest feed-db

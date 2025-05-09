@@ -7,7 +7,7 @@
 (defn- new-feed-kv [kv]
   (->> {:kv/namespace ::feed} (merge kv) kv/init))
 
-(defmethod feed-db/new! :feed-db/impl-kv
+(defmethod feed-db/init :feed-db/impl-kv
   [i] (-> i (assoc :feed-db/feed-kv (new-feed-kv i))))
 
 (defmethod feed-db/get! :feed-db/impl-kv

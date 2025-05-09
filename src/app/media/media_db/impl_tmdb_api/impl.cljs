@@ -26,15 +26,15 @@
       [[:tmdb-query-plan-item/discover-movie q]])))
 
 
-(defn query-plan-query-results-chan! [query-plan-items]
-  (go-loop [query-results []
-            query-plan-items query-plan-items]
-    (if (empty? query-plan-items)
-      query-results
-      (recur (conj query-results (<! (query-plan-item/query-result-chan! (first query-plan-items))))
-             (rest query-plan-items)))))
+(defn query-plan-query-results-chan! [q-plan-items]
+  (go-loop [q-results []
+            q-plan-items q-plan-items]
+    (if (empty? q-plan-items)
+      q-results
+      (let [q (<! (query-plan-item/query-result-chan! (first q-plan-items)))]
+        (recur (conj q-results q) (rest q-plan-items))))))
 
-(defmethod media-db/query! :media-db/impl-tmdb-api [q]
+(defmethod media-db/query! :media-db/impl-tmdb-api [_config q]
   (go
     (let [query-plan-items (to-query-plan-items q)
           query-results (<! (query-plan-query-results-chan! query-plan-items))
