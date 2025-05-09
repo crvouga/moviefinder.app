@@ -12,7 +12,7 @@
       (update :media-db/impl update-impl)))
 
 (rpc/reg
- :rpc/media-db-query
+ :media-db/rpc
  (fn [req]
    (go
      (let [res (<! (media-db/query! (-> req ensure-not-rpc-impl) req))]
