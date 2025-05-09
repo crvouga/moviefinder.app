@@ -1,4 +1,4 @@
-(ns app.media.entity
+(ns app.media.media
   (:require [cljs.spec.alpha :as s]))
 
 (s/def :media/id (s/or :numeric number?

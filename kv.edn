@@ -1,67 +1,22 @@
 {[:app.user.user-db.impl-kv/by-user-id
-  "b5ae0c41-52d8-4327-b157-d09ce6e1fc27"]
- {:user/phone-number "1233",
-  :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
-  :user/created-at 1746414602096,
-  :result/type :result/ok},
- [:kv-test/ns-2 "same-key"] {:kv-test/data "value-2"},
- [:app.user.user-db.impl-kv/by-user-id
-  "84274018-adaf-4324-b856-c96be2bababd"]
- {:user/phone-number "1",
-  :user/user-id "84274018-adaf-4324-b856-c96be2bababd",
-  :user/username "movie finder 959677",
-  :user/created-at 1746420783878,
-  :result/type :result/ok},
- [:kv-test/ns-1 "same-key"] {:kv-test/data "value-1"},
- [:app.user.user-db.impl-kv/by-user-id
-  "f0e22cf2-3b35-4f93-8746-1bd80be58cfd"]
+  "user:ce4f2e78-ade2-4a0d-b9ac-a43056cd2280"]
  {:user/phone-number "123",
-  :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :user/username "movie finder123",
-  :user/avatar-seed "123123",
-  :user/created-at 1746091429898,
-  :result/type :result/ok,
-  :user/fullname "123123"},
+  :user/user-id "user:ce4f2e78-ade2-4a0d-b9ac-a43056cd2280",
+  :user/username "movie finder 276236",
+  :user/avatar-seed "movie finder 276236",
+  :user/created-at 1746752045202,
+  :kv/value nil,
+  :result/type :result/ok},
  [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "123"]
  {:user/phone-number "123",
-  :user/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :user/username "movie finder123",
-  :user/avatar-seed "123123",
-  :user/created-at 1746091429898,
-  :result/type :result/ok,
-  :user/fullname "123123"},
- [:app.auth.session.session-db.impl-kv/by-session-id
-  "aa31b7e5-c879-4ef3-829e-edc39251d357"]
- {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
-  :session/session-id "aa31b7e5-c879-4ef3-829e-edc39251d357",
-  :session/created-at 1746746444240},
- [:app.user.user-db.impl-kv/by-user-ids-by-phone-number nil]
- {:result/type :result/ok,
-  :user/avatar-seed "12",
-  :user/fullname "123123",
-  :user/username "movie finder 123"},
- [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "1"]
- {:user/phone-number "1",
-  :user/user-id "84274018-adaf-4324-b856-c96be2bababd",
-  :user/username "movie finder 959677",
-  :user/created-at 1746420783878,
+  :user/user-id "user:ce4f2e78-ade2-4a0d-b9ac-a43056cd2280",
+  :user/username "movie finder 276236",
+  :user/avatar-seed "movie finder 276236",
+  :user/created-at 1746752045202,
+  :kv/value nil,
   :result/type :result/ok},
- [:app.user.user-db.impl-kv/by-user-ids-by-phone-number "1233"]
- {:user/phone-number "1233",
-  :user/user-id "b5ae0c41-52d8-4327-b157-d09ce6e1fc27",
-  :user/created-at 1746414602096,
-  :result/type :result/ok},
- [:namespace-2 "same-key"] {:data "value-2"},
- [:test-namespace-2 "same-key"] {:kv-test/data "value-2"},
  [:app.auth.session.session-db.impl-kv/by-session-id
   "c7baa457-e0cb-4758-aa18-13d91bff0fbf"]
- {:session/user-id "f0e22cf2-3b35-4f93-8746-1bd80be58cfd",
+ {:session/user-id "user:ce4f2e78-ade2-4a0d-b9ac-a43056cd2280",
   :session/session-id "c7baa457-e0cb-4758-aa18-13d91bff0fbf",
-  :session/created-at 1746431343823},
- [:app.user.user-db.impl-kv/by-user-id nil]
- {:result/type :result/ok,
-  :user/avatar-seed "12",
-  :user/fullname "123123",
-  :user/username "movie finder 123"},
- [:namespace-1 "same-key"] {:data "value-1"},
- [:test-namespace-1 "same-key"] {:kv-test/data "value-1"}}
+  :session/created-at 1746752045202}}

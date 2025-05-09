@@ -1,7 +1,7 @@
 (ns app.media.media-db.inter
   (:require [cljs.spec.alpha :as s]
             [clojure.core.async :refer [go]]
-            [app.media.entity]))
+            [app.media.media]))
 
 
 
@@ -13,7 +13,7 @@
 (s/def :query/select (s/coll-of keyword?))
 (s/def :query/order vector?)
 
-(s/def :queried/query (s/keys :opt [:query/select :query/where :query/order :query/limit :query/offset]))
+(s/def :query-result/query (s/keys :opt [:query/select :query/where :query/order :query/limit :query/offset]))
 (s/def :query-result/limit number?)
 (s/def :query-result/offset number?)
 (s/def :query-result/total number?)
@@ -21,7 +21,7 @@
 (s/def :query-result/rows (s/coll-of map?))
 
 (s/def :query-result/query-result
-  (s/keys :req [:queried/query
+  (s/keys :req [:query-result/query
                 :query-result/limit
                 :query-result/offset
                 :query-result/total
@@ -53,7 +53,7 @@
     (assoc empty-query-result
            :error/message "Media db implementation not found"
            :error/data q
-           :queried/query q
+           :query-result/query q
            :query-result/rows [])))
 
 (defmulti upsert-chan!

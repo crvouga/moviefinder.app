@@ -21,7 +21,7 @@
                         :query-result/primary-key])
 
 (defn- reducer-query-result-by-query [query-result-by-query msg-payload]
-  (let [query (-> msg-payload :queried/query query-to-key)
+  (let [query (-> msg-payload :query-result/query query-to-key)
         primary-key (-> msg-payload :query-result/primary-key)
         entity-ids (->> msg-payload :query-result/rows (map primary-key))
         query-result (-> msg-payload (select-keys query-result-keys) (assoc :queried/row-ids entity-ids))]

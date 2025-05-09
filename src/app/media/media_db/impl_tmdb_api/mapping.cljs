@@ -1,11 +1,12 @@
 (ns app.media.media-db.impl-tmdb-api.mapping
   (:require
+   [app.media.media-id :as media-id]
+   [clojure.set :refer [rename-keys]]
    [lib.tmdb-api.configuration]
    [lib.tmdb-api.discover-movie]
-   [lib.tmdb-api.movie-details]
-   [clojure.set :refer [rename-keys]]))
+   [lib.tmdb-api.movie-details]))
 
-(def key-mapping {:tmdb/id :media/id
+(def key-mapping {:tmdb/id :media/tmdb-id
                   :tmdb/title :media/title
                   :tmdb/release-date :media/release-date
                   :tmdb/overview :media/overview
@@ -18,7 +19,8 @@
 (defn- tmdb-item->media [item]
   (-> item
       (rename-keys key-mapping)
-      (select-keys (vals key-mapping))))
+      (select-keys (vals key-mapping))
+      (assoc :media/id (media-id/from-tmdb-id (:tmdb/id item)))))
 
 (defn- assoc-image-urls [config movie]
   (assoc movie
@@ -34,7 +36,7 @@
                    (map #(assoc-image-urls input %))
                    (drop offset)
                    (take limit))]
-    {:queried/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
+    {:query-result/query (select-keys input [:query/where :query/limit :query/offset :query/order :query/select])
      :query-result/limit limit
      :query-result/offset offset
      :query-result/total total

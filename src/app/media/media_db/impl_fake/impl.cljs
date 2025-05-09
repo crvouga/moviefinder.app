@@ -12,7 +12,7 @@
                    (drop offset)
                    (take limit))]
     (-> q
-        (merge {:queried/query (select-keys q [:query/select :query/where :query/order :query/limit :query/offset])
+        (merge {:query-result/query (select-keys q [:query/select :query/where :query/order :query/limit :query/offset])
                 :query-result/limit limit
                 :query-result/offset offset
                 :query-result/total total

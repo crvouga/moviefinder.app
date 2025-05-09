@@ -4,7 +4,8 @@
    [clojure.core.async :refer [<!]]
    [app.auth.session.session-db.inter :as session-db]
    [app.auth.session.session-db.impl-kv]
-   [lib.kv.impl-atom])
+   [lib.kv.impl-atom]
+   [app.user.user-id :as user-id])
   (:require-macros
    [cljs.core.async.macros :refer [go]]))
 
@@ -84,7 +85,7 @@
      done
      (go
        (let [db (new-db)
-             test-user-id (str (random-uuid))
+             test-user-id (user-id/gen)
              test-session-id (str (random-uuid))
              test-session {:session/session-id test-session-id
                            :session/user-id test-user-id

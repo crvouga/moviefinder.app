@@ -1,5 +1,6 @@
 (ns app.user.user
   (:require
+   [app.user.user-id :as user-id]
    [cljs.spec.alpha :as s]
    [lib.time :as time]))
 
@@ -21,7 +22,7 @@
 (defn create [{:keys [user/phone-number]}]
   (let [username (str "movie finder " (rand-int 1000000))]
     {:user/phone-number phone-number
-     :user/user-id (str (random-uuid))
+     :user/user-id (user-id/gen)
      :user/username username
      :user/avatar-seed username
      :user/created-at (time/now!)}))

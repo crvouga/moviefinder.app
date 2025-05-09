@@ -1,7 +1,8 @@
 (ns lib.session-id-cookie
   (:require
    [lib.http-server.http-req :as http-req]
-   [lib.http-server.http-res :as http-res]))
+   [lib.http-server.http-res :as http-res]
+   [lib.session-id :as session-id]))
 
 
 (defn get-cookie [^js req]
@@ -24,5 +25,5 @@
   (fn [req res]
     (let [session-id (get-cookie req)]
       (when-not session-id
-        (set-cookie res (str (random-uuid))))
+        (set-cookie res (session-id/gen)))
       (respond req res))))
