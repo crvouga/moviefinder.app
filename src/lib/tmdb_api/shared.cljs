@@ -17,6 +17,7 @@
         name
         (str/replace "-" "_"))))
 
+
 (defn external-key->namespace-key [s]
   (when s
     (let [s-str (if (keyword? s)
@@ -25,8 +26,12 @@
       (when (string? s-str)
         (keyword "tmdb" (str/replace s-str "_" "-"))))))
 
+(defn namespaced-key? [k]
+  (str/includes? (str k) "tmdb/"))
+
 (defn- to-query-params [params]
   (->> params
+       (filter (fn [[k _]] (namespaced-key? k)))
        (map (fn [[k v]] [(namespace-key->external-key k) v]))
        (filter first)
        (into {})))
@@ -39,7 +44,7 @@
         query-params (to-query-params params)]
     {:http/method :http/get
      :http/url (str base-url endpoint)
-     :http-req/query-params query-params
+     :http/query-params query-params
      :http/headers {"Authorization" (str "Bearer " api-key)}}))
 
 (defn- map-response-ok [response empty-response]
