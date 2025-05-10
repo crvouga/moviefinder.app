@@ -20,30 +20,13 @@
    [lib.ui.image-preload :as image-preload]
    [lib.ui.swiper :as swiper]))
 
-(def popular-media-query
-  {:q/limit 25
-   :q/offset 0
-   :q/select [:media/id :media/title :media/year :media/popularity :media/genre-ids :media/poster-url]
-   :q/order [:media/popularity :desc]
-   :q/where [:q/and
-             [:q/> :media/popularity 80]
-             [:q/= :media/media-type :media-type/movie]]})
 
-
-;; 
-;; 
-;; 
-;; 
-;; 
-
-(def swiper-slide-index-chan
-  (swiper/slide-index-chan "#swiper-container"))
+#_(def swiper-slide-index-chan
+    (swiper/slide-index-chan "#swiper-container"))
 
 (defn load [i]
   (go
-    (let [;; feed-id-result {:feed/feed-id "feed:123"}
-          ;; feed-result (<! (feed-db/get-else-default! i (:feed/feed-id feed-id-result)))
-          media-query-result (<! (media-db/query! i (feed/to-media-query {})))]
+    (let [media-query-result (<! (media-db/query! i (feed/to-media-query {})))]
       (p/put! i [:db/got-query-result media-query-result]))))
 
 (defn- logic [i]
@@ -91,7 +74,7 @@
     [icon-button/view {:icon-button/view-icon icon/adjustments-horizontal}]]])
 
 (defn- view [i]
-  (let [query-result (db/to-query-result i popular-media-query)
+  (let [query-result (db/to-query-result i (feed/to-media-query {}))
         rows (:query-result/rows query-result)]
     [screen/view-screen i :screen/feed
      [view-top-bar i]
