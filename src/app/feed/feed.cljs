@@ -27,7 +27,7 @@
              [:q/> :media/popularity 80]
              [:q/= :media/media-type :media-type/movie]]
    :q/order [:media/popularity :desc]
-   :q/limit 5
+   :q/limit 30
    :q/offset (-> feed :feed/start-index (or 0))})
 
 (defn valid? [feed]

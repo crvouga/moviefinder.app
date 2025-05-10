@@ -11,7 +11,7 @@
    [app.media.details.frontend :as media-details]
    [app.media.media-db.frontend]
    [app.media.media-db.inter :as media-db]
-   [clojure.core.async :refer [<! go go-loop]]
+   [clojure.core.async :refer [<! go go-loop timeout]]
    [lib.program :as p]
    [lib.ui.bar :as bar]
    [lib.ui.icon :as icon]
@@ -21,22 +21,35 @@
    [lib.ui.swiper :as swiper]))
 
 
-#_(def swiper-slide-index-chan
-    (swiper/slide-index-chan "#swiper-container"))
 
 (defn load [i]
   (go
     (let [media-query-result (<! (media-db/query! i (feed/to-media-query {})))]
       (p/put! i [:db/got-query-result media-query-result]))))
 
+
+(defn to-query-result [i]
+  (db/to-query-result i (feed/to-media-query {})))
+
+(defn near-end? [i active-index])
+
 (defn- logic [i]
+  (p/reg-reducer i ::set (fn [s [_ k v]] (assoc s k v)))
   (screen/take-every! i :screen/feed (fn [_] (p/put! i [::load])))
   (p/take-every! i ::load (fn [_] (load i)))
-  (p/take-every! i ::swiper-slide-changed (fn [[_ idx]] (println "swiper-slide-changed" idx)))
-  #_(go-loop []
-      (let [slide-index (<! swiper-slide-index-chan)]
-        (p/put! i [::swiper-slide-changed slide-index])
-        (recur))))
+
+  (p/take-every!
+   i ::swiper-slide-changed
+   (fn [[_ e]]
+     (p/put! i [::set ::active-index (-> e :swiper/active-index)])))
+
+  (go
+    (<! (timeout 500))
+    (let [slide-changed-chan (swiper/slide-changed-chan "#swiper-container")]
+      (go-loop []
+        (let [e (<! slide-changed-chan)]
+          (p/put! i [::swiper-slide-changed e])
+          (recur))))))
 
 ;; 
 ;; 
@@ -48,6 +61,7 @@
    [:button.w-full.h-full.overflow-hidden.cursor-pointer.select-none
     {:on-click #(p/put! i [:screen/clicked-link (media-details/to-screen row)])}
     [image-preload/view {:image/url (:media/backdrop-url row)}]
+    [:code ":media/popularity" (-> row :media/popularity)]
     [image/view {:image/url (:media/poster-url row)
                  :image/alt (:media/title row)
                  :class "w-full h-full"}]]])
@@ -61,6 +75,7 @@
   [swiper/container
    {:class "w-full flex-1 overflow-hidden"
     :direction :vertical
+    :on-swiperslidechange #(println "on-swiper-slide-change")
     :id "swiper-container"}
    (for [row rows]
      ^{:key row}

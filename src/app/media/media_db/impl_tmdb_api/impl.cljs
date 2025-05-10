@@ -20,6 +20,18 @@
       (let [q (<! (query-plan-item/result-chan! (first q-plan) ctx))]
         (recur (conj q-results q) (rest q-plan))))))
 
+(defn distinct-on [rows key-fn]
+  (loop [seen #{}
+         acc []
+         remaining rows]
+    (if (empty? remaining)
+      acc
+      (let [row (first remaining)
+            key (key-fn row)]
+        (if (contains? seen key)
+          (recur seen acc (rest remaining))
+          (recur (conj seen key) (conj acc row) (rest remaining)))))))
+
 (defmethod media-db/query! :media-db/impl-tmdb-api [ctx q]
   (go
     (let [q-plan (query-plan/from-query q)
@@ -30,7 +42,7 @@
                         :query-result/primary-key :media/id
                         :query-result/rows []}
           q-result (query-result/combine q-result-acc q-results)
-          q-result (query-result/paginate q-result)
+          q-result (-> q-result query-result/paginate (update :query-result/rows distinct-on :media/id))
           result (-> q-result
                      (merge result/ok)
                      (assoc :query-result/query q))]

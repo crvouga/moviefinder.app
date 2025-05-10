@@ -1,5 +1,6 @@
 (ns lib.ui.swiper
   (:require
+   [clojure.core.async :as a :refer [chan]]
    [lib.dom :as dom]
    [lib.ui.children :as children]))
 
@@ -17,11 +18,19 @@
    [:swiper-slide props]
    children))
 
-(defn- event->slide-index [e]
+
+
+(defn- js-event->slide-index [e]
   (let [detail (.-detail e)
         first-item (aget detail 0)
         active-index (aget first-item "activeIndex")]
     (js/parseInt active-index)))
 
-(defn slide-index-chan [css-selector]
-  (dom/watch-event-chan! css-selector "swiperslidechange" (map event->slide-index)))
+(defn- js-event->event [e]
+  {:swiper/active-index (js-event->slide-index e)})
+
+(defn slide-changed-chan [css-selector]
+  (let [c (chan 1 (map js-event->event))]
+    (dom/put-events! c css-selector "swiperslidechange")
+    c))
+
