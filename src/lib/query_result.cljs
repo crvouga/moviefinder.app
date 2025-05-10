@@ -29,3 +29,29 @@
    :query-result/offset 0
    :query-result/total 0
    :query-result/rows []})
+
+
+(defn- combine-reducer [acc query-result]
+  (let [rows (concat (:query-result/rows acc) (:query-result/rows query-result))
+        total (max (:query-result/total acc) (:query-result/total query-result))
+        limit (:query-result/limit acc)
+        offset (:query-result/offset acc)
+        primary-key (:query-result/primary-key acc)]
+    {:query-result/limit limit
+     :query-result/offset offset
+     :query-result/total total
+     :query-result/primary-key primary-key
+     :query-result/rows rows}))
+
+(defn combine [acc results]
+  (reduce combine-reducer acc results))
+
+
+(defn subset?
+  [smaller-result bigger-result]
+  (let [rows-smaller (:query-result/rows smaller-result)
+        rows-bigger (:query-result/rows bigger-result)
+        limit-smaller (:query-result/limit smaller-result)
+        offset-smaller (:query-result/offset smaller-result)]
+    (= rows-smaller (->> rows-bigger (drop offset-smaller) (take limit-smaller)))))
+

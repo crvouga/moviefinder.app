@@ -1,13 +1,15 @@
 (ns app.media.media-db.impl-tmdb-api.impl
-  (:require [clojure.core.async :refer [go <! go-loop]]
-            [lib.tmdb-api.configuration]
-            [lib.tmdb-api.discover-movie]
-            [lib.tmdb-api.movie-details]
-            [app.media.media-db.inter :as media-db]
-            [app.media.media-db.impl-tmdb-api.query-plan-item.index]
-            [app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]
-            [app.media.media-db.impl-tmdb-api.query-plan :as query-plan]
-            [lib.result :as result]))
+  (:require
+   [app.media.media-db.impl-tmdb-api.query-plan :as query-plan]
+   [app.media.media-db.impl-tmdb-api.query-plan-item :as query-plan-item]
+   [app.media.media-db.impl-tmdb-api.query-plan-item.index]
+   [app.media.media-db.inter :as media-db]
+   [clojure.core.async :refer [<! go go-loop]]
+   [lib.query-result :as query-result]
+   [lib.result :as result]
+   [lib.tmdb-api.configuration]
+   [lib.tmdb-api.discover-movie]
+   [lib.tmdb-api.movie-details]))
 
 
 (defn query-plan-query-results-chan! [ctx q-plan]
@@ -22,7 +24,12 @@
   (go
     (let [q-plan (query-plan/from-query q)
           q-results (<! (query-plan-query-results-chan! ctx q-plan))
-          q-result (first q-results)]
+          q-result-acc {:query-result/query (select-keys q [:q/limit :q/offset :q/order :q/select :q/where])
+                        :query-result/limit (-> q :q/limit)
+                        :query-result/offset (-> q :q/offset)
+                        :query-result/primary-key :media/id
+                        :query-result/rows []}
+          q-result (query-result/combine q-result-acc q-results)]
       (-> q-result
           (merge result/ok)
           (assoc :query-result/query q)))))

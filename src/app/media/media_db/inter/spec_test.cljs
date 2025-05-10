@@ -13,14 +13,16 @@
 
 (deftest query-result-spec-test
   (testing "query-result-chan! returns spec valid response"
-    (async done
-           (go
-             (doseq [config fixture/configs-read-only]
-               (let [query (test-query config)
-                     result (<! (media-db/query! config query))]
-                 (is (s/valid? :query-result/query-result result)
-                     (str "Invalid query result for implementation " (:media-db/impl config)))))
-             (done)))))
+    (async
+     done
+     (go
+       (doseq [config fixture/configs-read-only]
+         (let [query (test-query config)
+               result (<! (media-db/query! config query))]
+           (when (not (s/valid? :query-result/query-result result))
+             (s/explain :query-result/query-result result)
+             (is false "Invalid query result"))))
+       (done)))))
 
 (deftest query-result-rows-test
   (testing "query-result-chan! returns non-empty results"

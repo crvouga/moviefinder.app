@@ -1,9 +1,14 @@
 (ns lib.pretty
   (:require
-   [cljs.pprint :as pprint]))
+   [clojure.pprint :refer [pprint]]))
 
 (defn str-edn [edn]
   (with-out-str
     (binding [*print-level* nil
               *print-length* nil]
-      (pprint/pprint edn))))
+      (pprint edn))))
+
+
+(defn log [print-level edn]
+  (binding [*print-level* print-level]
+    (js/console.log (with-out-str (pprint edn)))))

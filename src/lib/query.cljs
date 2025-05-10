@@ -11,13 +11,20 @@
 (s/def :q/order vector?)
 
 
-(defn to-page-count [{:keys [q/limit q/offset]} page-size]
-  (quot (+ offset limit) page-size))
+(defn to-page-count [q page-size]
+  (math/ceil (/ (:q/limit q) page-size)))
 
-(defn to-page-indexes [{:keys [q/limit q/offset]} page-size]
-  (let [start-page (math/floor (/ offset page-size))
-        end-page (math/ceil (/ (+ offset (max limit 1)) page-size))
-        page-indexes (range start-page end-page)]
+(defn to-start-page-index [{:keys [q/offset]} page-size]
+  (math/floor (/ offset page-size)))
+
+(defn to-end-page-index [q page-size]
+  (+ (to-start-page-index q page-size)
+     (to-page-count q page-size)))
+
+(defn to-page-indexes [q page-size]
+  (let [start-page-index (to-start-page-index q page-size)
+        end-page-index (to-end-page-index q page-size)
+        page-indexes (range start-page-index end-page-index)]
     (vec page-indexes)))
 
 (defn to-page-numbers [q page-size]
