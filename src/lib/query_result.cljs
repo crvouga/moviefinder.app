@@ -55,3 +55,11 @@
         offset-smaller (:query-result/offset smaller-result)]
     (= rows-smaller (->> rows-bigger (drop offset-smaller) (take limit-smaller)))))
 
+
+
+(defn paginate [query-result]
+  (let [rows (:query-result/rows query-result)
+        limit (:query-result/limit query-result)
+        offset (:query-result/offset query-result)
+        rows-new (take limit (drop offset rows))]
+    (assoc query-result :query-result/rows rows-new)))

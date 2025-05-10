@@ -29,7 +29,8 @@
                         :query-result/offset (-> q :q/offset)
                         :query-result/primary-key :media/id
                         :query-result/rows []}
-          q-result (query-result/combine q-result-acc q-results)]
+          q-result (query-result/combine q-result-acc q-results)
+          q-result (query-result/paginate q-result)]
       (-> q-result
           (merge result/ok)
           (assoc :query-result/query q)))))

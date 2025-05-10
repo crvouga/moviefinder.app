@@ -17,9 +17,35 @@
 (defn to-start-page-index [{:keys [q/offset]} page-size]
   (math/floor (/ offset page-size)))
 
+(defn to-page-index [q page-size]
+  (math/floor (mod (:q/offset q) page-size)))
+
+(defn- to-end-page-offset [q page-size]
+  (if (zero? (to-page-index q page-size)) 0 1))
+
 (defn to-end-page-index [q page-size]
   (+ (to-start-page-index q page-size)
-     (to-page-count q page-size)))
+     (to-page-count q page-size)
+     (to-end-page-offset q page-size)))
+
+(comment
+  ;; impl From<(Pagination, usize)> for PageBased {
+  ;;     fn from((pagination, page_size): (Pagination, usize)) -> Self {
+  ;;         let page_count = (pagination.limit as f64 / page_size as f64).ceil() as usize;
+  ;;         let start_page = (pagination.offset / page_size) + 1;
+  ;;         let index = pagination.offset % page_size;
+  ;;         let end_page_offset = if index == 0 { 0 } else { 1 };
+  ;;         let end_page = start_page + page_count - 1 + end_page_offset;
+
+  ;;         PageBased {
+  ;;             start_page,
+  ;;             end_page,
+  ;;             page_size,
+  ;;             index,
+  ;;         }
+  ;;     }
+  ;; }
+  )
 
 (defn to-page-indexes [q page-size]
   (let [start-page-index (to-start-page-index q page-size)
