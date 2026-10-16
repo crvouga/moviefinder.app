@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, describe, it, expect, vi } from "vite-plus/test";
 import { eq, sql } from "drizzle-orm";
 import { createDatabase } from "../../src/server/db";
+import { assertDatabaseReady, DatabaseNotReady } from "../../src/server/db/readiness";
 import { createApplication } from "../../src/server/app";
 import { createEntityStore } from "../../src/server/entity-store";
 import { executeCommand } from "../../src/server/commands";
@@ -545,4 +546,84 @@ it("revokes pending grants when an owner removes a collaborator or cancels an in
   await expect(
     cmd(editor, { type: "invitation.accept", invitationId } as never),
   ).rejects.toMatchObject({ status: 409 });
+});
+
+describe("database initialization diagnostics", () => {
+  it("checks all required tables and columns in a read-only transaction", async () => {
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`set transaction read only`);
+      await expect(assertDatabaseReady(tx)).resolves.toBeUndefined();
+    });
+  });
+  it("reports missing columns from unapplied additive migrations", async () => {
+    await db.execute(
+      sql`alter table moviefinder.source_entity rename column detail_fetched_at to detail_fetched_at_pending`,
+    );
+    try {
+      await expect(assertDatabaseReady(db)).rejects.toMatchObject({
+        missing: ["moviefinder.source_entity.detail_fetched_at"],
+      });
+    } finally {
+      await db.execute(
+        sql`alter table moviefinder.source_entity rename column detail_fetched_at_pending to detail_fetched_at`,
+      );
+    }
+  });
+  it("returns an actionable auth failure without printing SQL parameters for a missing user table", async () => {
+    await db.execute(sql`alter table moviefinder."user" rename to user_pending_migrations`);
+    const output = vi.spyOn(console, "log").mockImplementation(() => {}),
+      errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await expect(assertDatabaseReady(db)).rejects.toBeInstanceOf(DatabaseNotReady);
+      const response = await service.app.request("/api/auth/sign-in/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Origin: config.MOVIEFINDER_ORIGIN },
+        body: JSON.stringify({
+          email: "never-log-this@example.test",
+          password: "never-log-this-password",
+        }),
+      });
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({
+        code: "DATABASE_NOT_READY",
+        message: expect.stringContaining("not been initialized"),
+      });
+      expect(errors).not.toHaveBeenCalled();
+      const logged = JSON.stringify(output.mock.calls);
+      expect(logged).not.toContain("never-log-this");
+      expect(logged).not.toContain("Failed query");
+      expect(logged).not.toContain("select");
+    } finally {
+      output.mockRestore();
+      errors.mockRestore();
+      await db.execute(sql`alter table moviefinder.user_pending_migrations rename to "user"`);
+    }
+  });
+  it("preserves expected invalid-credential responses with centralized auth error handling", async () => {
+    const response = await service.app.request("/api/auth/sign-in/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Origin: config.MOVIEFINDER_ORIGIN },
+      body: JSON.stringify({
+        email: "owner@example.test",
+        password: "a-different-invalid-password",
+      }),
+    });
+    expect(response.status).toBe(401);
+  });
+  it("pauses synchronization after a missing-table error rather than polling every second", async () => {
+    await db.execute(sql`alter table moviefinder.sync_job rename to sync_job_pending_migrations`);
+    const output = vi.spyOn(console, "log").mockImplementation(() => {}),
+      worker = createSync(db, fixtureUpstream);
+    try {
+      await worker.tick();
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      const logs = output.mock.calls.map(([entry]) => JSON.parse(entry));
+      expect(logs.filter((entry) => entry.category === "sync")).toHaveLength(1);
+      expect(logs[0].message).toContain("database migrations are missing");
+    } finally {
+      worker.stop();
+      output.mockRestore();
+      await db.execute(sql`alter table moviefinder.sync_job_pending_migrations rename to sync_job`);
+    }
+  });
 });

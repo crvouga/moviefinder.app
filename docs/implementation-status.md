@@ -1,6 +1,6 @@
 # Implementation and verification status
 
-Recorded on 2026-10-15 (America/Phoenix). This is an implementation handoff, not a claim of completed production deployment.
+Updated on 2026-10-16 (America/Phoenix). This is an implementation handoff, not a claim of completed production deployment.
 
 ## Delivered application
 
@@ -22,21 +22,21 @@ The selective source replica retains JSONB, revisions/checksums, projection-spec
 - `scripts`, `tests`, `.github/workflows`, `Dockerfile`: development supervision, isolated PostgreSQL tests, Atlas verification, live catalog/container smoke, and centralized publishing configuration.
 - `README.md`, `AGENTS.md`, and `docs/*`: setup, actual architecture/contracts, verification, and prepared infrastructure handoff.
 
-The supplied SPEC.md is unchanged. No pre-existing application code, legacy deployment, shared database, shared policy, or infrastructure allocation was overwritten.
+The supplied SPEC.md is unchanged. No pre-existing application code, legacy deployment, shared database, shared policy, or infrastructure allocation was overwritten. Development database diagnostics read application catalog metadata only; shared DDL and writes remain unperformed.
 
 ## Verification evidence
 
 | Command / check                                                     | Actual result                                                                                                                                       |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run check`                                                     | Passed: Oxfmt, Oxlint, native type checking with no warnings/errors; 22 unit/property tests                                                         |
+| `bun run check`                                                     | Passed: Oxfmt, Oxlint, native type checking with no warnings/errors; 24 unit/property tests                                                         |
 | `bun run build`                                                     | Passed: code-split production assets; no oversized-chunk warning                                                                                    |
-| `bun run test:integration`                                          | Passed: 33 tests against fresh disposable PostgreSQL with real Atlas migrations and Better Auth                                                     |
+| `bun run test:integration`                                          | Passed: 38 tests against fresh disposable PostgreSQL with real Atlas migrations and Better Auth                                                     |
 | `bun run test:e2e`                                                  | Passed: 20 tests across mobile and desktop Chromium with real Bun/Hono/PostgreSQL and deterministic upstream fixtures                               |
 | `bun run db:validate`                                               | Passed: all committed migration hashes valid                                                                                                        |
 | `bun run db:verify`                                                 | Passed: fresh Atlas replay and desired-schema comparison report no schema changes                                                                   |
 | `vault run -- bun scripts/smoke.ts`                                 | Passed against live TMDB: movie, TV, season, episode, and person source documents validate and normalize; no database writes                        |
-| `docker build --platform linux/amd64 -t moviefinder:verification .` | Passed: image built, 89,071,430 bytes (84.9 MiB)                                                                                                    |
-| Native ARM64 image build and container smoke                        | Passed: `/health` 200 with PostgreSQL unavailable, `/auth` 200, protected API 401, protected deep link 302; final image 90,390,941 bytes (86.2 MiB) |
+| `docker build --platform linux/amd64 -t moviefinder:verification .` | Passed: image built, 89,073,376 bytes (84.9 MiB)                                                                                                    |
+| Native ARM64 image build and container smoke                        | Passed: `/health` 200 with PostgreSQL unavailable, `/auth` 200, protected API 401, protected deep link 302; final image 90,392,880 bytes (86.2 MiB) |
 | Local emulated x64 container execution                              | Failed inside Bun 1.4.2 before application startup, with no AVX support reported by the emulator; not counted as a successful runtime check         |
 | Native x64 CI / public live deployment                              | Not executed; required before production completion                                                                                                 |
 
@@ -69,3 +69,11 @@ The complete request body is [hosting-request.md](hosting-request.md); setup and
 TMDB has distinct film and TV genre categories and lacks some TV cast/crew discovery constraints. The app reports affected combinations, uses cached credits where available, and avoids claiming unavailable metadata is complete. Random and personalized feeds rank bounded provider candidates; they do not claim a uniform sample or exhaustive ordering of the full TMDB catalog. Personalization uses actual genre preferences rather than invented recommendations.
 
 The initial architecture deliberately serializes committing writes and polls PostgreSQL events. It retains durable event/operation history without automatic destructive pruning. Measure workload before scaling replicas or adding a reviewed retention strategy. Shared deployment, mail delivery, OAuth, physical-handset testing, and native x64 runtime checks must remain unchecked until real evidence exists.
+
+## Local missing-table follow-up (2026-10-16)
+
+The reported `relation "moviefinder.user" does not exist` error was reproduced against disposable PostgreSQL. A read-only check of the selected Vault development database confirms that required application tables/columns are absent. The current inventory was re-fetched and still records no schema allocation for this repository. No shared migration was applied.
+
+Development now checks all required tables/columns before starting either server and exits with migration/allocation instructions when they are missing. Database readiness uses the same check; public liveness stays independent. Missing-schema/permissions errors pause synchronization until restart; transient connection failures back off with bounded logs. Unexpected Better Auth errors go through Hono's sanitized 503 response instead of printing SQL parameters. Regression tests cover missing authentication tables, additive columns, expected invalid-credential responses, read-only metadata checks, worker pause, and transient recovery.
+
+The super.engineering Run menu includes **Database check** (read only) and **Migrate database** (the existing allocation-guarded Atlas command). Login remains blocked on the external schema allocation and subsequent authorized migrations. A credential being available in Vault is not evidence that the application schema has been provisioned.

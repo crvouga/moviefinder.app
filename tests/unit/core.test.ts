@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vite-plus/test";
+import { describe, it, expect, vi } from "vite-plus/test";
 import fc from "fast-check";
 import { generateKeyBetween } from "fractional-indexing";
 import {
@@ -17,6 +17,13 @@ import { queryIdentity, encodeCursor, decodeCursor, localMatch } from "../../src
 import { upstreamParameters } from "../../src/server/entity-store-sync";
 import { createTmdb } from "../../src/server/entity-store-sync/tmdb";
 import { movieDetail } from "../fixtures/catalog";
+import { createSync } from "../../src/server/entity-store-sync";
+import type { Database } from "../../src/server/db";
+import {
+  databaseFailure,
+  databaseStartupMessage,
+  DatabaseNotReady,
+} from "../../src/server/db/readiness";
 describe("canonical catalog", () => {
   it("separates movie and series identities", () =>
     expect(canonicalId("movie", 1)).not.toBe(canonicalId("tv", 1)));
@@ -249,4 +256,57 @@ it("restricts title-tag and list commands to movies and series", async () => {
       seen: true,
     }).success,
   ).toBe(false);
+});
+
+describe("database failures", () => {
+  it("distinguishes wrapped schema failures from transient connection errors", () => {
+    expect(
+      databaseFailure(
+        new Error("Failed query with sensitive parameters", { cause: { code: "42P01" } }),
+      ),
+    ).toBe("schema");
+    expect(databaseFailure({ code: "ECONNREFUSED" })).toBe("connection");
+    expect(databaseFailure({ code: "42501" })).toBe("permissions");
+    expect(databaseFailure({ code: "23505" })).toBeUndefined();
+    expect(databaseStartupMessage(new DatabaseNotReady(["moviefinder.user.id"]))).toContain(
+      "After allocation approval",
+    );
+    expect(databaseStartupMessage(new Error("postgres://do-not-log-this"))).not.toContain(
+      "do-not-log-this",
+    );
+  });
+  it("backs off transient failures, recovers normal polling, and cancels pending work on stop", async () => {
+    vi.useFakeTimers();
+    const output = vi.spyOn(console, "log").mockImplementation(() => {}),
+      transaction = vi
+        .fn()
+        .mockRejectedValue(
+          Object.assign(new Error("connection refused"), { code: "ECONNREFUSED" }),
+        ),
+      worker = createSync({ transaction } as unknown as Database, async () => ({}));
+    try {
+      await worker.tick();
+      expect(transaction).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(transaction).toHaveBeenCalledTimes(2);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(transaction).toHaveBeenCalledTimes(2);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(transaction).toHaveBeenCalledTimes(3);
+      expect(output).toHaveBeenCalledTimes(1);
+      transaction.mockResolvedValue([]);
+      await vi.advanceTimersByTimeAsync(4000);
+      expect(transaction).toHaveBeenCalledTimes(4);
+      expect(JSON.stringify(output.mock.calls)).toContain("Database connection restored");
+      await vi.advanceTimersByTimeAsync(800);
+      expect(transaction).toHaveBeenCalledTimes(5);
+      worker.stop();
+      await vi.advanceTimersByTimeAsync(60000);
+      expect(transaction).toHaveBeenCalledTimes(5);
+    } finally {
+      worker.stop();
+      output.mockRestore();
+      vi.useRealTimers();
+    }
+  });
 });

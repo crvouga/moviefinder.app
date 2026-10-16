@@ -12,7 +12,7 @@ Requires Bun 1.4.2, a supported Node runtime (22.22.3 used here), Atlas, Docker 
 4. After allocation approval, run `bun run db:status` and `bun run db:migrate` with the non-secret `MOVIEFINDER_DATABASE_ALLOCATION=moviefinder` confirmation supplied by the approved environment.
 5. Set the plain `MOVIEFINDER_ORIGIN` to `http://localhost:5173`, then run `bun run dev`.
 
-The browser uses port 5173. Vite+ proxies API requests to Bun on 8080. `bun run dev` injects development Vault secrets and starts both processes. `dev:local` is for an environment that has already injected its configuration. No CORS setup is needed.
+The browser uses port 5173. Vite+ proxies API requests to Bun on 8080. `bun run dev` injects development Vault secrets, checks the required database tables and columns without writing, then starts both processes. If migrations are missing, it exits with the setup steps before starting either server. `dev:local` is for an environment that has already injected its configuration. No CORS setup is needed.
 
 Required runtime variables are `DATABASE_URL` and `BETTER_AUTH_SECRET`. Production also requires the app-specific `MOVIEFINDER_ORIGIN`. `TMDB_API_READ_ACCESS_TOKEN` enables catalog refresh; cached content remains usable during an upstream outage. `.env.example` lists variable names without values. Never reuse another application's authentication base URL.
 
@@ -25,9 +25,13 @@ The repository's `.super.engineering/config.json` provides the built-in hooks:
 - **Setup** runs `bun install --frozen-lockfile` when super.engineering sets up the checkout.
 - **Run → MovieFinder** is the default. It runs `bun run dev`, loads development secrets through Vault, and starts the frontend and backend together. Open `http://localhost:5173`.
 - **Run → Checks** runs the formatting, lint, native type checking, and unit/property suite with `bun run check`.
+- **Run → Database check** checks the development database tables/columns without writing or applying migrations.
+- **Run → Migrate database** runs the guarded Atlas migration command after the infrastructure allocation has been approved and its confirmation configured.
 - **Stop** terminates the selected Run process. The development supervisor handles termination of both development servers.
 
-Authenticate with `vault login` and complete the approved database allocation/migration steps above before running MovieFinder. Hooks do not create shared resources or apply migrations. Keep runtime files and secrets out of the shared hook configuration.
+Authenticate with `vault login` and complete the approved database allocation/migration steps above before running MovieFinder. Setup and MovieFinder never apply migrations; the separate migration entry keeps the existing allocation guard. Keep runtime files and secrets out of the shared hook configuration.
+
+If logs say `relation "moviefinder.user" does not exist`, PostgreSQL is reachable but the authentication tables have not been created in the selected database. Run **Database check** (or `bun run db:check`) for a read-only diagnosis. Obtain the approved `moviefinder` schema allocation through `crvouga/workspace`, then run **Migrate database** (or `bun run db:migrate`) and restart MovieFinder. An available `DATABASE_URL` or a missing table does not authorize creating shared infrastructure, switching databases, or bypassing the allocation guard. The current inventory does not yet record an allocation for this repository; the complete change request is in `docs/hosting-request.md`.
 
 ## Commands
 
@@ -40,6 +44,7 @@ Authenticate with `vault login` and complete the approved database allocation/mi
 | `bun run test:integration`          | Disposable PostgreSQL, Atlas migrations, API/concurrency integration suite |
 | `bun run test:e2e`                  | Disposable PostgreSQL and Playwright mobile/desktop; build first           |
 | `bun run db:validate`               | Validate Atlas migration integrity                                         |
+| `bun run db:check`                  | Read-only development database table/column check through Vault            |
 | `bun run db:diff change_name`       | Generate an Atlas migration from atlas/schema.sql                          |
 | `bun run db:migrate`                | Apply through Vault after the allocation guard passes                      |
 | `bun run db:status`                 | Read Atlas migration status through Vault                                  |

@@ -100,7 +100,8 @@ test("advances through virtualized posters and restores the selected title after
         for (let step = 1; step <= 8; step++) {
           await touch.send("Input.dispatchTouchEvent", {
             type: "touchMove",
-            touchPoints: [{ x, y: box!.y + box!.height * (0.45 - step * 0.05) }],
+            // Cross half a slide so a slower gesture also completes under CI load.
+            touchPoints: [{ x, y: box!.y + box!.height * (0.45 - step * 0.08) }],
           });
         }
         await touch.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });

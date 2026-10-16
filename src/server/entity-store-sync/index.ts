@@ -10,6 +10,7 @@ import { canonicalId, type FeedParams } from "../../shared/contracts";
 import { appendEvent } from "../events";
 import { metrics, log } from "../log";
 import { type Tmdb, UpstreamError, upstreamPage } from "./tmdb";
+import { databaseFailure } from "../db/readiness";
 export function upstreamParameters(p: FeedParams, page: number, type: "movie" | "tv") {
   const out: Record<string, string> = {
     page: fieldText(Math.min(page, 500)),
@@ -86,6 +87,8 @@ export function createSync(db: Database, tmdb: Tmdb) {
   };
 
   let stopped = false;
+  let connectionFailures = 0;
+  let lastDatabaseLog = -Infinity;
   const abort = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   async function enqueue(id: string, kind: string, params: Record<string, unknown>) {
@@ -222,6 +225,7 @@ export function createSync(db: Database, tmdb: Tmdb) {
   }
   async function tick() {
     if (stopped) return;
+    let nextPoll = 800;
     try {
       const claimed = await db.transaction(async (tx) => {
         const result = await tx.execute(
@@ -245,6 +249,8 @@ export function createSync(db: Database, tmdb: Tmdb) {
           )
           .returning();
       });
+      if (connectionFailures) log("sync", "Database connection restored");
+      connectionFailures = 0;
       // A bounded, sequential upstream lane makes rate limiting predictable.
       for (const job of claimed) {
         try {
@@ -288,10 +294,29 @@ export function createSync(db: Database, tmdb: Tmdb) {
           log("sync", message, { job: job.id, attempt: job.attempts });
         }
       }
-    } catch {
-      log("sync", "Background worker could not access the database");
+    } catch (error) {
+      const reason = databaseFailure(error);
+      if (reason !== "connection") {
+        log(
+          "sync",
+          reason === "schema"
+            ? "Catalog sync paused: database migrations are missing. After allocation approval, run bun run db:migrate and restart MovieFinder."
+            : reason === "permissions"
+              ? "Catalog sync paused: check the allocated database credentials and schema grants, then restart MovieFinder."
+              : "Catalog sync paused after an unexpected database error. Check configuration and restart MovieFinder.",
+        );
+        return;
+      }
+      connectionFailures++;
+      nextPoll = Math.min(60000, 1000 * 2 ** Math.min(connectionFailures - 1, 6));
+      if (Date.now() - lastDatabaseLog >= 60000) {
+        log("sync", "Database unavailable; catalog sync will retry with backoff", {
+          retryMilliseconds: nextPoll,
+        });
+        lastDatabaseLog = Date.now();
+      }
     }
-    if (!stopped) timer = setTimeout(() => void tick(), 800);
+    if (!stopped) timer = setTimeout(() => void tick(), nextPoll);
   }
   async function warm() {
     const stale = await db

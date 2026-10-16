@@ -2,7 +2,7 @@
 
 The production boundary is one Bun process, one public HTTP port, and one application origin. Hono owns `/api/*`; Better Auth owns `/api/auth/*`; the remaining registered application routes serve the compiled React SPA after a persisted-session check. Static hashed assets are immutable. Unknown API routes return JSON 404s rather than the SPA.
 
-Development uses the same API with Vite+'s relative-origin proxy. `scripts/dev.ts` supervises both processes and stops its sibling when either exits.
+Development uses the same API with Vite+'s relative-origin proxy. `scripts/dev.ts` first runs a read-only table/column check, then supervises both processes and stops its sibling when either exits. An unmigrated database stops development startup before the UI can accept a login attempt. Production liveness remains independent of database readiness.
 
 ## Server boundaries
 
@@ -27,6 +27,8 @@ Discovery mounts only neighboring virtual slides. Poster dimensions are reserved
 
 ## Operational scope
 
-Pools contain at most five connections with acquisition and statement timeouts. Logs carry request IDs and structured categories; they do not include URLs with query strings, upstream bodies, credentials, or database errors containing connection details. Liveness never queries dependencies. Readiness queries PostgreSQL separately. SIGTERM closes streams, cancels synchronization, drains the HTTP server, and closes the pool.
+Pools contain at most five connections with acquisition and statement timeouts. Logs carry request IDs and structured categories; they do not include URLs with query strings, upstream bodies, credentials, or database errors containing connection details. Better Auth's `onAPIError.throw` option passes unexpected errors to Hono for sanitization, preventing the underlying router from printing SQL parameters; expected authentication API errors retain their normal HTTP status. See the [Better Auth option reference](https://better-auth.com/docs/reference/options#onapierror).
+
+Liveness never queries dependencies. Readiness checks the application's required tables/columns separately. `db/readiness.ts` derives that inventory from the Drizzle mappings, traverses wrapped driver error codes, and produces safe development diagnostics. Missing schema or permissions pauses the catalog worker until restart; known transient connection failures retry with capped exponential backoff and at most one failure log per minute. SIGTERM closes streams, cancels synchronization, drains the HTTP server, and closes the pool.
 
 The initial deployment serializes committing writers to make conflict resolution and replay unambiguous. PostgreSQL event polling supports visibility across processes without an in-memory-only fan-out assumption. High-volume deployments should measure the commit lock and polling load before increasing replicas.

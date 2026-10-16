@@ -6,7 +6,7 @@ The authoritative guide is https://www.chrisvouga.dev/llms.txt. Re-fetch it befo
 
 The target repository is `crvouga/moviefinder`. Its original checkout contained only SPEC.md. At implementation time, the published inventory has three older MovieFinder services owned by `moviefinder.app-rust`, `moviefinder.app-react`, and `moviefinder.app-clojurescript`. None names this repository, and no explicit `moviefinder` application schema allocation is recorded for this target. Those deployments have been preserved.
 
-No shared PostgreSQL query, DDL, or write has been performed by this implementation. All database verification used disposable loopback PostgreSQL containers. An available shared DATABASE_URL is not allocation authorization.
+Shared development diagnostics read only application catalog metadata through `bun run db:check`. No shared PostgreSQL DDL or write has been performed by this implementation. Automated database verification uses disposable loopback PostgreSQL containers. An available shared DATABASE_URL is not allocation authorization.
 
 The approved platform change must allocate the `moviefinder` schema in both development and production, with separate environment-selected connection contracts. The existing DATABASE_URL must remain opaque and must not be replaced globally to repurpose another app's database. All authentication, catalog, user, event, and collaboration tables live inside the allocated schema. No extension is required. Atlas revision metadata also stays in that schema.
 
@@ -54,6 +54,12 @@ Reuse shared keys where appropriate; do not copy another app's OAuth credentials
 7. Roll back application image through the central workflow if necessary. Additive database changes remain compatible; do not automatically drop user/catalog/auth tables to roll back.
 
 The desired SQL model declares the schema for disposable Atlas normalization. Application migrations contain table changes only and assume the infrastructure-owned namespace already exists. Migration generation uses a disposable database populated by committed Atlas migrations, then Atlas schema diff; it does not require a paid baseline feature and does not inspect shared data.
+
+## Missing tables during local startup
+
+`relation "moviefinder.user" does not exist` means the selected PostgreSQL server is reachable but the app's authentication table is absent. It does not mean an existing account's password is wrong. `bun run db:check` reports missing application tables/columns using read-only catalog queries and does not expose the connection string. `bun run dev` runs this check before starting either server.
+
+The inventory was re-fetched on 2026-10-16 and still has no approved `database_schema` allocation for `crvouga/moviefinder`. The three legacy MovieFinder services are separate repositories. Complete the prepared allocation request through the shared platform; only after approval may the existing guarded Atlas command apply migrations. Do not set its confirmation flag to work around missing authorization, create the namespace manually, or redirect another application's connection contract.
 
 ## Hosting request
 

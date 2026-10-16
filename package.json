@@ -15,6 +15,7 @@
     "format": "vp fmt",
     "lint": "vp lint",
     "db:validate": "atlas migrate validate --dir file://atlas/migrations",
+    "db:check": "vault run -- bun scripts/database-check.ts",
     "db:diff": "bun scripts/migrate.ts diff",
     "db:migrate": "vault run -- bun scripts/migrate.ts apply",
     "db:status": "vault run -- bun scripts/migrate.ts status",

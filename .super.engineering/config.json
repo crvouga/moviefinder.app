@@ -16,6 +16,20 @@
         "bun run check"
       ],
       "default": false
+    },
+    {
+      "name": "Database check",
+      "commands": [
+        "bun run db:check"
+      ],
+      "default": false
+    },
+    {
+      "name": "Migrate database",
+      "commands": [
+        "bun run db:migrate"
+      ],
+      "default": false
     }
   ]
 }

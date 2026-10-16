@@ -14,6 +14,9 @@ export function createAuth(db: Database, config: Config) {
       level: "error",
       log: (level) => log("auth", "Authentication operation failed", { level }),
     },
+    // Let Hono sanitize unexpected errors. The auth router otherwise prints SQL and parameters.
+    // Expected APIErrors still become their normal HTTP responses inside Better Call.
+    onAPIError: { throw: true },
     secret: config.BETTER_AUTH_SECRET,
     baseURL: config.MOVIEFINDER_ORIGIN,
     trustedOrigins: [config.MOVIEFINDER_ORIGIN],

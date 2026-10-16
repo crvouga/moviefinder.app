@@ -17,6 +17,7 @@ import { executeCommand } from "./commands";
 import { snapshot } from "./state";
 import { replay } from "./events";
 import { events, jobs } from "./db/schema";
+import { assertDatabaseReady, databaseFailure } from "./db/readiness";
 export function createApplication(db: Database, config: Config, upstream?: Tmdb) {
   const auth = createAuth(db, config),
     sync = createSync(db, upstream ?? createTmdb(config.TMDB_API_READ_ACCESS_TOKEN ?? "")),
@@ -53,6 +54,21 @@ export function createApplication(db: Database, config: Config, upstream?: Tmdb)
           : undefined;
     if (databaseCode === "23505")
       return c.json({ error: "This value is already in use", requestId: c.get("requestId") }, 409);
+    const failure = databaseFailure(error);
+    if (failure) {
+      const message =
+        failure === "schema"
+          ? "The MovieFinder database has not been initialized. Contact the service operator."
+          : "The MovieFinder database is unavailable. Please try again later.";
+      log("database", "Request could not access the application database", {
+        requestId: c.get("requestId"),
+        reason: failure,
+      });
+      return c.json(
+        { error: message, message, code: "DATABASE_NOT_READY", requestId: c.get("requestId") },
+        503,
+      );
+    }
     log("error", "Request failed", { requestId: c.get("requestId"), category: error.name });
     return c.json(
       { error: "The service could not complete this request", requestId: c.get("requestId") },
@@ -90,7 +106,7 @@ export function createApplication(db: Database, config: Config, upstream?: Tmdb)
   const api = root
     .get("/api/ready", async (c) => {
       try {
-        await db.execute(sql`select 1`);
+        await assertDatabaseReady(db);
         return c.json({ status: "ready" });
       } catch {
         return c.json({ status: "unavailable" }, 503);
