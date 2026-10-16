@@ -8,6 +8,9 @@
       "commands": [
         "bun run dev"
       ],
+      "stop_commands": [
+        "bun scripts/stop-dev.ts"
+      ],
       "default": true
     },
     {

@@ -4,7 +4,7 @@ import { assertDatabaseReady, databaseStartupMessage } from "../src/server/db/re
 const url = process.env.DATABASE_URL;
 if (!url) {
   console.error(
-    "DATABASE_URL is required. Use bun run db:check to load development configuration through Vault.",
+    "DATABASE_URL is required. Use bun run db:check:shared to load shared development configuration through Vault.",
   );
   process.exit(1);
 }

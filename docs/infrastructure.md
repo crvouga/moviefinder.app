@@ -1,12 +1,12 @@
 # Shared infrastructure integration
 
-The authoritative guide is https://www.chrisvouga.dev/llms.txt. Re-fetch it before each infrastructure operation. Inventory in crvouga/workspace takes precedence. This repository never creates a Vault service, PostgreSQL server, Railway project, Cloudflare account, database/schema allocation, or control-plane credential.
+The authoritative guide is https://www.chrisvouga.dev/llms.txt. Re-fetch it before each infrastructure operation. Inventory in crvouga/workspace takes precedence. This repository never provisions shared Vault/PostgreSQL/Railway/Cloudflare infrastructure, database/schema allocations, or control-plane credentials. At the user's request, local development runs an independent embedded PostgreSQL cluster; it never connects to shared PostgreSQL.
 
 ## Verified ownership and current boundary
 
 The target repository is `crvouga/moviefinder`. Its original checkout contained only SPEC.md. At implementation time, the published inventory has three older MovieFinder services owned by `moviefinder.app-rust`, `moviefinder.app-react`, and `moviefinder.app-clojurescript`. None names this repository, and no explicit `moviefinder` application schema allocation is recorded for this target. Those deployments have been preserved.
 
-Shared development diagnostics read only application catalog metadata through `bun run db:check`. No shared PostgreSQL DDL or write has been performed by this implementation. Automated database verification uses disposable loopback PostgreSQL containers. An available shared DATABASE_URL is not allocation authorization.
+Shared development diagnostics read only application catalog metadata through `bun run db:check`. No shared PostgreSQL DDL or write has been performed by this implementation. Automated local database verification uses isolated temporary embedded PostgreSQL clusters, or an explicit validated loopback TEST_DATABASE_URL. An available shared DATABASE_URL is not allocation authorization.
 
 The approved platform change must allocate the `moviefinder` schema in both development and production, with separate environment-selected connection contracts. The existing DATABASE_URL must remain opaque and must not be replaced globally to repurpose another app's database. All authentication, catalog, user, event, and collaboration tables live inside the allocated schema. No extension is required. Atlas revision metadata also stays in that schema.
 
@@ -53,13 +53,15 @@ Reuse shared keys where appropriate; do not copy another app's OAuth credentials
 6. Verify public liveness, authenticated readiness, registration/session reload, live catalog ingestion, and two-user list propagation at the approved origin.
 7. Roll back application image through the central workflow if necessary. Additive database changes remain compatible; do not automatically drop user/catalog/auth tables to roll back.
 
-The desired SQL model declares the schema for disposable Atlas normalization. Application migrations contain table changes only and assume the infrastructure-owned namespace already exists. Migration generation uses a disposable database populated by committed Atlas migrations, then Atlas schema diff; it does not require a paid baseline feature and does not inspect shared data.
+The desired SQL model declares the schema for disposable Atlas normalization. Application migrations contain table changes only and assume the infrastructure-owned namespace already exists. Migration generation uses a temporary embedded database populated by committed Atlas migrations, then Atlas schema diff; it does not require a paid baseline feature and does not inspect shared data.
 
-## Missing tables during local startup
+## Local embedded PostgreSQL
 
-`relation "moviefinder.user" does not exist` means the selected PostgreSQL server is reachable but the app's authentication table is absent. It does not mean an existing account's password is wrong. `bun run db:check` reports missing application tables/columns using read-only catalog queries and does not expose the connection string. `bun run dev` runs this check before starting either server.
+`bun run dev` starts a per-checkout PostgreSQL cluster with `embedded-postgres`, creates its local database/schema, and automatically applies the committed Atlas migrations before starting the app. The connection is generated locally and replaces any Vault DATABASE_URL in child processes. Data and generated local credentials stay in ignored `.local/`, excluded from Git and Docker contexts. PostgreSQL binds only to loopback, and Stop preserves its data for the next run. No shared schema allocation flag or Docker daemon is required for local development.
 
-The inventory was re-fetched on 2026-10-16 and still has no approved `database_schema` allocation for `crvouga/moviefinder`. The three legacy MovieFinder services are separate repositories. Complete the prepared allocation request through the shared platform; only after approval may the existing guarded Atlas command apply migrations. Do not set its confirmation flag to work around missing authorization, create the namespace manually, or redirect another application's connection contract.
+`db:migrate`, `db:status`, `db:check`, and `db:drift` default to this local database. Shared operations are explicitly named `db:migrate:shared`, `db:status:shared`, `db:check:shared`, and `db:drift:shared`. They load Vault configuration and retain the existing allocation guard. Do not pass shared URLs to the local launcher or copy shared data into local development.
+
+The previously reported missing `moviefinder.user` error came from using an unprovisioned shared database during local startup. That path is replaced by automatic embedded setup. The inventory allocation requirements above remain prerequisites for shared deployment only.
 
 ## Hosting request
 

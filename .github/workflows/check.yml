@@ -21,6 +21,7 @@ jobs:
       - run: bun run build
       - uses: ariga/setup-atlas@v0
       - run: bun run db:validate
+      - run: bun run test:local-database
   integration:
     runs-on: ubuntu-latest
     services:

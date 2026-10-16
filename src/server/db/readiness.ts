@@ -68,7 +68,7 @@ export async function assertDatabaseReady(db: Executor) {
 
 export function databaseStartupMessage(error: unknown) {
   if (error instanceof DatabaseNotReady || databaseFailure(error) === "schema")
-    return `${error instanceof DatabaseNotReady ? error.message : "MovieFinder database migrations have not been applied."}\nFirst obtain the approved moviefinder schema allocation through crvouga/workspace. After allocation approval, run bun run db:migrate, then restart MovieFinder. See docs/infrastructure.md. Startup checks never apply migrations.`;
+    return `${error instanceof DatabaseNotReady ? error.message : "MovieFinder database migrations have not been applied."}\nFirst obtain the approved moviefinder schema allocation through crvouga/workspace. After allocation approval, run bun run db:migrate:shared, then restart the shared deployment. See docs/infrastructure.md. Shared startup checks never apply migrations. Local development uses bun run dev and migrates embedded PostgreSQL automatically.`;
   if (databaseFailure(error) === "permissions")
     return "MovieFinder cannot access its allocated database. Check the development DATABASE_URL and schema grants through crvouga/workspace. Connection details have been omitted.";
   return "MovieFinder could not connect to its database. Check development Vault configuration and PostgreSQL availability, then retry. Connection details have been omitted.";

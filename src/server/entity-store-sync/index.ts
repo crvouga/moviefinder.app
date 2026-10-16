@@ -300,7 +300,7 @@ export function createSync(db: Database, tmdb: Tmdb) {
         log(
           "sync",
           reason === "schema"
-            ? "Catalog sync paused: database migrations are missing. After allocation approval, run bun run db:migrate and restart MovieFinder."
+            ? "Catalog sync paused: database migrations are missing. Apply the configured database's migrations and restart MovieFinder."
             : reason === "permissions"
               ? "Catalog sync paused: check the allocated database credentials and schema grants, then restart MovieFinder."
               : "Catalog sync paused after an unexpected database error. Check configuration and restart MovieFinder.",

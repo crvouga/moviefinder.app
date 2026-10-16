@@ -15,12 +15,17 @@
     "format": "vp fmt",
     "lint": "vp lint",
     "db:validate": "atlas migrate validate --dir file://atlas/migrations",
-    "db:check": "vault run -- bun scripts/database-check.ts",
+    "db:check": "bun scripts/local-database-command.ts check",
     "db:diff": "bun scripts/migrate.ts diff",
-    "db:migrate": "vault run -- bun scripts/migrate.ts apply",
-    "db:status": "vault run -- bun scripts/migrate.ts status",
-    "db:drift": "vault run -- bun scripts/migrate.ts drift",
-    "db:verify": "bun scripts/schema-diff.ts verify --check"
+    "db:migrate": "bun scripts/local-database-command.ts apply",
+    "db:status": "bun scripts/local-database-command.ts status",
+    "db:drift": "bun scripts/local-database-command.ts drift",
+    "db:verify": "bun scripts/schema-diff.ts verify --check",
+    "db:check:shared": "vault run -- bun scripts/database-check.ts",
+    "db:migrate:shared": "vault run -- bun scripts/migrate.ts apply",
+    "db:status:shared": "vault run -- bun scripts/migrate.ts status",
+    "test:local-database": "vp test run --project local-database",
+    "db:drift:shared": "vault run -- bun scripts/migrate.ts drift"
   },
   "dependencies": {
     "@hono/zod-validator": "0.9.1",
@@ -51,10 +56,21 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "embedded-postgres": "18.4.0-beta.17",
     "fast-check": "4.10.2",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite-plus": "1.2.0"
   },
-  "packageManager": "bun@1.4.2"
+  "packageManager": "bun@1.4.2",
+  "trustedDependencies": [
+    "@embedded-postgres/darwin-arm64",
+    "@embedded-postgres/darwin-x64",
+    "@embedded-postgres/linux-arm",
+    "@embedded-postgres/linux-arm64",
+    "@embedded-postgres/linux-ia32",
+    "@embedded-postgres/linux-ppc64",
+    "@embedded-postgres/linux-x64",
+    "@embedded-postgres/windows-x64"
+  ]
 }

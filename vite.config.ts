@@ -8,6 +8,8 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
+    watch: { ignored: ["**/.local/**"] },
+    fs: { deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/.local/**"] },
     proxy: { "/api": "http://127.0.0.1:8080", "/health": "http://127.0.0.1:8080" },
   },
   build: { outDir: "dist", sourcemap: false },
@@ -19,6 +21,14 @@ export default defineConfig({
   test: {
     projects: [
       { test: { name: "unit", include: ["tests/unit/**/*.test.ts"] } },
+      {
+        test: {
+          name: "local-database",
+          include: ["tests/local-database/**/*.test.ts"],
+          testTimeout: 30000,
+          fileParallelism: false,
+        },
+      },
       {
         test: {
           name: "integration",

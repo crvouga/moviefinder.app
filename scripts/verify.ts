@@ -1,8 +1,13 @@
+import { openLocalDatabase } from "./local-database";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createDatabase } from "../src/server/db";
 import { sql } from "drizzle-orm";
 const mode = process.argv[2] ?? "integration";
-const container = `moviefinder-test-${process.pid}`;
-let started = false;
+let embedded: Awaited<ReturnType<typeof openLocalDatabase>> | undefined;
+let directory: string | undefined;
+let exitCode = 0;
 async function run(args: string[], env: Record<string, string | undefined> = process.env) {
   const child = Bun.spawn(args, { stdout: "inherit", stderr: "inherit", env });
   const code = await child.exited;
@@ -11,25 +16,9 @@ async function run(args: string[], env: Record<string, string | undefined> = pro
 try {
   let url = process.env.TEST_DATABASE_URL;
   if (!url) {
-    await run([
-      "docker",
-      "run",
-      "--rm",
-      "-d",
-      "--name",
-      container,
-      "-e",
-      "POSTGRES_PASSWORD=local-test-only",
-      "-e",
-      "POSTGRES_DB=moviefinder_test",
-      "-p",
-      "127.0.0.1::5432",
-      "postgres:17.6-alpine",
-    ]);
-    started = true;
-    const inspect = Bun.spawn(["docker", "port", container, "5432/tcp"], { stdout: "pipe" });
-    const port = (await new Response(inspect.stdout).text()).trim().split(":").at(-1);
-    url = `postgres://postgres:local-test-only@127.0.0.1:${port}/moviefinder_test?sslmode=disable`;
+    directory = await mkdtemp(join(tmpdir(), "moviefinder-test-"));
+    embedded = await openLocalDatabase(directory, "moviefinder_test");
+    url = embedded.url;
   }
   const parsed = new URL(url);
   if (!["127.0.0.1", "localhost"].includes(parsed.hostname) || !parsed.pathname.endsWith("_test"))
@@ -65,6 +54,11 @@ try {
       : ["bun", "x", "--no-install", "vp", "test", "run", "--project", "integration"],
     { ...process.env, TEST_DATABASE_URL: url },
   );
+} catch (error) {
+  console.error(error instanceof Error ? error.message : "Database verification failed");
+  exitCode = 1;
 } finally {
-  if (started) await run(["docker", "stop", container]);
+  await embedded?.stop();
+  if (directory) await rm(directory, { recursive: true, force: true });
 }
+process.exit(exitCode);
