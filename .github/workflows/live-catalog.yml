@@ -1,0 +1,29 @@
+name: Live catalog smoke
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - uses: hashicorp/vault-action@v4
+        id: vault
+        with:
+          url: https://vault.chrisvouga.dev
+          method: jwt
+          path: jwt
+          role: github-actions
+          jwtGithubAudience: https://vault.chrisvouga.dev
+          exportEnv: false
+          secrets: |
+            secret/data/personal/prd TMDB_API_READ_ACCESS_TOKEN | TMDB_API_READ_ACCESS_TOKEN
+      - run: bun scripts/smoke.ts
+        env:
+          TMDB_API_READ_ACCESS_TOKEN: ${{ steps.vault.outputs.TMDB_API_READ_ACCESS_TOKEN }}

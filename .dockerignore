@@ -1,0 +1,12 @@
+.git
+.sc
+node_modules
+dist
+.env*
+.vault.yaml
+test-results
+playwright-report
+coverage
+*.log
+.super.engineering
+.superconductor

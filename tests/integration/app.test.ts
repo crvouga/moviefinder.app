@@ -1,0 +1,548 @@
+import { beforeAll, afterAll, describe, it, expect, vi } from "vite-plus/test";
+import { eq, sql } from "drizzle-orm";
+import { createDatabase } from "../../src/server/db";
+import { createApplication } from "../../src/server/app";
+import { createEntityStore } from "../../src/server/entity-store";
+import { executeCommand } from "../../src/server/commands";
+import { createQueries } from "../../src/server/queries";
+import { createSync } from "../../src/server/entity-store-sync";
+import { readConfig } from "../../src/server/config";
+import { replay, currentCursor } from "../../src/server/events";
+import { snapshot } from "../../src/server/state";
+import * as schema from "../../src/server/db/schema";
+import { type Command, feedParams } from "../../src/shared/contracts";
+import { movie, movieDetail, television, fixtureUpstream } from "../fixtures/catalog";
+const url = process.env.TEST_DATABASE_URL;
+if (
+  !url ||
+  !["127.0.0.1", "localhost"].includes(new URL(url).hostname) ||
+  !new URL(url).pathname.endsWith("_test")
+)
+  throw new Error(
+    "Integration tests require a disposable loopback TEST_DATABASE_URL whose database name ends in _test. Run bun run test:integration.",
+  );
+const { db, pool } = createDatabase(url),
+  config = readConfig({
+    DATABASE_URL: url,
+    BETTER_AUTH_SECRET: "isolated-test-auth-secret-at-least-32-characters",
+    MOVIEFINDER_ORIGIN: "http://localhost:5173",
+    NODE_ENV: "test",
+  }),
+  service = createApplication(db, config, fixtureUpstream),
+  store = createEntityStore(db);
+let owner = "",
+  editor = "",
+  viewer = "",
+  listId = "",
+  ownerCookie = "";
+const cmd = (userId: string, command: Omit<Command, "operationId">) =>
+  executeCommand(db, userId, { ...command, operationId: crypto.randomUUID() } as Command);
+async function register(name: string) {
+  const res = await service.app.request("/api/auth/sign-up/email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: config.MOVIEFINDER_ORIGIN },
+    body: JSON.stringify({
+      email: `${name}@example.test`,
+      name,
+      password: "a-strong-test-password",
+      username: name,
+    }),
+  });
+  expect(res.status).toBe(200);
+  const value = await res.json();
+  return {
+    id: value.user.id as string,
+    cookie: res.headers.get("set-cookie")?.split(";")[0] ?? "",
+  };
+}
+beforeAll(async () => {
+  await db.execute(
+    sql`truncate moviefinder."user",moviefinder.source_entity,moviefinder.query_cache,moviefinder.sync_job,moviefinder.event cascade`,
+  );
+  const a = await register("owner");
+  owner = a.id;
+  ownerCookie = a.cookie;
+  editor = (await register("editor")).id;
+  viewer = (await register("viewer")).id;
+  await db.transaction(async (tx) => {
+    await store.ingest(tx, "tmdb:movie:550", movieDetail, "detail");
+    await store.ingest(tx, "tmdb:tv:1399", television);
+  });
+});
+afterAll(async () => {
+  service.stop();
+  await pool.end();
+});
+describe("real PostgreSQL authentication and authorization", () => {
+  it("persists user, account, and session records", async () => {
+    expect((await db.select().from(schema.user)).length).toBe(3);
+    expect((await db.select().from(schema.account)).length).toBe(3);
+    expect((await db.select().from(schema.session)).length).toBe(3);
+  });
+  it("protects every application API while keeping liveness independent", async () => {
+    expect((await service.app.request("/health")).status).toBe(200);
+    expect((await service.app.request("/api/state")).status).toBe(401);
+    expect((await service.app.request("/api/discover")).status).toBe(401);
+    expect((await service.app.request("/api/events")).status).toBe(401);
+  });
+  it("restores a persisted cookie session and excludes authentication internals", async () => {
+    const res = await service.app.request("/api/state", { headers: { Cookie: ownerCookie } });
+    expect(res.status).toBe(200);
+    const state = await res.json();
+    expect(state.entities.some((e: { id: string }) => e.id === owner)).toBe(true);
+    expect(JSON.stringify(state)).not.toContain("a-strong-test-password");
+    expect(
+      state.entities
+        .filter((e: { kind: string }) => e.kind === "user")
+        .every((e: { data: Record<string, unknown> }) => !("email" in e.data)),
+    ).toBe(true);
+  });
+  it("rejects cross-origin commands", async () => {
+    expect(
+      (
+        await service.app.request("/api/command", {
+          method: "POST",
+          headers: {
+            Cookie: ownerCookie,
+            Origin: "https://untrusted.example",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "status",
+            titleId: "tmdb:movie:550",
+            seen: true,
+            operationId: crypto.randomUUID(),
+          }),
+        })
+      ).status,
+    ).toBe(403);
+  });
+  it("supports logout and rejects an expired/revoked session", async () => {
+    const a = await register("logoutuser");
+    const res = await service.app.request("/api/auth/sign-out", {
+      method: "POST",
+      headers: {
+        Cookie: a.cookie,
+        Origin: config.MOVIEFINDER_ORIGIN,
+        "Content-Type": "application/json",
+      },
+      body: "{}",
+    });
+    expect(res.status).toBe(200);
+    expect(
+      (await service.app.request("/api/state", { headers: { Cookie: a.cookie } })).status,
+    ).toBe(401);
+  });
+});
+describe("transactional user state", () => {
+  it("maintains independent dimensions under concurrent updates", async () => {
+    await Promise.all([
+      cmd(owner, { type: "status", titleId: "tmdb:movie:550", seen: true } as never),
+      cmd(owner, { type: "status", titleId: "tmdb:movie:550", sentiment: "liked" } as never),
+    ]);
+    const rows = await db.select().from(schema.statuses).where(eq(schema.statuses.userId, owner));
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ seen: true, sentiment: "liked" });
+  });
+  it("deduplicates retries and rejects reuse for different payloads", async () => {
+    const operation = {
+      type: "status",
+      titleId: "tmdb:movie:550",
+      seen: false,
+      operationId: crypto.randomUUID(),
+    } as const;
+    const results = await Promise.all([
+      executeCommand(db, owner, operation),
+      executeCommand(db, owner, operation),
+    ]);
+    expect(results[0]).toEqual(results[1]);
+    await expect(executeCommand(db, owner, { ...operation, seen: true })).rejects.toMatchObject({
+      status: 409,
+    });
+  });
+  it("persists the state and its event atomically", async () => {
+    const before = Number(await currentCursor(db));
+    await cmd(owner, { type: "status", titleId: "tmdb:movie:550", sentiment: "meh" } as never);
+    const rows = await replay(db, owner, before);
+    expect(
+      rows.some((e) =>
+        e.payload.entities.some((e) => e.kind === "status" && e.data.sentiment === "meh"),
+      ),
+    ).toBe(true);
+  });
+});
+describe("collaborative lists with concurrent database commands", () => {
+  it("creates a list and grants only its creator ownership", async () => {
+    const result = await cmd(owner, {
+      type: "list.create",
+      title: "Test movie night",
+      description: "Shared picks",
+    } as never);
+    listId = result.entities.find((e) => e.kind === "list")!.id;
+    expect(result.entities.find((e) => e.kind === "collaborator")?.data.role).toBe("owner");
+  });
+  it("rejects a public viewer edit", async () => {
+    await expect(
+      cmd(viewer, { type: "list.add", listId, titleId: "tmdb:movie:550" } as never),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+  it("requires an invitation to be accepted by its intended recipient", async () => {
+    const result = await cmd(owner, { type: "list.invite", listId, userId: editor } as never),
+      inv = result.entities.find((e) => e.kind === "invitation")!;
+    await expect(
+      cmd(viewer, { type: "invitation.accept", invitationId: inv.id } as never),
+    ).rejects.toMatchObject({ status: 403 });
+    await cmd(editor, { type: "invitation.accept", invitationId: inv.id } as never);
+    await expect(
+      cmd(editor, { type: "list.edit", listId, title: "Not allowed", description: "" } as never),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+  it("deduplicates concurrent additions without losing distinct titles", async () => {
+    await Promise.all([
+      cmd(owner, { type: "list.add", listId, titleId: "tmdb:movie:550" } as never),
+      cmd(editor, { type: "list.add", listId, titleId: "tmdb:movie:550" } as never),
+      cmd(editor, { type: "list.add", listId, titleId: "tmdb:tv:1399" } as never),
+    ]);
+    expect(
+      await db.select().from(schema.items).where(eq(schema.items.listId, listId)),
+    ).toHaveLength(2);
+  });
+  it("serializes individual item moves and preserves concurrently added entries", async () => {
+    const rows = await db.select().from(schema.items).where(eq(schema.items.listId, listId));
+    await Promise.all([
+      cmd(owner, { type: "list.move", listId, itemId: rows[0]!.id, beforeId: null } as never),
+      cmd(editor, {
+        type: "list.move",
+        listId,
+        itemId: rows[1]!.id,
+        beforeId: rows[0]!.id,
+      } as never),
+    ]);
+    const after = await db.select().from(schema.items).where(eq(schema.items.listId, listId));
+    expect(after).toHaveLength(2);
+    expect(new Set(after.map((r) => r.orderKey)).size).toBe(2);
+  });
+  it("copies public contents with fresh stable item IDs", async () => {
+    const result = await cmd(viewer, { type: "list.copy", listId } as never);
+    expect(result.entities.filter((e) => e.kind === "item")).toHaveLength(2);
+    expect(result.entities.find((e) => e.kind === "list")?.data.ownerId).toBe(viewer);
+  });
+  it("replays committed list events in ascending order without exposing private feed events", async () => {
+    const before = Number(await currentCursor(db));
+    await cmd(owner, {
+      type: "feed.save",
+      title: "Private preference",
+      params: feedParams.parse({}),
+    } as never);
+    await cmd(owner, {
+      type: "list.edit",
+      listId,
+      title: "A better movie night",
+      description: "",
+    } as never);
+    const rows = await replay(db, editor, before);
+    expect(rows.some((r) => r.payload.entities.some((e) => e.kind === "list"))).toBe(true);
+    expect(rows.some((r) => r.payload.entities.some((e) => e.kind === "feed"))).toBe(false);
+    expect(rows.map((r) => r.id)).toEqual(rows.map((r) => r.id).sort((a, b) => a - b));
+  });
+  it("removes editor authorization immediately", async () => {
+    await cmd(owner, { type: "list.member.remove", listId, userId: editor } as never);
+    await expect(
+      cmd(editor, { type: "list.remove", listId, itemId: crypto.randomUUID() } as never),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+});
+describe("cache-first catalog and durable synchronization", () => {
+  it("returns an explicit partial cache result without waiting for upstream", async () => {
+    let calls = 0;
+    const isolated = createSync(db, async (path, p) => {
+        calls++;
+        return fixtureUpstream(path, p);
+      }),
+      query = createQueries(db, isolated);
+    const result = await query.discover({ type: "movie", seed: "cold-query" }, owner);
+    expect(calls).toBe(0);
+    expect(["partial", "missing"]).toContain(result.coverage.state);
+    const jobs = await db.select().from(schema.jobs).where(eq(schema.jobs.id, result.id));
+    expect(jobs).toHaveLength(1);
+    await isolated.runJob(jobs[0]!);
+    expect(calls).toBe(1);
+    const hydrated = await query.discover({ type: "movie", seed: "cold-query" }, owner);
+    expect(hydrated.coverage.state).toBe("complete");
+    expect(hydrated.ids.length).toBeGreaterThan(0);
+    expect(hydrated.coverage.nextCursor).toBeTruthy();
+  });
+  it("coalesces simultaneous missing-entity requests into one durable job", async () => {
+    await Promise.all(Array.from({ length: 10 }, () => service.sync.hydrate("tmdb:movie:999")));
+    expect(
+      await db.select().from(schema.jobs).where(eq(schema.jobs.id, "entity:tmdb:movie:999")),
+    ).toHaveLength(1);
+  });
+  it("never overwrites hydrated credits with a summary response", async () => {
+    await db.transaction((tx) => store.ingest(tx, "tmdb:movie:550", movie));
+    const [row] = await db
+      .select()
+      .from(schema.sources)
+      .where(eq(schema.sources.id, "tmdb:movie:550"));
+    expect(row?.projection).toBe("detail");
+    expect(row?.payload.credits).toEqual(movieDetail.credits);
+  });
+  it("does not corrupt the previous source document after a provider failure", async () => {
+    const [before] = await db
+      .select()
+      .from(schema.sources)
+      .where(eq(schema.sources.id, "tmdb:movie:550"));
+    await expect(
+      db.transaction((tx) => store.ingest(tx, "tmdb:movie:550", { id: "invalid" })),
+    ).rejects.toThrow();
+    const [after] = await db
+      .select()
+      .from(schema.sources)
+      .where(eq(schema.sources.id, "tmdb:movie:550"));
+    expect(after?.payload).toEqual(before?.payload);
+  });
+  it("pairs a consistent snapshot with a durable replay cursor", async () => {
+    const state = await snapshot(db, owner);
+    expect(Number(state.cursor)).toBeGreaterThan(0);
+    expect(state.entities.some((e) => e.kind === "list")).toBe(true);
+    const after = await replay(db, owner, Number(state.cursor));
+    expect(after).toHaveLength(0);
+  });
+});
+
+describe("recovery and social boundaries", () => {
+  it("issues and consumes a real Better Auth recovery token and revokes prior sessions", async () => {
+    let email = "";
+    vi.stubGlobal("fetch", async (_input: unknown, init?: RequestInit) => {
+      email = JSON.parse(typeof init?.body === "string" ? init.body : "{}").text;
+      return Response.json({ id: "test-mail" });
+    });
+    const recovery = createApplication(
+      db,
+      { ...config, RESEND_API_KEY: "test-delivery-only", EMAIL_FROM: "test@example.test" },
+      fixtureUpstream,
+    );
+    try {
+      const request = await recovery.app.request("/api/auth/request-password-reset", {
+        method: "POST",
+        headers: { Origin: config.MOVIEFINDER_ORIGIN, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "owner@example.test",
+          redirectTo: "http://localhost:5173/auth",
+        }),
+      });
+      expect(request.status).toBe(200);
+      const url = email.match(/http[^\s]+/)?.[0];
+      expect(url).toBeTruthy();
+      const token = new URL(url!).pathname.split("/").at(-1);
+      const reset = await recovery.app.request("/api/auth/reset-password", {
+        method: "POST",
+        headers: { Origin: config.MOVIEFINDER_ORIGIN, "Content-Type": "application/json" },
+        body: JSON.stringify({ token, newPassword: "a-new-recovered-password" }),
+      });
+      expect(reset.status).toBe(200);
+      expect(
+        (await recovery.app.request("/api/state", { headers: { Cookie: ownerCookie } })).status,
+      ).toBe(401);
+      const login = await recovery.app.request("/api/auth/sign-in/email", {
+        method: "POST",
+        headers: { Origin: config.MOVIEFINDER_ORIGIN, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "owner@example.test", password: "a-new-recovered-password" }),
+      });
+      expect(login.status).toBe(200);
+    } finally {
+      recovery.stop();
+      vi.unstubAllGlobals();
+    }
+  });
+  it("searches registered users and public lists through the database", async () => {
+    const result = await service.app.request("/api/social-search?q=owner", {
+      headers: { Cookie: (await register("searcher")).cookie },
+    });
+    expect(result.status).toBe(200);
+    const value = await result.json();
+    expect(
+      value.entities.some((e: { kind: string; id: string }) => e.kind === "user" && e.id === owner),
+    ).toBe(true);
+    expect(
+      value.entities.every((e: { data: Record<string, unknown> }) => !("email" in e.data)),
+    ).toBe(true);
+  });
+  it("returns scoped list projections with title metadata", async () => {
+    const cookie = (await register("listreader")).cookie;
+    const res = await service.app.request(`/api/lists/${listId}`, { headers: { Cookie: cookie } });
+    expect(res.status).toBe(200);
+    const value = await res.json();
+    expect(value.entities.filter((e: { kind: string }) => e.kind === "item")).toHaveLength(2);
+    expect(value.entities.some((e: { kind: string }) => e.kind === "movie")).toBe(true);
+  });
+  it("allows save, unsave, and save again with fresh stable identities", async () => {
+    const first = await cmd(viewer, { type: "list.follow", listId, follow: true } as never);
+    await cmd(viewer, { type: "list.follow", listId, follow: false } as never);
+    const again = await cmd(viewer, { type: "list.follow", listId, follow: true } as never);
+    expect(first.entities.find((e) => e.kind === "follow")?.id).not.toBe(
+      again.entities.find((e) => e.kind === "follow")?.id,
+    );
+  });
+});
+it("merges sorted movie and television source streams across page boundaries", async () => {
+  const sync = createSync(db, fixtureUpstream),
+    query = createQueries(db, sync),
+    params = feedParams.parse({ type: "both", seed: "global-order-test" });
+  let result = await query.discover(params, viewer);
+  let [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, result.id));
+  await sync.runJob(job!);
+  result = await query.discover(params, viewer);
+  expect(result.coverage.state).toBe("complete");
+  expect(result.ids).toHaveLength(20);
+  const all = [...result.ids];
+  expect(result.coverage.nextCursor).toBeTruthy();
+  const nextParams = { ...params, cursor: result.coverage.nextCursor! };
+  let next = await query.discover(nextParams, viewer);
+  [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, next.id));
+  await sync.runJob(job!);
+  next = await query.discover(nextParams, viewer);
+  all.push(...next.ids);
+  expect(new Set(all).size).toBe(25);
+  const records = await db
+      .select()
+      .from(schema.sources)
+      .where(
+        sql`${schema.sources.id} in (${sql.join(
+          all.map((id) => sql`${id}`),
+          sql`,`,
+        )})`,
+      ),
+    map = new Map(records.map((r) => [r.id, r.popularity])),
+    scores = all.map((id) => map.get(id)!);
+  expect(scores).toEqual([...scores].sort((a, b) => b - a));
+  expect(next.coverage.nextCursor).toBeNull();
+});
+it("ingests an unchanged source idempotently without manufacturing a new revision", async () => {
+  const [before] = await db
+    .select()
+    .from(schema.sources)
+    .where(eq(schema.sources.id, "tmdb:movie:550"));
+  await db.transaction((tx) => store.ingest(tx, "tmdb:movie:550", before!.payload, "detail"));
+  const [after] = await db
+    .select()
+    .from(schema.sources)
+    .where(eq(schema.sources.id, "tmdb:movie:550"));
+  expect(after?.version).toBe(before?.version);
+});
+it("streams committed changes after Last-Event-ID and releases a disconnected subscriber", async () => {
+  const readerUser = await register("streamreader"),
+    cursor = await currentCursor(db),
+    response = await service.app.request(`/api/events?cursor=0`, {
+      headers: { Cookie: readerUser.cookie, "Last-Event-ID": cursor },
+    });
+  expect(response.headers.get("content-type")).toContain("text/event-stream");
+  const reader = response.body!.getReader();
+  try {
+    await cmd(readerUser.id, {
+      type: "status",
+      titleId: "tmdb:movie:550",
+      sentiment: "liked",
+    } as never);
+    let text = "";
+    for (let i = 0; i < 8 && !text.includes('"kind":"status"'); i++) {
+      const part = await reader.read();
+      if (part.done) break;
+      text += new TextDecoder().decode(part.value);
+    }
+    expect(text).toContain('"kind":"status"');
+    const eventIds = [...text.matchAll(/^id: (\d+)/gm)].map((m) => Number(m[1]));
+    expect(eventIds.length).toBeGreaterThan(0);
+    expect(eventIds.every((id) => id > Number(cursor))).toBe(true);
+  } finally {
+    await reader.cancel();
+  }
+});
+it("recovers a cursor older than retained history with a consistent snapshot reset", async () => {
+  const actor = await register("snapshotreader");
+  await db.delete(schema.events);
+  await cmd(actor.id, { type: "status", titleId: "tmdb:movie:550", seen: true } as never);
+  const response = await service.app.request("/api/events?cursor=1", {
+      headers: { Cookie: actor.cookie },
+    }),
+    reader = response.body!.getReader();
+  try {
+    const first = await reader.read(),
+      text = new TextDecoder().decode(first.value);
+    expect(text).toContain('"type":"reset"');
+    expect(text).toContain('"subscription":"snapshot"');
+    expect(text).toContain(actor.id);
+  } finally {
+    await reader.cancel();
+  }
+});
+it("persists provider cooldown across synchronization worker instances", async () => {
+  const { UpstreamError } = await import("../../src/server/entity-store-sync/tmdb");
+  let calls = 0;
+  const first = createSync(db, async () => {
+      throw new UpstreamError(429, 60000);
+    }),
+    second = createSync(db, async (path, p) => {
+      calls++;
+      return fixtureUpstream(path, p);
+    });
+  await first.hydrate("tmdb:movie:99991");
+  const [job] = await db
+    .select()
+    .from(schema.jobs)
+    .where(eq(schema.jobs.id, "entity:tmdb:movie:99991"));
+  try {
+    await expect(first.runJob(job!)).rejects.toMatchObject({ status: 429 });
+    await expect(second.runJob(job!)).rejects.toMatchObject({ status: 429 });
+    expect(calls).toBe(0);
+  } finally {
+    await db.delete(schema.checkpoints);
+  }
+});
+it("reclaims an expired synchronization lease after a worker restart", async () => {
+  await db.delete(schema.jobs);
+  await db.insert(schema.jobs).values({
+    id: "entity:tmdb:movie:8888",
+    kind: "entity",
+    params: { id: "tmdb:movie:8888" },
+    state: "running",
+    leaseUntil: new Date(Date.now() - 10000),
+    runAt: new Date(Date.now() - 20000),
+    attempts: 1,
+  });
+  const recovered = createSync(db, fixtureUpstream);
+  try {
+    await recovered.tick();
+    const [job] = await db
+      .select()
+      .from(schema.jobs)
+      .where(eq(schema.jobs.id, "entity:tmdb:movie:8888"));
+    expect(job?.state).toBe("done");
+    expect(job?.attempts).toBe(2);
+  } finally {
+    recovered.stop();
+  }
+});
+it("retains an explicitly partial movie page when the television source fails", async () => {
+  const failing = createSync(db, async (path, p) => {
+      if (path === "discover/tv") throw new Error("fixture provider unavailable");
+      return fixtureUpstream(path, p);
+    }),
+    query = createQueries(db, failing),
+    params = feedParams.parse({ type: "both", seed: "partial-source-failure" });
+  let result = await query.discover(params, viewer);
+  const [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, result.id));
+  await expect(failing.runJob(job!)).rejects.toThrow();
+  result = await query.discover(params, viewer);
+  expect(result.coverage.state).toBe("partial");
+  expect(result.ids.length).toBeGreaterThan(0);
+  expect(result.ids.every((id) => id.startsWith("tmdb:movie:"))).toBe(true);
+});
+it("revokes pending grants when an owner removes a collaborator or cancels an invitation", async () => {
+  const invited = await cmd(owner, { type: "list.invite", listId, userId: editor } as never),
+    invitationId = invited.entities.find((e) => e.kind === "invitation")!.id;
+  await cmd(owner, { type: "list.member.remove", listId, userId: editor } as never);
+  await expect(
+    cmd(editor, { type: "invitation.accept", invitationId } as never),
+  ).rejects.toMatchObject({ status: 409 });
+});

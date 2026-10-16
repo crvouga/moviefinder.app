@@ -1,0 +1,431 @@
+import { useEffect, useState } from "react";
+import { Link, useParams, useRouter } from "@tanstack/react-router";
+import { ArrowLeft, Star, Play, ArrowUpRight, Calendar, Clock } from "lucide-react";
+import { useEntity, useEntities, loadEntity, report } from "../state";
+import { Poster, Tags, TitleCard, External, imageUrl } from "../components/common";
+import { Button } from "../components/ui/button";
+import type { Entity } from "../../shared/contracts";
+const text = (value: unknown) =>
+  typeof value === "string" || typeof value === "number" ? String(value) : "";
+const records = (value: unknown): Record<string, unknown>[] =>
+  Array.isArray(value)
+    ? value.filter((v): v is Record<string, unknown> => !!v && typeof v === "object")
+    : [];
+const ids = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+export function DetailPage({ userId }: { userId: string }) {
+  const [filmographyTab, setFilmographyTab] = useState("all");
+  const { id } = useParams({ strict: false }) as { id: string },
+    entity = useEntity(id),
+    router = useRouter(),
+    people = useEntities("person"),
+    credits = useEntities("credit"),
+    genres = useEntities("genre"),
+    movies = useEntities("movie"),
+    series = useEntities("tv"),
+    seasons = useEntities("season"),
+    episodes = useEntities("episode");
+  useEffect(() => {
+    const c = new AbortController();
+    void loadEntity(id).catch((error) => {
+      if (!c.signal.aborted) report(error);
+    });
+    return () => c.abort();
+  }, [id]);
+  if (!entity)
+    return (
+      <div className="detail-page">
+        <Button variant="ghost" onClick={() => router.history.back()}>
+          <ArrowLeft size={16} />
+          Back
+        </Button>
+        <div className="detail-skeleton">
+          <div className="skeleton-poster" />
+          <div>
+            <div className="skeleton-line wide" />
+            <div className="skeleton-line" />
+            <p>
+              Gathering the story, cast, and little details. They’ll appear here as they arrive.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  const byId = new Map(
+      [...people, ...movies, ...series, ...seasons, ...episodes].map((e) => [e.id, e]),
+    ),
+    cast = ((entity.data.credits as string[]) ?? [])
+      .map((cid) => credits.find((c) => c.id === cid))
+      .filter((c): c is Entity => !!c),
+    relations = (entity.data.relations as Record<string, string[]>) ?? {},
+    related = [
+      ...new Set([
+        ...ids(relations.recommendations),
+        ...ids(relations.similar),
+        ...ids(relations.filmography),
+        ...ids(relations.knownFor),
+      ]),
+    ]
+      .map((i) => byId.get(i))
+      .filter((e): e is Entity => !!e),
+    person = entity.kind === "person";
+  return (
+    <div className="detail-page">
+      {entity.backdrop && (
+        <div
+          className="detail-backdrop"
+          style={{
+            backgroundImage: `linear-gradient(0deg,var(--background),transparent),url(${imageUrl(entity.backdrop, "w1280")})`,
+          }}
+        />
+      )}
+      <Button
+        className="back-button"
+        variant="ghost"
+        onClick={() =>
+          router.history.length > 1 ? router.history.back() : router.navigate({ to: "/" })
+        }
+      >
+        <ArrowLeft size={17} /> Back to the good stuff
+      </Button>
+      <section className="detail-hero">
+        <Poster entity={entity} priority />
+        <div className="detail-intro">
+          <span className="eyebrow">
+            {person
+              ? "THE PEOPLE BEHIND THE STORIES"
+              : entity.kind === "tv"
+                ? "A STORY WORTH SETTLING INTO"
+                : entity.kind === "season"
+                  ? "ONE CHAPTER AT A TIME"
+                  : entity.kind === "episode"
+                    ? "THE NEXT CHAPTER"
+                    : "YOUR NEXT GREAT WATCH"}
+          </span>
+          <h1>{entity.title}</h1>
+          {text(entity.data.originalTitle) && entity.data.originalTitle !== entity.title && (
+            <p className="original-title">{text(entity.data.originalTitle)}</p>
+          )}
+          <div className="detail-facts">
+            {entity.year && (
+              <span>
+                <Calendar size={15} />
+                {entity.year}
+              </span>
+            )}
+            {!!entity.rating && (
+              <span className="rating">
+                <Star size={15} fill="currentColor" />
+                {entity.rating.toFixed(1)}{" "}
+                <small>({Number(entity.data.voteCount ?? 0).toLocaleString()} votes)</small>
+              </span>
+            )}
+            {!!entity.data.runtime && (
+              <span>
+                <Clock size={15} />
+                {Array.isArray(entity.data.runtime)
+                  ? entity.data.runtime.join("–")
+                  : text(entity.data.runtime)}{" "}
+                min
+              </span>
+            )}
+            <span>
+              {person
+                ? text(entity.data.department)
+                : entity.kind === "tv"
+                  ? "TV series"
+                  : entity.kind === "movie"
+                    ? "Film"
+                    : entity.kind}
+            </span>
+          </div>
+          <div className="detail-genres">
+            {entity.genres?.map((g) => (
+              <Link key={g} to="/" search={{ genres: g.split(":").at(-1) }} className="chip">
+                {genres.find((e) => e.id === g)?.title ?? "Explore genre"}
+              </Link>
+            ))}
+          </div>
+          {text(entity.data.tagline) && <p className="tagline">“{text(entity.data.tagline)}”</p>}
+          <p className="synopsis">
+            {entity.overview || "A synopsis hasn’t been provided for this story yet."}
+          </p>
+          {["movie", "tv"].includes(entity.kind) && <Tags entity={entity} userId={userId} />}
+          <div className="detail-links">
+            {entity.kind === "season" && (
+              <Link to="/title/$id" params={{ id: id.split(":season:")[0]! }}>
+                View series <ArrowUpRight size={14} />
+              </Link>
+            )}
+            {entity.kind === "episode" && (
+              <Link to="/title/$id" params={{ id: id.split(":episode:")[0]! }}>
+                View season <ArrowUpRight size={14} />
+              </Link>
+            )}
+            {text(entity.data.imdbId) && (
+              <External
+                href={`https://www.imdb.com/${person ? "name" : "title"}/${text(entity.data.imdbId)}`}
+              >
+                IMDb
+              </External>
+            )}
+            {text(entity.data.homepage).startsWith("https://") && (
+              <External href={text(entity.data.homepage)}>Official website</External>
+            )}
+          </div>
+        </div>
+      </section>
+      {records(entity.data.videos).length > 0 && (
+        <section className="detail-section">
+          <h2>Get a little taste.</h2>
+          <div className="video-links">
+            {records(entity.data.videos)
+              .slice(0, 6)
+              .map((v) => (
+                <External
+                  key={text(v.key)}
+                  href={`https://www.youtube.com/watch?v=${encodeURIComponent(text(v.key))}`}
+                >
+                  <Play size={17} />
+                  {text(v.name)}
+                </External>
+              ))}
+          </div>
+        </section>
+      )}
+      {records(entity.data.creators).length > 0 && (
+        <section className="detail-section">
+          <h2>The minds behind it.</h2>
+          <div className="detail-links">
+            {records(entity.data.creators).map((creator) => (
+              <Link
+                key={text(creator.id)}
+                to="/title/$id"
+                params={{ id: `tmdb:person:${text(creator.id)}` }}
+              >
+                {text(creator.name)}
+                <ArrowUpRight size={14} />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+      {cast.length > 0 && (
+        <section className="detail-section">
+          <div className="section-title">
+            <h2>The people who make it.</h2>
+            <span>{cast.length} credits</span>
+          </div>
+          <div className="cast-row">
+            {cast.map((credit) => {
+              const p = people.find((p) => p.id === credit.data.personId);
+              return p ? (
+                <Link key={credit.id} to="/title/$id" params={{ id: p.id }} className="person-card">
+                  <Poster entity={p} />
+                  <h3>{p.title}</h3>
+                  <p>{credit.title || "Cast & crew"}</p>
+                </Link>
+              ) : null;
+            })}
+          </div>
+        </section>
+      )}
+      {ids(entity.data.seasons).length > 0 && (
+        <section className="detail-section">
+          <h2>Stay for another season.</h2>
+          <div className="season-grid">
+            {ids(entity.data.seasons).map((sid) => {
+              const s = seasons.find((s) => s.id === sid);
+              return (
+                <Link key={sid} to="/title/$id" params={{ id: sid }} className="season-card">
+                  <Poster entity={s} />
+                  <div>
+                    <h3>{s?.title ?? "Season"}</h3>
+                    <p>{s?.year ?? "Air date unavailable"}</p>
+                  </div>
+                  <ArrowUpRight size={18} />
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+      {ids(entity.data.episodes).length > 0 && (
+        <section className="detail-section">
+          <h2>One more episode.</h2>
+          <div className="episode-list">
+            {ids(entity.data.episodes).map((eid) => {
+              const e = episodes.find((e) => e.id === eid);
+              return (
+                <Link key={eid} to="/title/$id" params={{ id: eid }}>
+                  <span className="episode-number">
+                    {text(e?.data.episodeNumber).padStart(2, "0")}
+                  </span>
+                  <Poster entity={e} />
+                  <div>
+                    <h3>{e?.title ?? "Episode"}</h3>
+                    <small>{text(e?.data.releaseDate) || "Air date unavailable"}</small>
+                    <p>{e?.overview || "Episode description unavailable."}</p>
+                  </div>
+                  <ArrowUpRight size={17} />
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+      <section className="detail-section">
+        <h2>{person ? "A little more about them." : "The little details."}</h2>
+        <dl className="metadata-grid">
+          {(person
+            ? [
+                ["Born", entity.data.birthday],
+                ["Died", entity.data.deathday],
+                ["From", entity.data.birthplace],
+                ["Known for", entity.data.department],
+              ]
+            : [
+                ["Status", entity.data.status],
+                ["Original language", entity.data.language],
+                ["Released / first aired", entity.data.releaseDate],
+                ["Latest air date", entity.data.lastAirDate],
+                ["Seasons", entity.data.numberOfSeasons],
+                ["Episodes", entity.data.numberOfEpisodes],
+                ["Popularity", entity.popularity],
+                [
+                  "Countries",
+                  records(entity.data.countries)
+                    .map((c) => text(c.name))
+                    .join(", ") || ids(entity.data.countries).join(", "),
+                ],
+                [
+                  "Production",
+                  records(entity.data.productionCompanies)
+                    .map((c) => text(c.name))
+                    .join(", "),
+                ],
+                [
+                  "Networks",
+                  records(entity.data.networks)
+                    .map((c) => text(c.name))
+                    .join(", "),
+                ],
+                [
+                  "Created by",
+                  records(entity.data.creators)
+                    .map((c) => text(c.name))
+                    .join(", "),
+                ],
+              ]
+          )
+            .filter(([, value]) => value !== undefined && value !== null && value !== "")
+            .map(([label, value]) => (
+              <div key={text(label)}>
+                <dt>{text(label)}</dt>
+                <dd>{text(value)}</dd>
+              </div>
+            ))}
+        </dl>
+        {!person && records(entity.data.keywords).length > 0 && (
+          <div className="keyword-row">
+            {records(entity.data.keywords).map((k) => (
+              <Link key={text(k.id)} to="/" search={{ keywords: text(k.id) }} className="chip">
+                {text(k.name)}
+              </Link>
+            ))}
+          </div>
+        )}
+        {!!entity.data.collection && (
+          <Link
+            to="/search"
+            search={{ q: text((entity.data.collection as Record<string, unknown>).name) }}
+            className="external-link"
+          >
+            Explore {text((entity.data.collection as Record<string, unknown>).name)}
+            <ArrowUpRight size={15} />
+          </Link>
+        )}
+      </section>
+      {!person && !!entity.data.watchProviders && <Providers value={entity.data.watchProviders} />}
+      {related.length > 0 && (
+        <section className="detail-section">
+          <h2>{person ? "A career in stories." : "If this is your kind of thing."}</h2>
+          {person && (
+            <p className="muted">
+              Acting, directing, writing, and crew credits from their filmography.
+            </p>
+          )}
+          {person && (
+            <div className="section-tabs">
+              {[
+                ["all", "All credits"],
+                ["Acting", "Acting"],
+                ["Directing", "Directing"],
+                ["Writing", "Writing"],
+                ["other", "Other crew"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  className={filmographyTab === key ? "active" : ""}
+                  onClick={() => setFilmographyTab(key!)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="title-grid">
+            {related
+              .filter(
+                (e) =>
+                  !person ||
+                  filmographyTab === "all" ||
+                  credits.some(
+                    (c) =>
+                      ids(entity.data.filmographyCredits).includes(c.id) &&
+                      c.data.titleId === e.id &&
+                      (filmographyTab === "other"
+                        ? !["Acting", "Directing", "Writing"].includes(text(c.data.department))
+                        : c.data.department === filmographyTab),
+                  ),
+              )
+              .map((e) => (
+                <TitleCard key={e.id} entity={e} />
+              ))}
+          </div>
+        </section>
+      )}
+      <p className="tmdb-credit">
+        This product uses the TMDB API but is not endorsed or certified by TMDB.
+      </p>
+    </div>
+  );
+}
+function Providers({ value }: { value: unknown }) {
+  const root = value && typeof value === "object" ? (value as Record<string, unknown>) : {},
+    results = root.results as Record<string, Record<string, unknown>> | undefined,
+    region = results?.US,
+    providers = records(region?.flatrate);
+  return (
+    <section className="detail-section">
+      <h2>Make a night of it.</h2>
+      {providers.length ? (
+        <>
+          <p className="muted">
+            Subscription streaming in the US · availability by JustWatch via TMDB
+          </p>
+          <div className="provider-row">
+            {providers.map((p) => (
+              <span key={text(p.provider_id)}>{text(p.provider_name)}</span>
+            ))}
+          </div>
+          {text(region?.link).startsWith("https://") && (
+            <External href={text(region?.link)}>Check current availability</External>
+          )}
+        </>
+      ) : (
+        <p className="muted">Streaming availability hasn’t been provided for your region.</p>
+      )}
+    </section>
+  );
+}

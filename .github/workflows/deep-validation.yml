@@ -1,0 +1,31 @@
+name: Deep validation
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 10 * * 1"
+permissions:
+  contents: read
+jobs:
+  browser-and-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.3
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: ariga/setup-atlas@v0
+      - run: bun install --frozen-lockfile
+      - run: bun x playwright install --with-deps chromium
+      - run: bun run build
+      - run: bun run test:e2e
+      - run: docker build -t moviefinder:verification .
+      - run: bun scripts/container-smoke.ts moviefinder:verification
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: test-results/
+          retention-days: 7
