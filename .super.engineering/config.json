@@ -1,0 +1,21 @@
+{
+  "setup": [
+    "bun install --frozen-lockfile"
+  ],
+  "run": [
+    {
+      "name": "MovieFinder",
+      "commands": [
+        "bun run dev"
+      ],
+      "default": true
+    },
+    {
+      "name": "Checks",
+      "commands": [
+        "bun run check"
+      ],
+      "default": false
+    }
+  ]
+}

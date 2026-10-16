@@ -18,6 +18,17 @@ Required runtime variables are `DATABASE_URL` and `BETTER_AUTH_SECRET`. Producti
 
 Email/password registration works without a social provider. Recovery is enabled only with `RESEND_API_KEY` and a verified `EMAIL_FROM`. Google login appears only with app-specific `MOVIEFINDER_GOOGLE_CLIENT_ID` and `MOVIEFINDER_GOOGLE_CLIENT_SECRET`. These integrations require registered infrastructure secrets and callback/sender configuration.
 
+## super.engineering hooks
+
+The repository's `.super.engineering/config.json` provides the built-in hooks:
+
+- **Setup** runs `bun install --frozen-lockfile` when super.engineering sets up the checkout.
+- **Run → MovieFinder** is the default. It runs `bun run dev`, loads development secrets through Vault, and starts the frontend and backend together. Open `http://localhost:5173`.
+- **Run → Checks** runs the formatting, lint, native type checking, and unit/property suite with `bun run check`.
+- **Stop** terminates the selected Run process. The development supervisor handles termination of both development servers.
+
+Authenticate with `vault login` and complete the approved database allocation/migration steps above before running MovieFinder. Hooks do not create shared resources or apply migrations. Keep runtime files and secrets out of the shared hook configuration.
+
 ## Commands
 
 | Command                             | Purpose                                                                    |

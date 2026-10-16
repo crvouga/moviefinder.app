@@ -3,7 +3,8 @@ dist/
 .env*
 !.env.example
 .vite/
-.super.engineering/
+.super.engineering/*
+!.super.engineering/config.json
 playwright-report/
 test-results/
 coverage/
