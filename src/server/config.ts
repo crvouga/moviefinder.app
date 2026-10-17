@@ -13,7 +13,10 @@ export const configSchema = z.object({
 });
 export type Config = z.infer<typeof configSchema>;
 export function readConfig(env: Record<string, string | undefined>) {
-  const result = configSchema.safeParse(env);
+  const result = configSchema.safeParse({
+    ...env,
+    BETTER_AUTH_SECRET: env.MOVIEFINDER_AUTH_SECRET ?? env.BETTER_AUTH_SECRET,
+  });
   if (!result.success)
     throw new Error(
       `Invalid configuration: ${result.error.issues.map((i) => i.path.join(".")).join(", ")}`,
