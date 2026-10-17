@@ -50,7 +50,7 @@ try {
   ]);
   await run(
     mode === "e2e"
-      ? ["bun", "x", "--no-install", "playwright", "test"]
+      ? ["bun", "x", "--no-install", "playwright", "test", ...process.argv.slice(3)]
       : ["bun", "x", "--no-install", "vp", "test", "run", "--project", "integration"],
     { ...process.env, TEST_DATABASE_URL: url },
   );

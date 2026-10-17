@@ -1,5 +1,6 @@
 name: Deep validation
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: "30 10 * * 1"
