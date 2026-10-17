@@ -17,7 +17,7 @@ try {
   // These are disposable process-only test values, never shared Vault credentials.
   const env = {
     ...process.env,
-    BETTER_AUTH_SECRET: crypto.randomUUID() + crypto.randomUUID(),
+    MOVIEFINDER_AUTH_SECRET: crypto.randomUUID() + crypto.randomUUID(),
     DATABASE_URL: "postgres://unreachable:local-only@127.0.0.1:1/moviefinder_test?sslmode=disable",
     MOVIEFINDER_ORIGIN: "http://127.0.0.1:8080",
     PORT: "8080",
@@ -33,7 +33,7 @@ try {
       "-p",
       "127.0.0.1::8080",
       "-e",
-      "BETTER_AUTH_SECRET",
+      "MOVIEFINDER_AUTH_SECRET",
       "-e",
       "DATABASE_URL",
       "-e",
