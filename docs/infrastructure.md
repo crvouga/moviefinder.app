@@ -12,18 +12,18 @@ The approved platform change must allocate the `moviefinder` schema in both deve
 
 ## Secrets and plain configuration
 
-| Name                             | Source / status                                                                              | Purpose                                               |
-| -------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| DATABASE_URL                     | Existing Vault personal/dev and personal/prd contract; allocation not approved               | Opaque PostgreSQL connection                          |
-| TMDB_API_READ_ACCESS_TOKEN       | Existing contract; development live read verified                                            | Server-only TMDB requests                             |
-| BETTER_AUTH_SECRET               | Development value exists; register/reconcile key and used_by inventory for both environments | Session/auth cryptography                             |
-| RESEND_API_KEY                   | Optional existing production key; absent in development                                      | Password recovery email                               |
-| MOVIEFINDER_GOOGLE_CLIENT_ID     | Optional new registered app-specific key                                                     | Google OAuth client                                   |
-| MOVIEFINDER_GOOGLE_CLIENT_SECRET | Optional new registered app-specific key                                                     | Google OAuth secret                                   |
-| MOVIEFINDER_ORIGIN               | Plain environment; localhost:5173 for development, approved HTTPS origin for production      | Better Auth origin/callback/CSRF                      |
-| MOVIEFINDER_DATABASE_ALLOCATION  | Plain confirmation of approved `moviefinder` allocation                                      | Migration guard; not a substitute for actual approval |
-| EMAIL_FROM                       | Optional plain verified sender                                                               | Recovery mail delivery                                |
-| PORT                             | Plain, 8080                                                                                  | Single public Bun port                                |
+| Name                             | Source / status                                                                                           | Purpose                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| DATABASE_URL                     | Existing Vault personal/dev and personal/prd contract; approval pending workspace PR #84                  | Opaque PostgreSQL connection                          |
+| TMDB_API_READ_ACCESS_TOKEN       | Existing contract; development live read verified                                                         | Server-only TMDB requests                             |
+| MOVIEFINDER_AUTH_SECRET          | New generated Vault field proposed in workspace PR #84; legacy local BETTER_AUTH_SECRET remains supported | Project-specific session/auth cryptography            |
+| RESEND_API_KEY                   | Optional existing production key; absent in development                                                   | Password recovery email                               |
+| MOVIEFINDER_GOOGLE_CLIENT_ID     | Optional new registered app-specific key                                                                  | Google OAuth client                                   |
+| MOVIEFINDER_GOOGLE_CLIENT_SECRET | Optional new registered app-specific key                                                                  | Google OAuth secret                                   |
+| MOVIEFINDER_ORIGIN               | Plain environment; localhost:5173 for development, approved HTTPS origin for production                   | Better Auth origin/callback/CSRF                      |
+| MOVIEFINDER_DATABASE_ALLOCATION  | Plain confirmation of approved `moviefinder` allocation                                                   | Migration guard; not a substitute for actual approval |
+| EMAIL_FROM                       | Optional plain verified sender                                                                            | Recovery mail delivery                                |
+| PORT                             | Plain, 8080                                                                                               | Single public Bun port                                |
 
 Reuse shared keys where appropriate; do not copy another app's OAuth credentials or authentication URL. New key names and environment parity must be registered through the workspace OpenTofu Vault inputs/inventory. Never print values. Runtime fleet services receive declared secrets directly from OpenTofu; they do not fetch Vault at boot. Local scripts use the supported vault run wrapper.
 
@@ -66,3 +66,27 @@ The previously reported missing `moviefinder.user` error came from using an unpr
 ## Hosting request
 
 A complete request is maintained in docs/hosting-request.md after container verification. Check existing workspace issues before submission. Deployment remains unverified until an approved inventory change, available published image, required runtime secrets, applied shared migrations, and live health smoke have all succeeded. Local image or fixture tests are not deployment evidence.
+
+## Production rollout request
+
+The infrastructure change is [workspace PR #84](https://github.com/crvouga/workspace/pull/84).
+The application change is [MovieFinder PR #1](https://github.com/crvouga/moviefinder/pull/1).
+The platform PR declares this repository as the owner of the new service and
+`moviefinder` schema, adds a namespace-only OpenTofu resource, registers a newly
+generated app-specific auth secret and retains application-owned publishing and
+validation. Existing deployments and schemas remain separate targets.
+
+The production migration workflow is `.github/workflows/migrate.yml`. After the
+platform allocation is merged and applied, run **Migrate production database**
+on application `main`. It reads the merged platform inventory to verify schema
+ownership, uses GitHub OIDC to request only the production DATABASE_URL, validates
+the committed Atlas migrations and applies them inside the approved namespace.
+It never runs as part of local startup, image building or a pull request.
+The opaque dev/prd DATABASE_URL contracts currently resolve to the same platform
+foundation database; this request does not provision separate physical databases.
+Local development and automated tests remain isolated in embedded PostgreSQL.
+
+The clean platform checkout cannot produce a real saved plan without its state
+passphrase/backend credentials. Its existing live ruleset also differs from the
+already-declared Fleet/merge-queue policy. These are recorded on the platform PR;
+no dashboard mutation or shared database write is used to bypass them.

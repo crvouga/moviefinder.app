@@ -1,6 +1,6 @@
 # Prepared shared-platform change request
 
-Status: prepared locally; not submitted or deployed. Source changes are in the current `crvouga/moviefinder` worktree on `feat/moviefinder-app`. The reusable publish workflow is included in the local implementation commit but has not been pushed upstream, and no GHCR image has been published. The guide's source/image prerequisites must be met before this becomes a deployable hosting request. Existing hosting requests were checked; none matched this repository/service ID.
+Status: implementation submitted as [MovieFinder PR #1](https://github.com/crvouga/moviefinder/pull/1), with the platform change in [workspace PR #84](https://github.com/crvouga/workspace/pull/84). Production is not deployed. Image publication and approved platform plan/application remain rollout prerequisites. The three legacy MovieFinder services are preserved.
 
 Suggested issue title: `[hosting] moviefinder — approve isolated social discovery allocation and Bun service`
 
@@ -48,14 +48,14 @@ Suggested issue title: `[hosting] moviefinder — approve isolated social discov
 
 Names only — never values.
 
-| Env var                          | Already in Vault personal?                                              | Configs                      | Purpose / source                                                                                 |
-| -------------------------------- | ----------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| DATABASE_URL                     | Yes; application allocation not approved                                | dev, prd                     | Opaque application-facing PostgreSQL contract                                                    |
-| TMDB_API_READ_ACCESS_TOKEN       | Yes; development live API contract verified                             | dev, prd                     | Server-only catalog read token                                                                   |
-| BETTER_AUTH_SECRET               | Development field exists; reconcile/register inventory and both configs | dev, prd                     | Existing compatible authentication secret, or managed value through the OpenTofu secrets process |
-| RESEND_API_KEY                   | Existing production contract; absent in development                     | dev, prd if recovery enabled | Optional Resend delivery with verified EMAIL_FROM                                                |
-| MOVIEFINDER_GOOGLE_CLIENT_ID     | Not verified; optional new app-specific registered key                  | dev, prd if enabled          | Google OAuth app registered for this approved origin                                             |
-| MOVIEFINDER_GOOGLE_CLIENT_SECRET | Not verified; optional new app-specific registered key                  | dev, prd if enabled          | Google OAuth app secret                                                                          |
+| Env var                          | Already in Vault personal?                             | Configs                      | Purpose / source                                                                                 |
+| -------------------------------- | ------------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| DATABASE_URL                     | Yes; application allocation not approved               | dev, prd                     | Opaque application-facing PostgreSQL contract                                                    |
+| TMDB_API_READ_ACCESS_TOKEN       | Yes; development live API contract verified            | dev, prd                     | Server-only catalog read token                                                                   |
+| MOVIEFINDER_AUTH_SECRET          | New generated key proposed by workspace PR #84         | dev, prd                     | Existing compatible authentication secret, or managed value through the OpenTofu secrets process |
+| RESEND_API_KEY                   | Existing production contract; absent in development    | dev, prd if recovery enabled | Optional Resend delivery with verified EMAIL_FROM                                                |
+| MOVIEFINDER_GOOGLE_CLIENT_ID     | Not verified; optional new app-specific registered key | dev, prd if enabled          | Google OAuth app registered for this approved origin                                             |
+| MOVIEFINDER_GOOGLE_CLIENT_SECRET | Not verified; optional new app-specific registered key | dev, prd if enabled          | Google OAuth app secret                                                                          |
 
 - PostgreSQL: required. Allocate `moviefinder` schema for this repository in both dev and prd. Preserve environment isolation and the existing opaque DATABASE_URL contract. No extension is needed. Do not replace a shared URL to repurpose another app's allocation.
 - Authentication, catalog JSONB/source metadata, coverage, jobs/checkpoints, tags, saved feeds, lists/items/members/invitations, follows, activities, operation receipts, and events all belong inside `moviefinder`.
