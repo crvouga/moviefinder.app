@@ -413,6 +413,7 @@ test("starts data reads on hover, focus and press before navigating, and aborts 
 }) => {
   await register(page);
   await page.goto("/search");
+  await expect(page.getByRole("heading", { name: "What are you in the mood for?" })).toBeVisible();
   for (const [index, type] of ["pointerover", "focusin", "pointerdown"].entries()) {
     const id = `tmdb:movie:${91000 + index}`;
     const request = page.waitForRequest(
