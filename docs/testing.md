@@ -12,7 +12,9 @@ Integration coverage uses real transactions for authentication tables, unauthori
 
 `bun run db:validate` checks migration hashes. Atlas application is also exercised on a fresh database by each isolated test run. Docker verification must build the actual multi-stage image, run its Bun process with runtime configuration, and request `/health`. A live TMDB smoke test is separate from deterministic suites and must report a missing credential or upstream error as a missing check.
 
-CI separates fast required checks and PostgreSQL integration from scheduled/manual deeper browser and container checks. The optional live catalog workflow obtains only the TMDB variable via short-lived GitHub OIDC; no persistent repository Vault token is used.
+One `Check` workflow runs three parallel required jobs on pull requests, merge queues, and main: `fast` (formatting, lint, types, unit tests, migration hashes, embedded database lifecycle), `integration` (PostgreSQL 17 API tests and schema replay/comparison), and `browser-and-container` (production build, mobile/desktop browser tests, native linux/amd64 image build and runtime smoke). These job names match the platform's required status checks. The same suite can run manually and every week. Toolchain setup is shared in `.github/actions/setup/action.yml`; installs use the frozen Bun lockfile, and Playwright uses the installed package without downloading a replacement CLI.
+
+On main pushes, publishing through the platform's reusable workflow starts only after all three jobs pass. Main runs serialize through publishing so concurrent builds cannot race to update `latest`; newer PR runs cancel superseded PR runs. Validation jobs have explicit time limits. Production migrations and live catalog smoke remain separate manual operations, so deterministic checks need no shared credentials. The live catalog workflow obtains only the TMDB variable via short-lived GitHub OIDC; no persistent repository Vault token is used.
 
 Actual verification results and any outstanding limits are recorded in docs/implementation-status.md at handoff. Do not infer successful production deployment from local fixture or container tests.
 

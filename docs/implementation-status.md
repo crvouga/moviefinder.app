@@ -89,3 +89,11 @@ Local integration/browser suites and Atlas generation/verification now use isola
 Verified on the final embedded path: 24 unit/property tests, 38 database integration tests, 20 browser tests, the embedded lifecycle regression, production client build, Atlas migration validation, and local schema replay/comparison. Shared PostgreSQL is unchanged. The prior Docker image measurements/smoke evidence above predate this local-tooling change; no fresh container-image verification is claimed for this follow-up.
 
 Local PostgreSQL data/credentials are ignored by Git and Docker, excluded from Vite file watching, and explicitly denied by Vite's file-serving rules. A real request to the local credential path returns 403. Local credentials and initdb temporary credentials are created with private permissions.
+
+## CI simplification follow-up
+
+Validation and publishing now share `.github/workflows/check.yml`. The three existing required job names and their coverage are preserved, with shared toolchain setup, explicit time limits, merge queue support, and cancellation of superseded PR runs. Publishing requires all three jobs to pass on main. Main push runs serialize through publishing; scheduled/manual checks use separate concurrency groups. Production migration and live catalog workflows remain manual.
+
+Verified locally for this change: frozen dependency installation, `actionlint`, formatting/lint/type checking and 30 unit/property tests, production build, Atlas migration validation, 38 isolated embedded PostgreSQL integration tests, schema replay/comparison, the embedded lifecycle test, and 22 mobile/desktop browser tests. PostgreSQL 17 service coverage remains in CI; the local integration run used embedded PostgreSQL. Docker daemon discovery did not respond, so no new container build or runtime smoke is claimed. The updated workflow has not yet run on GitHub.
+
+Publishing remains blocked by the platform-owned dispatch credential and failed foundation environment import documented in [infrastructure](infrastructure.md). No shared resources, credentials, or databases were modified to clear that failure.
