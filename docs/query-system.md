@@ -13,3 +13,23 @@ Pagination follows provider page limits and continues even when a locally filter
 Search immediately renders matching canonical cached entities, then supplements them through the same durable query/ingestion system. Movie, TV, and person results have navigable identities. User/list search uses public normalized projections.
 
 Query counters, latency, cache hits/misses, provider requests/rate limits, and failed jobs are exposed through authenticated metrics. Source responses and errors never expose provider credentials.
+
+## Anticipatory navigation
+
+Authenticated navigation warms screen code, canonical collection data and title
+artwork on pointer hover, keyboard focus and primary press-down. A viewport
+predictor warms four likely visible destinations; discovery additionally warms
+the current title, three upcoming titles and the previous title, and requests
+the next result page twelve slides before the end. Predicted requests share a
+three-request budget. Actual navigation promotes queued work immediately and
+joins in-flight reads. Route loaders prepare the module and first cache response
+before committing the destination.
+
+Request metadata retains query IDs only; all entities remain in TanStack DB.
+Incomplete speculative coverage is refreshed for at most fifteen seconds while
+interest remains. Leaving an intent, moving predictions out of view, changing
+routes, hiding the tab or signing out releases that interest and aborts reads
+with no remaining consumers. Shared server hydration jobs remain durable.
+Completed request metadata expires quickly and is invalidated by committed
+commands/SSE events. Save-Data and 2G connections disable viewport predictions.
+Cold provider misses and upstream outages can still produce progressive content.

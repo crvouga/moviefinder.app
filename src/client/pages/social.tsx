@@ -142,7 +142,11 @@ export function ProfilePage({ currentUserId }: { currentUserId: string }) {
       | null
       | undefined;
   useEffect(() => {
-    void loadSocial("profile", userId).catch(report);
+    const controller = new AbortController();
+    void loadSocial("profile", userId, undefined, controller.signal).catch((error) => {
+      if (!controller.signal.aborted) report(error);
+    });
+    return () => controller.abort();
   }, [userId]);
   return (
     <div className="standard-page profile-page">

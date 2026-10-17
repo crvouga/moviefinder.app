@@ -27,7 +27,7 @@ export function DetailPage({ userId }: { userId: string }) {
     episodes = useEntities("episode");
   useEffect(() => {
     const c = new AbortController();
-    void loadEntity(id).catch((error) => {
+    void loadEntity(id, c.signal).catch((error) => {
       if (!c.signal.aborted) report(error);
     });
     return () => c.abort();

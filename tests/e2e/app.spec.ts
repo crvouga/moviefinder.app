@@ -407,3 +407,57 @@ test("replays a queued list creation before dependent additions and moves", asyn
   await expect(page.locator(".list-entry")).toHaveCount(1);
   await expect(page.locator(".list-entry")).toContainText("Test story 1");
 });
+
+test("starts data reads on hover, focus and press before navigating, and aborts abandoned intent", async ({
+  page,
+}) => {
+  await register(page);
+  await page.goto("/search");
+  for (const [index, type] of ["pointerover", "focusin", "pointerdown"].entries()) {
+    const id = `tmdb:movie:${91000 + index}`;
+    const request = page.waitForRequest(
+      (r) => decodeURIComponent(new URL(r.url()).pathname) === `/api/title/${id}`,
+    );
+    await page.evaluate(
+      ({ id, type }) => {
+        const link = document.createElement("a");
+        link.href = `/title/${encodeURIComponent(id)}`;
+        link.textContent = "Intent target";
+        // Offscreen links exercise intent without being selected by the viewport predictor.
+        link.style.cssText = "position:absolute;top:-10000px;left:0";
+        document.body.append(link);
+        link.dispatchEvent(new PointerEvent(type, { bubbles: true, button: 0 }));
+      },
+      { id, type },
+    );
+    await request;
+    await expect(page).toHaveURL(/\/search$/);
+  }
+  const id = "tmdb:movie:92000";
+  let release!: () => void;
+  const blocked = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/title/*92000", async (route) => {
+    await blocked;
+    await route.continue().catch(() => {});
+  });
+  const failed = page.waitForEvent("requestfailed", {
+    predicate: (r) => r.url().includes("92000"),
+  });
+  const requested = page.waitForRequest(
+    (r) => r.url().includes("/api/title/") && r.url().includes("92000"),
+  );
+  await page.evaluate((id) => {
+    const link = document.createElement("a");
+    link.id = "abandoned-target";
+    link.href = `/title/${encodeURIComponent(id)}`;
+    link.style.cssText = "position:absolute;top:-10000px;left:0";
+    document.body.append(link);
+    link.dispatchEvent(new PointerEvent("pointerover", { bubbles: true }));
+  }, id);
+  await requested;
+  await page.locator("#abandoned-target").dispatchEvent("pointerout");
+  await failed;
+  release();
+});

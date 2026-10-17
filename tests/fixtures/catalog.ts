@@ -69,6 +69,7 @@ export async function fixtureUpstream(path: string, params: Record<string, strin
       results: fixtures.map((m) => ({
         ...m,
         id: m.id + (Number(params.page ?? 1) - 1) * 12,
+        title: `Test story ${m.id + (Number(params.page ?? 1) - 1) * 12}`,
         popularity: m.popularity - (Number(params.page ?? 1) - 1) * 12,
       })),
     };
@@ -114,5 +115,8 @@ export async function fixtureUpstream(path: string, params: Record<string, strin
       number_of_seasons: 8,
       number_of_episodes: 73,
     };
-  return { ...movieDetail, id: Number(path.split("/")[1]) || 550 };
+  const id = Number(path.split("/")[1]) || 550;
+  if (id >= 1 && id <= 24)
+    return { ...movieDetail, id, title: `Test story ${id}`, popularity: 101 - id };
+  return { ...movieDetail, id, ...(id === 680 ? { title: "Pulp Fiction" } : {}) };
 }

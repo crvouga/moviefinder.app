@@ -74,7 +74,11 @@ export function ListsPage({ userId }: { userId: string }) {
       | null
       | undefined;
   useEffect(() => {
-    void loadSocial("lists", tab).catch(report);
+    const controller = new AbortController();
+    void loadSocial("lists", tab, undefined, controller.signal).catch((error) => {
+      if (!controller.signal.aborted) report(error);
+    });
+    return () => controller.abort();
   }, [tab]);
   const visible = lists.filter(
     (l) =>
@@ -225,7 +229,11 @@ export function ListDetail({ userId }: { userId: string }) {
     [hover, setHover] = useState(""),
     drag = useRef<string | null>(null);
   useEffect(() => {
-    void loadSocial("list", listId).catch(report);
+    const controller = new AbortController();
+    void loadSocial("list", listId, undefined, controller.signal).catch((error) => {
+      if (!controller.signal.aborted) report(error);
+    });
+    return () => controller.abort();
   }, [listId]);
   const queryRows = useEntities("query"),
     nextPage = queryRows.find((q) => q.id === `social:list:${listId}`)?.data.nextCursor as

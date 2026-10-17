@@ -1,3 +1,4 @@
+import { preloadTitles } from "../preloading";
 import { movieGenreIds, tvGenreIds } from "../../shared/genres";
 import { localMatch } from "../../shared/filters";
 import { fieldText } from "../../shared/contracts";
@@ -32,7 +33,7 @@ import {
   report,
   notify,
 } from "../state";
-import { Poster, Tags, PageHeading, Empty, imageUrl } from "../components/common";
+import { Poster, Tags, PageHeading, Empty } from "../components/common";
 import { Button } from "../components/ui/button";
 import { Sheet } from "../components/ui/dialog";
 const genres = [
@@ -84,8 +85,7 @@ export function Discover({ userId }: { userId: string }) {
     [filters, setFilters] = useState(false),
     [genreSheet, setGenreSheet] = useState(false),
     [active, setActive] = useState(0),
-    swiper = useRef<SwiperType | null>(null),
-    fetching = useRef(new Set<string>());
+    swiper = useRef<SwiperType | null>(null);
   const matching = queries
       .filter(
         (q) =>
@@ -155,29 +155,24 @@ export function Discover({ userId }: { userId: string }) {
     const cleanups = pages.map((p) => subscribeQuery(p.id, p.params));
     return () => cleanups.forEach((fn) => fn());
   }, [pages.map((p) => p.id).join("|")]);
+  useEffect(
+    () =>
+      preloadTitles(
+        titles.slice(Math.max(0, active - 1), active + 4).map((e) => e.id),
+        userId,
+      ),
+    [active, titles.map((t) => t.id).join("|"), userId],
+  );
+  const approachingEnd = titles.length - active <= 12;
   useEffect(() => {
-    const upcoming = titles.slice(active + 1, active + 3);
-    const images = upcoming.map((e) => {
-      const img = new Image();
-      img.fetchPriority = "low";
-      img.src = imageUrl(e.poster, "w500") ?? "";
-      return img;
-    });
-    return () =>
-      images.forEach((img) => {
-        img.removeAttribute("src");
-      });
-  }, [active, titles.map((t) => t.id).join("|")]);
-  useEffect(() => {
-    if (titles.length - active > 5 || !coverage?.nextCursor || coverage.state !== "complete")
-      return;
+    if (!approachingEnd || !coverage?.nextCursor || coverage.state !== "complete") return;
     const cursor = coverage.nextCursor;
-    if (fetching.current.has(cursor)) return;
-    fetching.current.add(cursor);
-    void discover({ ...params, cursor })
-      .catch(report)
-      .finally(() => fetching.current.delete(cursor));
-  }, [active, titles.length, coverage?.nextCursor, coverage?.state]);
+    const controller = new AbortController();
+    void discover({ ...params, cursor }, controller.signal, true).catch((error) => {
+      if (!controller.signal.aborted) report(error);
+    });
+    return () => controller.abort();
+  }, [approachingEnd, coverage?.nextCursor, coverage?.state, key]);
   const activeTitle = titles[active];
   return (
     <div className="discover-page">

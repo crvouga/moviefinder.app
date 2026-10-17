@@ -1,3 +1,4 @@
+import { RequestPool } from "./request-pool";
 import { createOutbox } from "./outbox";
 const outbox = createOutbox(window.localStorage);
 const itemAliases = new Map<string, string>();
@@ -9,6 +10,7 @@ import { hc } from "hono/client";
 import { generateKeyBetween } from "fractional-indexing";
 import type { AppType } from "../server/app";
 import {
+  stableSerialize,
   kinds,
   type Entity,
   type Kind,
@@ -137,10 +139,31 @@ export function encodeParams(p: FeedParams): Record<string, string> {
       .map(([k, v]) => [k, Array.isArray(v) ? v.join(",") : fieldText(v)]),
   );
 }
-export async function discover(params: FeedParams, signal?: AbortSignal) {
+export const requests = new RequestPool<string | null>();
+const queryTTL = (id: string) =>
+  (collections.query.get(id)?.data.coverage as { state?: string } | undefined)?.state === "complete"
+    ? 30_000
+    : 250;
+export function discover(
+  params: FeedParams,
+  signal?: AbortSignal,
+  speculative = false,
+): Promise<string> {
+  let id = "";
+  return requests.run(
+    `discover:${stableSerialize(params)}`,
+    async (sharedSignal) => {
+      id = await readDiscovery(params, sharedSignal);
+      return id;
+    },
+    { signal, speculative, ttl: () => queryTTL(id) },
+  ) as Promise<string>;
+}
+async function readDiscovery(params: FeedParams, signal: AbortSignal) {
   const result = await readResponse<QueryResult>(
     await api.api.discover.$get({ query: encodeParams(params) }, { init: { signal } }),
   );
+  signal.throwIfAborted();
   await merge(result.entities);
   await collections.query.preload();
   await collections.query.utils.writeUpsert({
@@ -164,8 +187,18 @@ export function subscribeQuery(id: string, params: FeedParams) {
     else subscriptions.delete(id);
   };
 }
-export async function loadEntity(id: string) {
-  const res = await readResponse<QueryResult>(await api.api.title[":id"].$get({ param: { id } }));
+export function loadEntity(id: string, signal?: AbortSignal, speculative = false) {
+  return requests.run(`entity:${id}`, (sharedSignal) => readEntity(id, sharedSignal), {
+    signal,
+    speculative,
+    ttl: () => queryTTL(`entity:${id}`),
+  });
+}
+async function readEntity(id: string, signal: AbortSignal) {
+  const res = await readResponse<QueryResult>(
+    await api.api.title[":id"].$get({ param: { id } }, { init: { signal } }),
+  );
+  signal.throwIfAborted();
   await merge(res.entities);
   await collections.query.preload();
   await collections.query.utils.writeUpsert({
@@ -175,7 +208,7 @@ export async function loadEntity(id: string) {
     title: "Details",
     data: { ids: res.ids, coverage: res.coverage },
   });
-  return res;
+  return res.id;
 }
 export async function startSync(userId: string) {
   if (started) return;
@@ -209,6 +242,7 @@ export async function startSync(userId: string) {
             }
             versions.clear();
           }
+          requests.invalidate();
           await merge(event.entities);
           await remove(event.removed);
           last = Number(event.id);
@@ -241,6 +275,7 @@ export async function startSync(userId: string) {
   }
 }
 export function stopSync() {
+  requests.clear();
   syncEpoch++;
   if (syncRetry) clearTimeout(syncRetry);
   source?.close();
@@ -506,6 +541,7 @@ export async function command(
             outbox.alias(userId, c.operationId, item.id);
           }
         }
+        requests.invalidate();
         await merge(result.entities);
         await remove(result.removed);
       });
@@ -535,30 +571,44 @@ export async function send(input: CommandInput, userId: string) {
   return command(input as Omit<Command, "operationId">, userId);
 }
 
-export async function loadSocial(
+async function readSocial(
   kind: "list" | "profile" | "lists" | "search",
   value: string,
-  cursor?: string,
+  cursor: string | undefined,
+  signal: AbortSignal,
 ) {
   const response =
     kind === "list"
-      ? await api.api.lists[":id"].$get({ param: { id: value }, query: cursor ? { cursor } : {} })
+      ? await api.api.lists[":id"].$get(
+          { param: { id: value }, query: cursor ? { cursor } : {} },
+          { init: { signal } },
+        )
       : kind === "profile"
-        ? await api.api.profiles[":id"].$get({
-            param: { id: value },
-            query: cursor ? { cursor } : {},
-          })
+        ? await api.api.profiles[":id"].$get(
+            {
+              param: { id: value },
+              query: cursor ? { cursor } : {},
+            },
+            { init: { signal } },
+          )
         : kind === "lists"
-          ? await api.api.lists.$get({
-              query: {
-                scope: value === "yours" ? "mine" : value === "saved" ? "saved" : "all",
-                ...(cursor ? { cursor } : {}),
+          ? await api.api.lists.$get(
+              {
+                query: {
+                  scope: value === "yours" ? "mine" : value === "saved" ? "saved" : "all",
+                  ...(cursor ? { cursor } : {}),
+                },
               },
-            })
-          : await api.api["social-search"].$get({
-              query: { q: value, ...(cursor ? { cursor } : {}) },
-            });
+              { init: { signal } },
+            )
+          : await api.api["social-search"].$get(
+              {
+                query: { q: value, ...(cursor ? { cursor } : {}) },
+              },
+              { init: { signal } },
+            );
   const result = await readResponse<{ entities: Entity[]; nextCursor: string | null }>(response);
+  signal.throwIfAborted();
   await merge(result.entities);
   await collections.query.preload();
   await collections.query.utils.writeUpsert({
@@ -569,4 +619,18 @@ export async function loadSocial(
     data: { nextCursor: result.nextCursor },
   });
   return result.nextCursor;
+}
+
+export function loadSocial(
+  kind: "list" | "profile" | "lists" | "search",
+  value: string,
+  cursor?: string,
+  signal?: AbortSignal,
+  speculative = false,
+) {
+  return requests.run(
+    `social:${stableSerialize([kind, value, cursor])}`,
+    (sharedSignal) => readSocial(kind, value, cursor, sharedSignal),
+    { signal, speculative, ttl: () => 5_000 },
+  );
 }

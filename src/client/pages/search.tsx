@@ -27,9 +27,11 @@ export function SearchPage() {
   }, [input]);
   useEffect(() => {
     if (!query) return;
-    void loadSocial("search", query).catch(report);
     const params = feedParams.parse({ q: query }),
       abort = new AbortController();
+    void loadSocial("search", query, undefined, abort.signal).catch((error) => {
+      if (!abort.signal.aborted) report(error);
+    });
     let unsub: undefined | (() => void);
     void discover(params, abort.signal)
       .then((id) => {
