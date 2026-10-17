@@ -1,29 +1,31 @@
 name: Check
 on:
   pull_request:
+  merge_group:
   push:
     branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "30 10 * * 1"
 permissions:
   contents: read
+concurrency:
+  group: check-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  # Let main finish publishing before another run can update the image tags.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   fast:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.22.3
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - run: bun install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - run: bun run check
-      - run: bun run build
-      - uses: ariga/setup-atlas@v0
       - run: bun run db:validate
       - run: bun run test:local-database
   integration:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:17.6-alpine
@@ -36,13 +38,42 @@ jobs:
       TEST_DATABASE_URL: postgres://postgres:local-test-only@127.0.0.1:5432/moviefinder_test?sslmode=disable
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.22.3
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - uses: ariga/setup-atlas@v0
-      - run: bun install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - run: bun run test:integration
       - run: bun run db:verify
+  browser-and-container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: bun x --no-install playwright install --with-deps chromium
+      - run: bun run build
+      - run: bun run test:e2e
+      - run: docker build --platform linux/amd64 -t moviefinder:verification .
+      - run: bun scripts/container-smoke.ts moviefinder:verification
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: test-results/
+          retention-days: 7
+  publish:
+    needs: [fast, integration, browser-and-container]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: read
+    uses: crvouga/workspace/.github/workflows/ci.yml@main
+    secrets:
+      DEPLOY_DISPATCH_TOKEN: ${{ secrets.DEPLOY_DISPATCH_TOKEN }}
+      CALLER_GITHUB_TOKEN: ${{ github.token }}
+    with:
+      service_id: moviefinder
+      dockerfile: ./Dockerfile
+      context: .
+      image_owner: crvouga
+      image_prefix: chrisvouga
+      infra_github_repo: crvouga/workspace

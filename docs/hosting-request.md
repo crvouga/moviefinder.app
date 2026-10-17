@@ -26,7 +26,7 @@ Suggested issue title: `[hosting] moviefinder — approve isolated social discov
 | Dockerfile         | `Dockerfile`                                                                                                                                   |
 | Build context      | `.`                                                                                                                                            |
 | Platform           | `linux/amd64` image builds; native x64 runtime verification must run in CI. Local CPU emulation crashes inside Bun before application startup. |
-| Publish workflow   | Authored at `.github/workflows/publish.yml`; upstream commit pending                                                                           |
+| Publish workflow   | `publish` job in `.github/workflows/check.yml`, gated on all three validation jobs                                                             |
 | Image size         | 84.9 MiB AMD64 / 86.2 MiB ARM64; exact byte counts are recorded in implementation-status.md                                                    |
 
 ## Runtime
