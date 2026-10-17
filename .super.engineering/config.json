@@ -1,0 +1,38 @@
+{
+  "setup": [
+    "bun install --frozen-lockfile"
+  ],
+  "run": [
+    {
+      "name": "MovieFinder",
+      "commands": [
+        "bun run dev"
+      ],
+      "stop_commands": [
+        "bun scripts/stop-dev.ts"
+      ],
+      "default": true
+    },
+    {
+      "name": "Checks",
+      "commands": [
+        "bun run check"
+      ],
+      "default": false
+    },
+    {
+      "name": "Database check",
+      "commands": [
+        "bun run db:check"
+      ],
+      "default": false
+    },
+    {
+      "name": "Migrate database",
+      "commands": [
+        "bun run db:migrate"
+      ],
+      "default": false
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+name: Migrate production database
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: moviefinder-production-migrations
+  cancel-in-progress: false
+jobs:
+  migrate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: ariga/setup-atlas@v0
+      - run: bun scripts/verify-allocation.ts
+      - run: bun run db:validate
+      - name: Wait for Vault readiness
+        run: |
+          for attempt in $(seq 1 20); do
+            status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 'https://vault.chrisvouga.dev/v1/sys/health?standbyok=true' || true)
+            if [ "$status" = 200 ]; then exit 0; fi
+            sleep 3
+          done
+          echo 'Vault did not become ready; production migrations were not attempted.' >&2
+          exit 1
+      - name: Read only the production database connection
+        uses: hashicorp/vault-action@v4
+        id: vault
+        with:
+          url: https://vault.chrisvouga.dev
+          method: jwt
+          path: jwt
+          role: github-actions
+          jwtGithubAudience: https://vault.chrisvouga.dev
+          exportEnv: false
+          secrets: |
+            secret/data/personal/prd DATABASE_URL | DATABASE_URL
+      - name: Apply committed Atlas migrations to the allocated namespace
+        env:
+          DATABASE_URL: ${{ steps.vault.outputs.DATABASE_URL }}
+          MOVIEFINDER_DATABASE_ALLOCATION: moviefinder
+        run: bun scripts/migrate.ts apply
